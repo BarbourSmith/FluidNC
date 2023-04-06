@@ -31,8 +31,9 @@ void setup() {
     disableCore0WDT();
     try {
         timing_init();
+        
         uartInit();  // Setup serial port
-
+        Uart0.println();  // create some white space after ESP32 boot info
         StartupLog::init();
 
         // Setup input polling loop after loading the configuration,

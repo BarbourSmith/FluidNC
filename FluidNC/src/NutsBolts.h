@@ -87,6 +87,7 @@ bool  char_is_numeric(char value);
 char* trim(char* value);
 void  trim(std::string_view& sv);
 
+
 template <typename T>
 T myMap(T x, const T in_min, const T in_max, T out_min, T out_max) {  // DrawBot_Badge
     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
