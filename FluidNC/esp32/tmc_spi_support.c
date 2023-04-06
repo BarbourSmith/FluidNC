@@ -11,10 +11,9 @@
 #include <sdkconfig.h>
 #ifdef CONFIG_IDF_TARGET_ESP32S3
 #    define HSPI_HOST SPI2_HOST
-#    define SPI2 GPSPI2
 #endif
 
-spi_dev_t* hw = &SPI2;
+spi_dev_t* hw = &GPSPI2;
 
 static spi_ll_clock_val_t clk_reg_val = 0;
 
