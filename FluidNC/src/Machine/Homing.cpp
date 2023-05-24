@@ -422,6 +422,8 @@ namespace Machine {
     // cycle.  The protocol loop will then respond to events and advance
     // the homing state machine through its phases.
     void Homing::run_cycles(AxisMask axisMask) {
+        log_error("Beginning of homing cycle run_cycles");
+        log_error(axisMask);
         if (!config->_kinematics->canHome(axisMask)) {
             sys.state = State::Alarm;
             return;
