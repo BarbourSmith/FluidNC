@@ -430,31 +430,31 @@ namespace Machine {
 
         if(axisMask == 1){  //Top left
             log_info("Top left");
-            //axisTLHomed = axisTL.retract(computeTL(-200, 200, 0));
+            myMachine.axisTLHomed = myMachine.axisTL.retract(myMachine.computeTL(-200, 200, 0));
         }
         else if(axisMask == 2){  //Top right
             log_info("Top right");
             myMachine.axisTR.testEncoder();
-            //axisTRHomed = axisTR.retract(computeTR(-200, 200, 0));
+            myMachine.axisTRHomed = myMachine.axisTR.retract(myMachine.computeTR(-200, 200, 0));
         }
         else if(axisMask == 4){ //Bottom right
             log_info("Bottom right");
-            //if(axisBLHomed && axisBRHomed && axisTRHomed && axisTLHomed){
-            //    runCalibration();
-            //}
-            //else{
-            //    axisBRHomed = axisBR.retract(computeBR(-200, 300, 0));
-            //}
+            if(myMachine.axisBLHomed && myMachine.axisBRHomed && myMachine.axisTRHomed && myMachine.axisTLHomed){
+                myMachine.runCalibration();
+            }
+            else{
+                myMachine.axisBRHomed = myMachine.axisBR.retract(myMachine.computeBR(-200, 300, 0));
+            }
         }
         else if(axisMask == 0){  //Bottom left
             log_info("Bottom left");
-            //axisBL.testEncoder();
-            //axisBLHomed = axisBL.retract(computeBL(-200, 300, 0));
+            myMachine.axisBL.testEncoder();
+            myMachine.axisBLHomed = myMachine.axisBL.retract(myMachine.computeBL(-200, 300, 0));
         }
         
-        //if(axisBLHomed && axisBRHomed && axisTRHomed && axisTLHomed){
-        //    log_info( "All axis ready.\n");
-       // }
+        if(myMachine.axisBLHomed && myMachine.axisBRHomed && myMachine.axisTRHomed && myMachine.axisTLHomed){
+           log_info( "All axis ready.\n");
+       }
 
         if (!config->_kinematics->canHome(axisMask)) {
             sys.state = State::Alarm;
