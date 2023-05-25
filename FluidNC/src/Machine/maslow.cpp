@@ -54,6 +54,16 @@ void printToWeb (double precision){
     //log_info( "Calibration Precision: %fmm\n", precision);
 }
 
+//Updates where the center x and y positions are
+void Maslow_::updateCenterXY(){
+    
+    double A = (trY - blY)/(trX-blX);
+    double B = (brY-tlY)/(brX-tlX);
+    centerX = (brY-(B*brX)+(A*trX)-trY)/(A-B);
+    centerY = A*(centerX - trX) + trY;
+    
+}
+
 //Called from protocol.cpp
 void Maslow_::recomputePID(){
     //Stop everything but keep track of the encoder positions if we are idle or alarm. Unless doing calibration.

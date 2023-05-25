@@ -7,6 +7,7 @@ This class is a singleton (meaning it can be created only once, and then accesse
 because the machine is a single entity, but we need to talk to it in multiple places within FluidNC.
 
 */
+#pragma once
 
 #include <Arduino.h>
 #include "../System.h"         // sys.*
@@ -76,6 +77,12 @@ class Maslow_ {
     float beltEndExtension;
     float armLength;
 
+
+  public:
+    static Maslow_ &getInstance(); // Accessor for singleton instance
+
+    Maslow_(const Maslow_ &) = delete; // no copying
+    Maslow_ &operator=(const Maslow_ &) = delete;
     bool axisBLHomed;
     bool axisBRHomed;
     bool axisTRHomed;
@@ -96,12 +103,6 @@ class Maslow_ {
     MotorUnit axisTR;
     MotorUnit axisBL;
     MotorUnit axisBR;
-
-  public:
-    static Maslow_ &getInstance(); // Accessor for singleton instance
-
-    Maslow_(const Maslow_ &) = delete; // no copying
-    Maslow_ &operator=(const Maslow_ &) = delete;
 
   public:
     void begin();

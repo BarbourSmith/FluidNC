@@ -25,10 +25,11 @@
 
 #    include "WebUI/WifiConfig.h"
 #    include "Driver/localfs.h"
+#    include "Machine/maslow.h"
 
 extern void make_user_commands();
 
-int thisMadeUpNameThatIsUnique = 23;
+
 
 void setup() {
     disableCore0WDT();
@@ -153,6 +154,10 @@ void setup() {
         WebUI::bt_config.begin();
     }
     allChannels.deregistration(&startupLog);
+
+    Maslow_& myMachine = Maslow_::getInstance(); //This is special because we are getting an instance of the maslow machine, not making a new one
+    myMachine.begin();
+
 }
 
 static void reset_variables() {
