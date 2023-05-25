@@ -1,104 +1,16 @@
-/*
-	custom_code_template.cpp (copy and use your machine name)
-	Part of Grbl_ESP32
-
-	copyright (c) 2020 -	Bart Dring. This file was intended for use on the ESP32
-
-  ...add your date and name here.
-
-	CPU. Do not use this with Grbl for atMega328P
-
-	Grbl_ESP32 is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Grbl_ESP32 is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with Grbl.  If not, see <http://www.gnu.org/licenses/>.
-
-	=======================================================================
-
-This is a template for user-defined C++ code functions.  Grbl can be
-configured to call some optional functions, enabled by #define statements
-in the machine definition .h file.  Implement the functions thus enabled
-herein.  The possible functions are listed and described below.
-
-To use this file, copy it to a name of your own choosing, and also copy
-Machines/template.h to a similar name.
-
-Example:
-Machines/my_machine.h
-Custom/my_machine.cpp
-
-Edit machine.h to include your Machines/my_machine.h file
-
-Edit Machines/my_machine.h according to the instructions therein.
-
-Fill in the function definitions below for the functions that you have
-enabled with USE_ defines in Machines/my_machine.h
-
-===============================================================================
-
-*/
 #include "maslow.h"
+#include <Arduino.h>
 
-MotorUnit axisTL(tlIn1Pin, tlIn2Pin, tlADCPin, TLEncoderLine, tlIn1Channel, tlIn2Channel);
-MotorUnit axisTR(trIn1Pin, trIn2Pin, trADCPin, TREncoderLine, trIn1Channel, trIn2Channel);
-MotorUnit axisBL(blIn1Pin, blIn2Pin, blADCPin, BLEncoderLine, blIn1Channel, blIn2Channel);
-MotorUnit axisBR(brIn1Pin, brIn2Pin, brADCPin, BREncoderLine, brIn1Channel, brIn2Channel);
+void Maslow_::begin() {
+    pinMode(LED_BUILTIN, OUTPUT);
+    Serial.println("Maslow begin ran");
 
-IndicatorLED indicators();
+    // Initialize the motor units
+    axisTL.begin(tlIn1Pin, tlIn2Pin, tlADCPin, TLEncoderLine, tlIn1Channel, tlIn2Channel);
+    axisTR.begin(trIn1Pin, trIn2Pin, trADCPin, TREncoderLine, trIn1Channel, trIn2Channel);
+    axisBL.begin(blIn1Pin, blIn2Pin, blADCPin, BLEncoderLine, blIn1Channel, blIn2Channel);
+    axisBR.begin(brIn1Pin, brIn2Pin, brADCPin, BREncoderLine, brIn1Channel, brIn2Channel);
 
-//The xy coordinates of each of the anchor points
-float tlX;
-float tlY;
-float tlZ;
-float trX;
-float trY;
-float trZ;
-float blX;
-float blY;
-float blZ;
-float brX;
-float brY;
-float brZ;
-float centerX;
-float centerY;
-
-float tlTension;
-float trTension;
-
-float beltEndExtension;
-float armLength;
-
-bool axisBLHomed;
-bool axisBRHomed;
-bool axisTRHomed;
-bool axisTLHomed;
-bool calibrationInProgress;  //Used to turn off regular movements during calibration
-
-//The number of times that the encoder has read 0 or 16383 which can indicate a connection failure
-int tlEncoderErrorCount = 0;
-int trEncoderErrorCount = 0;
-int blEncoderErrorCount = 0;
-int brEncoderErrorCount = 0;
-
-//Used to keep track of how often the PID controller is updated
-unsigned long lastCallToPID = millis();
-
-
-#ifdef USE_MACHINE_INIT
-/*
-machine_init() is called when Grbl_ESP32 first starts. You can use it to do any
-special things your machine needs at startup.
-*/
-void machine_init()
-{   
     Serial.println("Testing reading from encoders: ");
     axisBL.testEncoder();
     axisBR.testEncoder();
@@ -137,14 +49,13 @@ void machine_init()
     beltEndExtension = 30;
     armLength = 114;
 }
-#endif
 
 void printToWeb (double precision){
     //log_info( "Calibration Precision: %fmm\n", precision);
 }
 
 //Called from protocol.cpp
-void recomputePID(){
+void Maslow_::recomputePID(){
     //Stop everything but keep track of the encoder positions if we are idle or alarm. Unless doing calibration.
     if((sys.state == State::Idle || sys.state == State::Alarm) && !calibrationInProgress){
         axisBL.stop();
@@ -220,18 +131,10 @@ void recomputePID(){
     // }
 }
 
-//Updates where the center x and y positions are
-void updateCenterXY(){
-    
-    double A = (trY - blY)/(trX-blX);
-    double B = (brY-tlY)/(brX-tlX);
-    centerX = (brY-(B*brX)+(A*trX)-trY)/(A-B);
-    centerY = A*(centerX - trX) + trY;
-    
-}
+
 
 //Computes the tensions in the upper two belts
-void computeTensions(float x, float y){
+void Maslow_::computeTensions(float x, float y){
     //This should be a lot smarter and compute the vector tensions to see if the lower belts are contributing positively
 
     //These internal version move the center to (0,0)
@@ -252,7 +155,7 @@ void computeTensions(float x, float y){
 }
 
 //Bottom left belt
-float computeBL(float x, float y, float z){
+float Maslow_::computeBL(float x, float y, float z){
     //Move from lower left corner coordinates to centered coordinates
     x = x + centerX;
     y = y + centerY;
@@ -274,7 +177,7 @@ float computeBL(float x, float y, float z){
 }
 
 //Bottom right belt
-float computeBR(float x, float y, float z){
+float Maslow_::computeBR(float x, float y, float z){
     //Move from lower left corner coordinates to centered coordinates
     x = x + centerX;
     y = y + centerY;
@@ -294,7 +197,7 @@ float computeBR(float x, float y, float z){
 }
 
 //Top right belt
-float computeTR(float x, float y, float z){
+float Maslow_::computeTR(float x, float y, float z){
     //Move from lower left corner coordinates to centered coordinates
     x = x + centerX;
     y = y + centerY;
@@ -305,7 +208,7 @@ float computeTR(float x, float y, float z){
 }
 
 //Top left belt
-float computeTL(float x, float y, float z){
+float Maslow_::computeTL(float x, float y, float z){
     //Move from lower left corner coordinates to centered coordinates
     x = x + centerX;
     y = y + centerY;
@@ -315,7 +218,7 @@ float computeTL(float x, float y, float z){
     return sqrt(a*a+b*b+c*c) - (beltEndExtension+armLength);
 }
 
-void setTargets(float xTarget, float yTarget, float zTarget){
+void Maslow_::setTargets(float xTarget, float yTarget, float zTarget){
     
     if(!calibrationInProgress){
 
@@ -328,9 +231,8 @@ void setTargets(float xTarget, float yTarget, float zTarget){
     }
 }
 
-
 //Runs the calibration sequence to determine the machine's dimensions
-void runCalibration(){
+void Maslow_::runCalibration(){
     
     //log_info( "Beginning calibration\n");
     
@@ -467,11 +369,11 @@ void runCalibration(){
     
 }
 
-void printMeasurements(float lengths[]){
+void Maslow_::printMeasurements(float lengths[]){
     //log_info( "{bl:%f,   br:%f,   tr:%f,   tl:%f},\n", lengths[0], lengths[1], lengths[2], lengths[3]);
 }
 
-void lowerBeltsGoSlack(){
+void Maslow_::lowerBeltsGoSlack(){
     //log_info( "Lower belts going slack\n");
     
     unsigned long startTime = millis();
@@ -537,7 +439,7 @@ float printMeasurementMetrics(double avg, double m1, double m2, double m3, doubl
 }
 
 //Checks to make sure the deviation within the measurement avg looks good before moving on
-void takeMeasurementAvgWithCheck(float lengths[]){
+void Maslow_::takeMeasurementAvgWithCheck(float lengths[]){
     //grbl_sendf( "Beginning takeMeasurementAvg\n");
     float threshold = 0.9;
     while(true){
@@ -551,7 +453,7 @@ void takeMeasurementAvgWithCheck(float lengths[]){
 }
 
 //Takes 5 measurements and return how consistent they are
-float takeMeasurementAvg(float avgLengths[]){
+float Maslow_::takeMeasurementAvg(float avgLengths[]){
     //grbl_sendf( "Beginning to take averaged measurement.\n");
     
     //Where our five measurements will be stored
@@ -591,7 +493,7 @@ float takeMeasurementAvg(float avgLengths[]){
 }
 
 //Retract the lower belts until they pull tight and take a measurement
-void takeMeasurement(float lengths[]){
+void Maslow_::takeMeasurement(float lengths[]){
     //grbl_sendf( "Taking a measurement.\n");
 
     axisBL.stop();
@@ -654,7 +556,7 @@ void takeMeasurement(float lengths[]){
 }
 
 //Reposition the sled without knowing the machine dimensions
-void moveWithSlack(float x, float y){
+void Maslow_::moveWithSlack(float x, float y){
     
     //log_info( "Moving to (%f, %f) with slack lower belts\n", x, y);
     
@@ -728,7 +630,7 @@ void moveWithSlack(float x, float y){
 //This function removes any slack in the belt between the spool and the roller. 
 //If there is slack there then when the motor turns the belt won't move which triggers the
 //current threshold on pull tight too early. It only does this for the bottom axis.
-void takeUpInternalSlack(){
+void Maslow_::takeUpInternalSlack(){
     //Set the target to be .5mm in
     axisBL.setTarget(axisBL.getPosition() - 0.5);
     axisBR.setTarget(axisBR.getPosition() - 0.5);
@@ -764,7 +666,7 @@ void takeUpInternalSlack(){
     axisTL.stop();
 }
 
-float computeVertical(float firstUpper, float firstLower, float secondUpper, float secondLower){
+float Maslow_::computeVertical(float firstUpper, float firstLower, float secondUpper, float secondLower){
     //Derivation at https://math.stackexchange.com/questions/4090346/solving-for-triangle-side-length-with-limited-information
     
     float b = secondUpper;   //upper, second
@@ -779,7 +681,7 @@ float computeVertical(float firstUpper, float firstLower, float secondUpper, flo
     return a;
 }
 
-void computeFrameDimensions(float lengthsSet1[], float lengthsSet2[], float machineDimensions[]){
+void Maslow_::computeFrameDimensions(float lengthsSet1[], float lengthsSet2[], float machineDimensions[]){
     //Call compute verticals from each side
     
     float leftHeight = computeVertical(lengthsSet1[3],lengthsSet1[0], lengthsSet2[3], lengthsSet2[0]);
@@ -788,142 +690,9 @@ void computeFrameDimensions(float lengthsSet1[], float lengthsSet2[], float mach
     //log_info( "Computed vertical measurements:\n%f \n%f \n%f \n",leftHeight, rightHeight, (leftHeight+rightHeight)/2.0);
 }
 
-#ifdef USE_CUSTOM_HOMING
-/*
-  user_defined_homing() is called at the beginning of the normal Grbl_ESP32 homing
-  sequence.  If user_defined_homing() returns false, the rest of normal Grbl_ESP32
-  homing is skipped if it returns false, other normal homing continues.  For
-  example, if you need to manually prep the machine for homing, you could implement
-  user_defined_homing() to wait for some button to be pressed, then return true.
-*/
-bool user_defined_homing(uint8_t cycle_mask)
-{
-  //log_info( "Extending\n");
-  
-  if(cycle_mask == 1){  //Top left
-    axisTLHomed = axisTL.retract(computeTL(-200, 200, 0));
-  }
-  else if(cycle_mask == 2){  //Top right
-    axisTR.testEncoder();
-    axisTRHomed = axisTR.retract(computeTR(-200, 200, 0));
-  }
-  else if(cycle_mask == 4){ //Bottom right
-    if(axisBLHomed && axisBRHomed && axisTRHomed && axisTLHomed){
-        runCalibration();
-    }
-    else{
-       axisBRHomed = axisBR.retract(computeBR(-200, 300, 0));
-    }
-  }
-  else if(cycle_mask == 0){  //Bottom left
-    axisBL.testEncoder();
-    axisBLHomed = axisBL.retract(computeBL(-200, 300, 0));
-  }
-  
-  if(axisBLHomed && axisBRHomed && axisTRHomed && axisTLHomed){
-      //log_info( "All axis ready.\n");
-  }
-  
-  return true;
-}
-#endif
-
-#ifdef USE_KINEMATICS
-/*
-  Inverse Kinematics converts X,Y,Z Cartesian coordinate to the steps
-  on your "joint" motors.  It requires the following three functions:
-*/
-
-/*
-  inverse_kinematics() looks at incoming move commands and modifies
-  them before Grbl_ESP32 puts them in the motion planner.
-
-  Grbl_ESP32 processes arcs by converting them into tiny little line segments.
-  Kinematics in Grbl_ESP32 works the same way. Search for this function across
-  Grbl_ESP32 for examples. You are basically converting cartesian X,Y,Z... targets to
-
-    target = an N_AXIS array of target positions (where the move is supposed to go)
-    pl_data = planner data (see the definition of this type to see what it is)
-    position = an N_AXIS array of where the machine is starting from for this move
-*/
-void inverse_kinematics(float *target, plan_line_data_t *pl_data, float *position)
-{
-  // this simply moves to the target. Replace with your kinematics.
-  mc_line(target, pl_data);
+Maslow_ &Maslow_::getInstance() {
+  static Maslow_ instance;
+  return instance;
 }
 
-/*
-  kinematics_pre_homing() is called before normal homing
-  You can use it to do special homing or just to set stuff up
-
-  cycle_mask is a bit mask of the axes being homed this time.
-*/
-bool kinematics_pre_homing(uint8_t cycle_mask))
-{
-  return false; // finish normal homing cycle
-}
-
-/*
-  kinematics_post_homing() is called at the end of normal homing
-*/
-void kinematics_post_homing()
-{
-}
-#endif
-
-#ifdef USE_FWD_KINEMATIC
-/*
-  The status command uses forward_kinematics() to convert
-  your motor positions to Cartesian X,Y,Z... coordinates.
-
-  Convert the N_AXIS array of motor positions to Cartesian in your code.
-*/
-void forward_kinematics(float *position)
-{
-  // position[X_AXIS] =
-  // position[Y_AXIS] =
-}
-#endif
-
-#ifdef USE_TOOL_CHANGE
-/*
-  user_tool_change() is called when tool change gcode is received,
-  to perform appropriate actions for your machine.
-*/
-void user_tool_change(uint8_t new_tool)
-{
-}
-#endif
-
-#if defined(MACRO_BUTTON_0_PIN) || defined(MACRO_BUTTON_1_PIN) || defined(MACRO_BUTTON_2_PIN)
-/*
-  options.  user_defined_macro() is called with the button number to
-  perform whatever actions you choose.
-*/
-void user_defined_macro(uint8_t index)
-{
-}
-#endif
-
-#ifdef USE_M30
-/*
-  user_m30() is called when an M30 gcode signals the end of a gcode file.
-*/
-void user_m30()
-{
-}
-#endif
-
-#ifdef USE_MACHINE_TRINAMIC_INIT
-/*
-  machine_triaminic_setup() replaces the normal setup of trinamic
-  drivers with your own code.  For example, you could setup StallGuard
-*/
-void machine_trinamic_setup()
-{
-}
-#endif
-
-// If you add any additional functions specific to your machine that
-// require calls from common code, guard their calls in the common code with
-// #ifdef USE_WHATEVER and add function prototypes (also guarded) to grbl.h
+Maslow_ &Maslow = Maslow.getInstance();

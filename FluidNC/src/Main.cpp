@@ -5,6 +5,7 @@
 #ifndef UNIT_TEST
 
 #    include "Main.h"
+#    include "./Machine/maslow.h"
 #    include "Machine/MachineConfig.h"
 
 #    include "Config.h"
@@ -26,6 +27,8 @@
 #    include "Driver/localfs.h"
 
 extern void make_user_commands();
+
+int thisMadeUpNameThatIsUnique = 23;
 
 void setup() {
     disableCore0WDT();
