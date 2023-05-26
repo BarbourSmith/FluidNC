@@ -21,6 +21,9 @@
 #include "Logging.h"
 #include "System.h"
 #include <Arduino.h>
+#include "./machine/maslow.h"
+
+Maslow_& myMachine = Maslow_::getInstance();
 
 volatile ExecAlarm rtAlarm;  // Global realtime executor bitflag variable for setting various alarms.
 
@@ -355,9 +358,19 @@ void protocol_auto_cycle_start() {
 // NOTE: The sys_rt_exec_state.bit variable flags are set by any process, step or serial interrupts, pinouts,
 // limit switches, or the main program.
 void protocol_execute_realtime() {
-    if(random(0,200) == 1){
+    if(random(0,2000) == 1){
         log_info("test");
+        myMachine.axisBL.testEncoder();
     }
+
+    // int32_t current_position[N_AXIS]; // Copy current state of the system position variable
+    // memcpy(current_position, sys_position, sizeof(sys_position));
+    // float print_position[N_AXIS];
+    // system_convert_array_steps_to_mpos(print_position, current_position);
+    
+    // recomputePID();
+    // setTargets(print_position[0], print_position[1], print_position[2]);
+
     protocol_exec_rt_system();
     if (sys.suspend.value) {
         protocol_exec_rt_suspend();
