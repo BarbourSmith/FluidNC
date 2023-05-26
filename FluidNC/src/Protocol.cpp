@@ -18,6 +18,9 @@
 #include "MotionControl.h"  // PARKING_MOTION_LINE_NUMBER
 #include "Settings.h"       // settings_execute_startup
 #include "Machine/LimitPin.h"
+#include "Logging.h"
+#include "System.h"
+#include <Arduino.h>
 
 volatile ExecAlarm rtAlarm;  // Global realtime executor bitflag variable for setting various alarms.
 
@@ -352,6 +355,9 @@ void protocol_auto_cycle_start() {
 // NOTE: The sys_rt_exec_state.bit variable flags are set by any process, step or serial interrupts, pinouts,
 // limit switches, or the main program.
 void protocol_execute_realtime() {
+    if(random(0,200) == 1){
+        log_info("test");
+    }
     protocol_exec_rt_system();
     if (sys.suspend.value) {
         protocol_exec_rt_suspend();
