@@ -48,6 +48,8 @@ void Maslow_::begin() {
     
     beltEndExtension = 30;
     armLength = 114;
+
+    initialized = true;
 }
 
 void printToWeb (double precision){
@@ -66,6 +68,11 @@ void Maslow_::updateCenterXY(){
 
 //Called from protocol.cpp
 void Maslow_::recomputePID(){
+
+    if(!initialized){ //If we haven't initialized we don't want to try to compute things because the PID controllers cause the processor to crash
+        return;
+    }
+
     //Stop everything but keep track of the encoder positions if we are idle or alarm. Unless doing calibration.
     if((sys.state == State::Idle || sys.state == State::Alarm) && !calibrationInProgress){
         axisBL.stop();

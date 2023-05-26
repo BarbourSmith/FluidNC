@@ -77,6 +77,8 @@ class Maslow_ {
     float beltEndExtension;
     float armLength;
 
+    bool initialized = false; //A flag to indicate if the setup() function has been called
+
 
   public:
     static Maslow_ &getInstance(); // Accessor for singleton instance
