@@ -73,75 +73,75 @@ void Maslow_::recomputePID(){
         return;
     }
 
-    //Stop everything but keep track of the encoder positions if we are idle or alarm. Unless doing calibration.
-    if((sys.state == State::Idle || sys.state == State::Alarm) && !calibrationInProgress){
-        axisBL.stop();
-        axisBL.updateEncoderPosition();
-        axisBR.stop();
-        axisBR.updateEncoderPosition();
-        axisTR.stop();
-        axisTR.updateEncoderPosition();
-        axisTL.stop();
-        axisTL.updateEncoderPosition();
-    }
-    else{  //Position the axis
-        axisBL.recomputePID();
-        axisBR.recomputePID();
-        axisTR.recomputePID();
-        axisTL.recomputePID();
-    }
+    // //Stop everything but keep track of the encoder positions if we are idle or alarm. Unless doing calibration.
+    // if((sys.state == State::Idle || sys.state == State::Alarm) && !calibrationInProgress){
+    //     axisBL.stop();
+    //     axisBL.updateEncoderPosition();
+    //     axisBR.stop();
+    //     axisBR.updateEncoderPosition();
+    //     axisTR.stop();
+    //     axisTR.updateEncoderPosition();
+    //     axisTL.stop();
+    //     axisTL.updateEncoderPosition();
+    // }
+    // else{  //Position the axis
+    //     axisBL.recomputePID();
+    //     axisBR.recomputePID();
+    //     axisTR.recomputePID();
+    //     axisTL.recomputePID();
+    // }
 
-    int tlAngle = axisTL.readAngle();
-    if(tlAngle == 0 || tlAngle == 16383){
-        tlEncoderErrorCount++;
-    }
-    else{
-        tlEncoderErrorCount = 0;
-    }
-    if(tlEncoderErrorCount > 10 && tlEncoderErrorCount < 100){
-        //log_info( "Count %i\n", tlEncoderErrorCount);
-        //log_info( "Encoder connection issue on TL\n");
-    }
+    // int tlAngle = axisTL.readAngle();
+    // if(tlAngle == 0 || tlAngle == 16383){
+    //     tlEncoderErrorCount++;
+    // }
+    // else{
+    //     tlEncoderErrorCount = 0;
+    // }
+    // if(tlEncoderErrorCount > 10 && tlEncoderErrorCount < 100){
+    //     //log_info( "Count %i\n", tlEncoderErrorCount);
+    //     //log_info( "Encoder connection issue on TL\n");
+    // }
     
 
-    int trAngle = axisTR.readAngle();
-    if(trAngle == 0 || trAngle == 16383){
-        trEncoderErrorCount++;
-    }
-    else{
-        trEncoderErrorCount = 0;
-    }
-    if(trEncoderErrorCount > 10 && trEncoderErrorCount < 100){
-        //log_info( "Encoder connection issue on TR\n");
-    }
+    // int trAngle = axisTR.readAngle();
+    // if(trAngle == 0 || trAngle == 16383){
+    //     trEncoderErrorCount++;
+    // }
+    // else{
+    //     trEncoderErrorCount = 0;
+    // }
+    // if(trEncoderErrorCount > 10 && trEncoderErrorCount < 100){
+    //     //log_info( "Encoder connection issue on TR\n");
+    // }
 
-    int blAngle = axisBL.readAngle();
-    if(blAngle == 0 || blAngle == 16383){
-        blEncoderErrorCount++;
-    }
-    else{
-        blEncoderErrorCount = 0;
-    }
-    if(blEncoderErrorCount > 10 && blEncoderErrorCount < 100){
-        //log_info( "Encoder connection issue on BL\n");
-    }
+    // int blAngle = axisBL.readAngle();
+    // if(blAngle == 0 || blAngle == 16383){
+    //     blEncoderErrorCount++;
+    // }
+    // else{
+    //     blEncoderErrorCount = 0;
+    // }
+    // if(blEncoderErrorCount > 10 && blEncoderErrorCount < 100){
+    //     //log_info( "Encoder connection issue on BL\n");
+    // }
 
-    int brAngle = axisBR.readAngle();
-    if(brAngle == 0 || brAngle == 16383){
-        brEncoderErrorCount++;
-    }
-    else{
-        brEncoderErrorCount = 0;
-    }
-    if(brEncoderErrorCount > 10 && brEncoderErrorCount < 100){
-        //log_info( "Encoder connection issue on BR\n");
-    }
+    // int brAngle = axisBR.readAngle();
+    // if(brAngle == 0 || brAngle == 16383){
+    //     brEncoderErrorCount++;
+    // }
+    // else{
+    //     brEncoderErrorCount = 0;
+    // }
+    // if(brEncoderErrorCount > 10 && brEncoderErrorCount < 100){
+    //     //log_info( "Encoder connection issue on BR\n");
+    // }
 
-    int timeSinceLastCall = millis() - lastCallToPID;
-    lastCallToPID = millis();
-    if(timeSinceLastCall > 50){
-        //log_info( "PID not being called often enough. Time since last call: %i\n", timeSinceLastCall);
-    }
+    // int timeSinceLastCall = millis() - lastCallToPID;
+    // lastCallToPID = millis();
+    // if(timeSinceLastCall > 50){
+    //     //log_info( "PID not being called often enough. Time since last call: %i\n", timeSinceLastCall);
+    // }
 
     // if(random(250) == 0){
     //     grbl_sendf( "Angles: TL %i, TR: %i, BL: %i, BR: %i\n", axisTL.readAngle(), axisTR.readAngle(), axisBL.readAngle(), axisBR.readAngle());
