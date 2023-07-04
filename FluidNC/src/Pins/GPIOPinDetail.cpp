@@ -42,6 +42,8 @@ namespace Pins {
 
             case 2:  // Normal pins
             case 4:
+            case 10:
+            case 11:
             case 12:  // Boot fail if pulled high
             case 13:
             case 14:  // Outputs PWM signal at boot
@@ -63,8 +65,6 @@ namespace Pins {
             case 7:
             case 8:
             case 9:
-            case 10:
-            case 11:
                 return PinCapabilities::Reserved;
 
             case 34:  // Input only pins

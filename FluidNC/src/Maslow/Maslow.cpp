@@ -118,6 +118,7 @@ void Maslow_::home(int axis) {
     case 4:
       log_info("Bottom right");
       if(axisBLHomed && axisBRHomed && axisTRHomed && axisTLHomed) {
+        log_info("Running calibration");
         runCalibration();
       }
       else {
