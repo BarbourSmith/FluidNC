@@ -76,8 +76,8 @@ void Maslow_::begin(void (*sys_rt)()) {
   //Recompute the center XY
   updateCenterXY();
   
-  _beltEndExtension = 30;
-  _armLength = 114;
+  _beltEndExtension = 30; //Based on the CAD model these should add to 153.4
+  _armLength = 123.4;
 
   _sys_rt = sys_rt;
 
@@ -655,7 +655,7 @@ void Maslow_::takeMeasurement(float lengths[]){
     while(!axisBLDone || !axisBRDone){  //As long as one axis is still pulling
         
         //If any of the current values are over the threshold then stop and exit, otherwise pull each axis a little bit tighter by incrementing the target position
-        int currentThreshold = 1200;
+        int currentThreshold = 1500;
         Serial.print("Current: ");
         Serial.print(axisBL.getCurrent());
         Serial.print(" BLDist: ");
@@ -677,6 +677,9 @@ void Maslow_::takeMeasurement(float lengths[]){
         }
         
         if(axisBR.getCurrent() > currentThreshold || axisBRDone){
+            if(axisBRDone == false){
+                log_info( "BR Trip Current: " + String(axisBR.getCurrent()) + "\n");
+            }
             axisBRDone = true;
         }
         else{
