@@ -287,12 +287,21 @@ bool MotorUnit::comply(unsigned long *timeLastMoved, double *lastPosition, doubl
 }
 
 /*!
+ *  @brief  Called when the machine is not moving to keep the encoder positions up to date
+ */
+void MotorUnit::restingUpdateEncoders(){
+    if(!calibrating){ //During calibration we want to take more direct control of the motors so we don't want to stop them here
+        stop();
+    }
+    updateEncoderPosition();
+}
+
+/*!
  *  @brief  Fully retracts this axis and zeros it out or if it is already retracted extends it to the targetLength
  */
 bool MotorUnit::retract(double targetLength){
-    
+    calibrating = true;
     Serial.println("Retracting");
-    log_info("Retracting called within MotorUnit!");
     int absoluteCurrentThreshold = 1900;
     int incrementalThreshold = 75;
     int incrementalThresholdHits = 0;
@@ -402,4 +411,5 @@ bool MotorUnit::retract(double targetLength){
             }
         }
     }
+    calibrating = false;
 }

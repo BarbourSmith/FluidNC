@@ -30,6 +30,7 @@ namespace MotorDrivers {
     }
 
     void Servo::startUpdateTask(int ms) {
+        encoderNumber = 0;
         if (_timer_ms == 0 || ms < _timer_ms) {
             _timer_ms = ms;
         }
@@ -55,7 +56,17 @@ namespace MotorDrivers {
         vTaskDelay(2000);                     // initial delay
         while (true) {                        // don't ever return from this or the task dies
             std::atomic_thread_fence(std::memory_order::memory_order_seq_cst);  // read fence for settings
-            log_info("Servo update");
+            //log_info("Servo update");
+
+            Maslow.recomputePID(4);
+
+            //This encoder number stuff may be un-necessary now and slowing things down...look into removing it
+            encoderNumber = encoderNumber + 1;
+
+            if(encoderNumber > 3){
+                encoderNumber = 0;
+            }
+
             for (Servo* p = List; p; p = p->link) {
                 p->update();
             }

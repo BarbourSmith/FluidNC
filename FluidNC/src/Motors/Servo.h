@@ -10,11 +10,12 @@
 */
 
 #include "MotorDriver.h"
+#include "../Maslow/Maslow.h"
 
 namespace MotorDrivers {
     class Servo : public MotorDriver {
     public:
-        int _timer_ms = 75;
+        int _timer_ms = 1;
 
         Servo();
 #if 0

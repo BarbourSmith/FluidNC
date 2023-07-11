@@ -29,6 +29,7 @@ class MotorUnit {
     double recomputePID();
     void decompressBelt();
     bool comply(unsigned long *timeLastMoved, double *lastPosition, double *amtToMove, double maxSpeed);
+    void restingUpdateEncoders();
     bool retract(double targetLength);
 
 
@@ -44,6 +45,7 @@ class MotorUnit {
     int _stallCount = 0;
     int _numPosErrors = 0; //Keeps track of the number of position errors in a row to detect a stall
     double mostRecentCumulativeEncoderReading = 0;
+    bool calibrating = false;
 
 };
 

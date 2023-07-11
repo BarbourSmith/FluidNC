@@ -154,43 +154,35 @@ void Maslow_::recomputePID(int encoderNumber2Compute){
 
     int timeSinceLastCall = millis() - lastCallToPID;
     
-    if(timeSinceLastCall > 50){
-        log_info( "PID not being called often enough. Time since last call: " + String(timeSinceLastCall));
-    }
-    
+    // if(timeSinceLastCall > 50){
+    //     log_info( "PID not being called often enough. Time since last call: " + String(timeSinceLastCall));
+    // }
+
     //We want to update the encoders at most ever 10ms to avoid it hogging the processor time
     if(timeSinceLastCall < 10){
       return;
     }
 
-    //Stop everything but keep track of the encoder positions if we are idle or alarm. Unless doing calibration.
+    //Stop everything but keep track of the encoder positions if we are idle or alarm. Unless doing calibration then we run the regular recompute PID.
     if((sys.state == State::Idle || sys.state == State::Alarm) && !calibrationInProgress){
         switch(encoderNumber2Compute){
             case 0:
-                axisBL.stop();
-                axisBL.updateEncoderPosition();
+                axisBL.restingUpdateEncoders();
                 break;
             case 1:
-                axisBR.stop();
-                axisBR.updateEncoderPosition();
+                axisBR.restingUpdateEncoders();
                 break;
             case 2:
-                axisTR.stop();
-                axisTR.updateEncoderPosition();
+                axisTR.restingUpdateEncoders();
                 break;
             case 3:
-                axisTL.stop();
-                axisTL.updateEncoderPosition();
+                axisTL.restingUpdateEncoders();
                 break;
             case 4:
-                axisBL.stop();
-                axisBL.updateEncoderPosition();
-                axisBR.stop();
-                axisBR.updateEncoderPosition();
-                axisTR.stop();
-                axisTR.updateEncoderPosition();
-                axisTL.stop();
-                axisTL.updateEncoderPosition();
+                axisBL.restingUpdateEncoders();
+                axisBR.restingUpdateEncoders();
+                axisTR.restingUpdateEncoders();
+                axisTL.restingUpdateEncoders();
                 break;
         }
     }
@@ -468,7 +460,10 @@ void Maslow_::runCalibration(){
         {lengths9[3], lengths9[2], lengths9[0], lengths9[1]},
     };
     double results[6] = {0,0,0,0,0,0};
+
+    calibrationInProgress = false; //Turn off motors while computing
     computeCalibration(measurements, results, printToWeb, tlX, tlY, trX, trY, brX, tlZ, trZ, blZ, brZ);
+    calibrationInProgress = true;
     
     log_info( "After computing calibration " + String(results[5]));
     
@@ -503,7 +498,6 @@ void Maslow_::runCalibration(){
     double brError = (lengths1[1]-(_beltEndExtension+_armLength))-computeBR(0,0,0);
     
     log_info( "Lower belt length mismatch: " + String(blError) + ", " +String(brError));
-    
     calibrationInProgress = false;
     log_info( "Calibration finished");
     
@@ -692,7 +686,7 @@ void Maslow_::takeMeasurement(float lengths[]){
         unsigned long elapsedTime = millis()-time;
         while(elapsedTime < 25){
             elapsedTime = millis()-time;
-            recomputePID(4);  //This recomputes the PID four all four servos
+            //recomputePID(4);  //This recomputes the PID four all four servos
             (*_sys_rt)();
         }
     }

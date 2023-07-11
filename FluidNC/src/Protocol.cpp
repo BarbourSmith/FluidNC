@@ -365,7 +365,7 @@ void protocol_execute_realtime() {
     //     Maslow.readEncoders();
     // }
 
-    Maslow.recomputePID(encoderNumber);
+    //Maslow.recomputePID(encoderNumber);
     Maslow.setTargets(steps_to_mpos(get_axis_motor_steps(0),0), steps_to_mpos(get_axis_motor_steps(1),1), steps_to_mpos(get_axis_motor_steps(2),2));
 
     encoderNumber = encoderNumber + 1;
