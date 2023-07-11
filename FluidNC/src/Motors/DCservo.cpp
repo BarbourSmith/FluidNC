@@ -24,11 +24,14 @@ namespace MotorDrivers {
 
     void DCservo::init() {
 
+        printf("DC Servo Init Ran\n");
+
         config_message();  // print the config
 
         startUpdateTask(_timer_ms);
 
         log_info("DC Servo Init Ran");
+        printf("DC Servo Init Ran\n");
     }
 
     // Configuration registration
