@@ -25,6 +25,7 @@
 #    include "WebUI/WifiConfig.h"
 #    include "Driver/localfs.h"
 
+
 extern void make_user_commands();
 
 void setup() {
@@ -150,7 +151,10 @@ void setup() {
         WebUI::bt_config.begin();
     }
     allChannels.deregistration(&startupLog);
+
 }
+
+
 
 static void reset_variables() {
     // Reset primary systems.

@@ -38,7 +38,7 @@ namespace MotorDrivers {
         if (this == List) {
             xTaskCreatePinnedToCore(updateTask,         // task
                                     "servoUpdateTask",  // name for task
-                                    4096,               // size of task stack
+                                    2*4096,               // size of task stack
                                     (void*)&_timer_ms,  // parameters
                                     1,                  // priority
                                     NULL,               // handle

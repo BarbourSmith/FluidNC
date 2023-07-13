@@ -38,6 +38,8 @@ class Maslow_ {
     float computeVertical(float firstUpper, float firstLower, float secondUpper, float secondLower);
     void computeFrameDimensions(float lengthsSet1[], float lengthsSet2[], float machineDimensions[]);
 
+    static void   updatePID(void*);
+
 
 
 

@@ -23,8 +23,6 @@ axes:
     homing: 
       cycle: -1
     
-    motor0:
-      dc_servo:
 
   y: 
     max_rate_mm_per_min: 2000.000000

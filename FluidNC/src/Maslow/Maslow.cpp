@@ -80,7 +80,22 @@ void Maslow_::begin(void (*sys_rt)()) {
   _armLength = 123.4;
 
   _sys_rt = sys_rt;
+    
+  int _timer_ms = 1;
+  
+    xTaskCreatePinnedToCore(updatePID,         // task
+                        "maslowUpdateTask",  // name for task
+                        2*4096,               // size of task stack
+                        (void*)&_timer_ms,  // parameters
+                        1,                  // priority
+                        NULL,               // handle
+                        SUPPORT_TASK_CORE   // core
+            );
 
+}
+
+ void Maslow_::updatePID(void* pvParameters){
+    Maslow.recomputePID(4);
 }
 
 void printToWeb (double precision){
