@@ -15,7 +15,7 @@
 namespace MotorDrivers {
     class Servo : public MotorDriver {
     public:
-        int _timer_ms = 1;
+        int _timer_ms = 10;
 
         Servo();
 #if 0

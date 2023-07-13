@@ -60,16 +60,9 @@ namespace MotorDrivers {
 
             Maslow.recomputePID(4);
 
-            //This encoder number stuff may be un-necessary now and slowing things down...look into removing it
-            encoderNumber = encoderNumber + 1;
-
-            if(encoderNumber > 3){
-                encoderNumber = 0;
-            }
-
-            for (Servo* p = List; p; p = p->link) {
-                p->update();
-            }
+            // for (Servo* p = List; p; p = p->link) {
+            //     p->update();
+            // }
 
             vTaskDelayUntil(&xLastWakeTime, xUpdate);
 
