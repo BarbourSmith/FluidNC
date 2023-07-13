@@ -487,7 +487,7 @@ void Maslow_::runCalibration(){
     //Move back to center after the results are applied
     moveWithSlack(0, 0, true);
     
-    //For safety we should pull tight here and verify that the results are basically what we expect before handing things over to the controller.
+    //For safety we pull tight here and verify that the results are basically what we expect before handing things over to the controller.
     takeMeasurementAvg(lengths1);
     takeMeasurementAvg(lengths1);
     
@@ -575,7 +575,6 @@ float Maslow_::printMeasurementMetrics(double avg, double m1, double m2, double 
 
 //Checks to make sure the deviation within the measurement avg looks good before moving on
 void Maslow_::takeMeasurementAvgWithCheck(float lengths[]){
-    log_info( "Beginning takeMeasurementAvg\n");
     Serial.println( "Beginning takeMeasurementAvg\n");
     float threshold = 0.9;
     while(true){
@@ -622,11 +621,11 @@ float Maslow_::takeMeasurementAvg(float avgLengths[]){
     float m4 = printMeasurementMetrics(avgLengths[3], lengths1[3], lengths2[3], lengths3[3], lengths4[3], lengths5[3]);
 
     float avgMaxDeviation = (m1+m2+m3+m4)/4.0;
-    
-    log_info( "Average Max Deviation: " + String(avgMaxDeviation));
-    log_info("Max error: " + String(std::max({m1, m2, m3, m4})))
+    float maxDeviation = std::max({m1, m2, m3, m4});
 
-    return avgMaxDeviation;
+    log_info("Max error: " + String(maxDeviation))
+
+    return maxDeviation;
 }
 
 //Retract the lower belts until they pull tight and take a measurement
