@@ -569,9 +569,7 @@ float Maslow_::printMeasurementMetrics(double avg, double m1, double m2, double 
     double m4Variation = myAbs(avg - m4);
     double m5Variation = myAbs(avg - m5);
 
-    //grbl_sendf( "m1Variation: %f m2Variation: %f, m3Variation: %f, m4Variation: %f, m5Variation: %f\n", m1Variation, m2Variation, m3Variation, m4Variation, m5Variation);
-    
-    double maxDeviation = max(max(max(m1Variation, m2Variation), max(m3Variation, m4Variation)), m5Variation);
+    float maxDeviation = std::max({m1Variation, m2Variation,m3Variation, m4Variation, m5Variation});
     
     log_info( "Max deviation: " + String(maxDeviation));
 
@@ -632,11 +630,11 @@ float Maslow_::takeMeasurementAvg(float avgLengths[]){
     float m3 = printMeasurementMetrics(avgLengths[2], lengths1[2], lengths2[2], lengths3[2], lengths4[2], lengths5[2]);
     float m4 = printMeasurementMetrics(avgLengths[3], lengths1[3], lengths2[3], lengths3[3], lengths4[3], lengths5[3]);
 
-    float avgMaxDeviation = (m1+m2+m3+m4)/4.0;
+    float maxDeviation = std::max({m1, m2, m3, m4});
     
-    log_info( "Average Max Deviation: " + String(avgMaxDeviation));
+    log_info( "Max Deviation: " + String(maxDeviation));
 
-    return avgMaxDeviation;
+    return maxDeviation;
 }
 
 //Retract the lower belts until they pull tight and take a measurement
