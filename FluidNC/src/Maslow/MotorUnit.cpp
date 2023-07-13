@@ -412,6 +412,7 @@ bool MotorUnit::retract(double targetLength){
                 return true;
             }
             else{
+                log_info("Measured belt length after retract: " + String(getPosition()));
                 calibrating = false;
                 return false;
             }

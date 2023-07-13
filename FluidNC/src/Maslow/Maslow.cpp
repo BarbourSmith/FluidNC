@@ -352,10 +352,10 @@ void Maslow_::setTargets(float xTarget, float yTarget, float zTarget){
 
         computeTensions(xTarget, yTarget);
 
-        axisBL.setTarget(computeBL(xTarget, yTarget, zTarget));
-        axisBR.setTarget(computeBR(xTarget, yTarget, zTarget));
-        axisTR.setTarget(computeTR(xTarget, yTarget, zTarget));
-        axisTL.setTarget(computeTL(xTarget, yTarget, zTarget));
+        //axisBL.setTarget(computeBL(xTarget, yTarget, zTarget));
+        //axisBR.setTarget(computeBR(xTarget, yTarget, zTarget));
+        //axisTR.setTarget(computeTR(xTarget, yTarget, zTarget));
+        //axisTL.setTarget(computeTL(xTarget, yTarget, zTarget));
     }
 }
 
@@ -505,7 +505,6 @@ void Maslow_::printMeasurements(float lengths[]){
 }
 
 void Maslow_::lowerBeltsGoSlack(){
-    log_info( "Lower belts going slack");
     
     unsigned long startTime = millis();
 
@@ -562,7 +561,7 @@ float Maslow_::printMeasurementMetrics(double avg, double m1, double m2, double 
 
     //grbl_sendf( "m1Variation: %f m2Variation: %f, m3Variation: %f, m4Variation: %f, m5Variation: %f\n", m1Variation, m2Variation, m3Variation, m4Variation, m5Variation);
     
-    double maxDeviation = max(max(max(m1Variation, m2Variation), max(m3Variation, m4Variation)), m5Variation);
+    float maxDeviation = std::max({m1Variation, m2Variation,m3Variation, m4Variation, m5Variation});
     
     log_info( "Max deviation: " + String(maxDeviation));
 
@@ -666,7 +665,7 @@ void Maslow_::takeMeasurement(float lengths[]){
         
         if(axisBR.getCurrent() > currentThreshold || axisBRDone){
             if(axisBRDone == false){
-                log_info( "BR Trip Current: " + String(axisBR.getCurrent()) + "\n");
+                log_info( "BR Trip Current: " + String(axisBR.getCurrent()));
             }
             axisBRDone = true;
         }
@@ -764,11 +763,23 @@ void Maslow_::moveWithSlack(float x, float y, bool withSlack = true){
             axisTR.setTarget(TREndPosition);
         }
 
-        log_info("TL Target: " + String(axisTL.getTarget()) + " TR Target: " + String(axisTR.getTarget()));
-        
-        //Take one step towards the goal
-        axisTR.recomputePID();
-        axisTL.recomputePID();
+        if(random(10)==1){
+            log_info("TL Target: " + String(axisTL.getTarget()) + "TL Pos: " + String(axisTL.getPosition()) + " TR Target: " + String(axisTR.getTarget()) + " TR Pos: " + String(axisTR.getPosition()));
+        }
+
+        if(axisTL.getError() > 1){
+            log_info("Big error detected in TL: " + String(axisTL.getError()));
+            log_info("Read target: " + String(axisTL.getTarget()));
+            log_info("Computed target: " + String(TLStartPosition + TLStep * numberOfStepsTaken));
+            log_info("Read position: " + String(axisTL.getPosition()));
+            
+        }
+        if(axisTR.getError() > 1){
+            log_info("Big error detected in TR: " + String(axisTR.getError()))
+            log_info("Read target: " + String(axisTR.getTarget()));
+            log_info("Computed target: " + String(TRStartPosition + TRStep * numberOfStepsTaken));
+            log_info("Read position: " + String(axisTR.getPosition()));
+        }
         
         //Set the lower axis to be compliant (if withSlack == true). PID is recomputed in comply()
         if(withSlack){
@@ -778,8 +789,6 @@ void Maslow_::moveWithSlack(float x, float y, bool withSlack = true){
         else{
             axisBL.stop();
             axisBR.stop();
-            axisBL.updateEncoderPosition();
-            axisBR.updateEncoderPosition();
         }
 
         //This maintains FluidNC stuff like wifi
