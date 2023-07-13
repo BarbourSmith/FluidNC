@@ -33,7 +33,7 @@ class Maslow_ {
     void takeMeasurementAvgWithCheck(float lengths[]);
     float takeMeasurementAvg(float avgLengths[]);
     void takeMeasurement(float lengths[]);
-    void moveWithSlack(float x, float y);
+    void moveWithSlack(float x, float y, bool withSlack);
     void takeUpInternalSlack();
     float computeVertical(float firstUpper, float firstLower, float secondUpper, float secondLower);
     void computeFrameDimensions(float lengthsSet1[], float lengthsSet2[], float machineDimensions[]);

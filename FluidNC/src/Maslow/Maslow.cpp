@@ -84,14 +84,13 @@ void Maslow_::begin(void (*sys_rt)()) {
 }
 
 void printToWeb (double precision){
-    Serial.print( "Calibration Precision: ");
+    Serial.print( "Anchor Positioning Error: ");
     Serial.println(precision);
 
-    log_info( "Calibration Precision: " + String(precision) +"mm");
+    log_info( "Anchor Positioning Error: " + String(precision) +"mm");
 }
 
 void Maslow_::readEncoders() {
-  Serial.println("Reading Encoders");
   axisTL.readEncoder();
   axisTR.readEncoder();
   axisBL.readEncoder();
@@ -99,8 +98,6 @@ void Maslow_::readEncoders() {
 }
 
 void Maslow_::home(int axis) {
-  log_info("Maslow home ran");
-  log_info(initialized);
 
   switch(axis) {
     case 0:
@@ -298,7 +295,7 @@ float Maslow_::computeBL(float x, float y, float z){
 
     //Add some extra slack if this belt isn't needed because the upper belt is already very taught
     //Max tension is around -1.81 at the very top and -.94 at the bottom
-    float extraSlack = min(max(-34.48*trTension - 32.41, 0.0), 8.0); //limit of 0-2mm of extension
+    float extraSlack = 0;//min(max(-34.48*trTension - 32.41, 0.0), 8.0); //limit of 0-2mm of extension
 
     // if(random(4000) == 10){
     //     grbl_sendf( "BL Slack By: %f\n", extraSlack);
@@ -318,7 +315,7 @@ float Maslow_::computeBR(float x, float y, float z){
 
     float length = sqrt(a*a+b*b+c*c) - (_beltEndExtension+_armLength);
 
-    float extraSlack = min(max(-34.48*tlTension - 32.41, 0.0), 8.0); //limit of 0-2mm of extension
+    float extraSlack = 0;//min(max(-34.48*tlTension - 32.41, 0.0), 8.0); //limit of 0-2mm of extension
 
     // if(random(4000) == 10){
     //     grbl_sendf( "BR Slack By: %f\n", extraSlack);
@@ -390,45 +387,45 @@ void Maslow_::runCalibration(){
     
     takeMeasurementAvgWithCheck(lengths1);
     
-    moveWithSlack(-200, 0);
+    moveWithSlack(-200, 0, false);
     
     takeMeasurementAvgWithCheck(lengths2);
     
-    moveWithSlack(-200, -200);
+    moveWithSlack(-200, -200, false);
     
     takeMeasurementAvgWithCheck(lengths3);
 
     lowerBeltsGoSlack();
     lowerBeltsGoSlack();
-    moveWithSlack(0, 200);
+    moveWithSlack(0, 200, true);
     
     takeMeasurementAvgWithCheck(lengths4);
     
-    moveWithSlack(0, 0);
+    moveWithSlack(0, 0, false);
     
     takeMeasurementAvgWithCheck(lengths5);
     
-    moveWithSlack(0, -200);
+    moveWithSlack(0, -200, false);
     
     takeMeasurementAvgWithCheck(lengths6);
     
     lowerBeltsGoSlack();
     lowerBeltsGoSlack();
-    moveWithSlack(200, 200);
+    moveWithSlack(200, 200, true);
     
     takeMeasurementAvgWithCheck(lengths7);
     
-    moveWithSlack(200, 0);
+    moveWithSlack(200, 0, false);
     
     takeMeasurementAvgWithCheck(lengths8);
     
-    moveWithSlack(200, -200);
+    moveWithSlack(200, -200, false);
     
     takeMeasurementAvgWithCheck(lengths9);
     
     lowerBeltsGoSlack();
     lowerBeltsGoSlack();
-    moveWithSlack(0, 0);  //Go back to the center. This will pull the lower belts tight too
+    moveWithSlack(0, 0, true);  //Go back to the center. This will pull the lower belts tight too
     
     axisBL.stop();
     axisBR.stop();
@@ -488,7 +485,7 @@ void Maslow_::runCalibration(){
     
     
     //Move back to center after the results are applied
-    moveWithSlack(0, 0);
+    moveWithSlack(0, 0, true);
     
     //For safety we should pull tight here and verify that the results are basically what we expect before handing things over to the controller.
     takeMeasurementAvg(lengths1);
@@ -594,8 +591,6 @@ void Maslow_::takeMeasurementAvgWithCheck(float lengths[]){
 
 //Takes 5 measurements and return how consistent they are
 float Maslow_::takeMeasurementAvg(float avgLengths[]){
-    log_info( "Beginning to take averaged measurement.\n");
-    Serial.println( "Beginning to take averaged measurement.");
     
     //Where our five measurements will be stored
     float lengths1[4];
@@ -629,13 +624,13 @@ float Maslow_::takeMeasurementAvg(float avgLengths[]){
     float avgMaxDeviation = (m1+m2+m3+m4)/4.0;
     
     log_info( "Average Max Deviation: " + String(avgMaxDeviation));
+    log_info("Max error: " + String(std::max({m1, m2, m3, m4})))
 
     return avgMaxDeviation;
 }
 
 //Retract the lower belts until they pull tight and take a measurement
 void Maslow_::takeMeasurement(float lengths[]){
-    log_info( "Taking a measurement.\n");
 
     axisBL.stop();
     axisBR.stop();
@@ -705,61 +700,90 @@ void Maslow_::takeMeasurement(float lengths[]){
     lengths[1] = axisBR.getPosition()+_beltEndExtension+_armLength;
     lengths[2] = axisTR.getPosition()+_beltEndExtension+_armLength;
     lengths[3] = axisTL.getPosition()+_beltEndExtension+_armLength;
-    
-    log_info("Measurement finished");
+
     //log_info( "Measured:\n%f, %f \n%f %f \n",lengths[3], lengths[2], lengths[0], lengths[1]);
     
     return;
 }
 
 //Reposition the sled without knowing the machine dimensions
-void Maslow_::moveWithSlack(float x, float y){
+void Maslow_::moveWithSlack(float x, float y, bool withSlack = true){
     
-    log_info( "Moving to with slack");
+    //Make the lower arms compliant (if withSlack == true) and move retract the other two until we get to the target distance
     
-    //The distance we need to move is the current position minus the target position
-    double TLDist = axisTL.getPosition() - computeTL(x,y,0);
-    double TRDist = axisTR.getPosition() - computeTR(x,y,0);
-    
-    //Record which direction to move
-    double TLDir  = constrain(TLDist, -1, 1);
-    double TRDir  = constrain(TRDist, -1, 1);
-    
-    double stepSize = .15;
-    
-    //Only use positive dist for incrementing counter (float int conversion issue?)
-    TLDist = abs(TLDist);
-    TRDist = abs(TRDist);
-    
-    //Make the lower arms compliant and move retract the other two until we get to the target distance
-    
+    //These are used for making the lower belts comply
     unsigned long timeLastMoved1 = millis();
     unsigned long timeLastMoved2 = millis();
     double lastPosition1 = axisBL.getPosition();
     double lastPosition2 = axisBR.getPosition();
     double amtToMove1 = 1;
     double amtToMove2 = 1;
-    
-    while(TLDist > 0 || TRDist > 0){
-        
-        //Set the lower axis to be compliant. PID is recomputed in comply()
-        axisBL.comply(&timeLastMoved1, &lastPosition1, &amtToMove1, 3);
-        axisBR.comply(&timeLastMoved2, &lastPosition2, &amtToMove2, 3);
-        
-        // grbl_sendf( "BRPos: %f, BRamt: %f, BRtime: %l\n", lastPosition2, amtToMove2, timeLastMoved2);
-        
-        //Move the upper axis one step
-        if(TLDist > 0){
-            TLDist = TLDist - stepSize;
-            axisTL.setTarget((axisTL.getTarget() - (stepSize*TLDir)));
+
+    //These are used to compute the intermeidate lengths for TL and TR
+    double TLStartPosition = axisTL.getPosition();
+    double TLEndPosition = computeTL(x,y,0);
+    double TRStartPosition = axisTR.getPosition();
+    double TREndPosition = computeTR(x,y,0);
+
+    log_info("TLStartPosition: " + String(TLStartPosition));
+    log_info("TRStartPosition: " + String(TRStartPosition));
+    log_info("TLEndPosition: " + String(TLEndPosition));
+    log_info("TREndPosition: " + String(TREndPosition));
+
+
+    //This computes the distance and then divides it by the step size
+    int TLNumSteps = abs(TLEndPosition - TLStartPosition) / .15;
+    int TRNumSteps = abs(TREndPosition - TRStartPosition) / .15;
+
+    log_info("TLNumSteps: " + String(TLNumSteps));
+    log_info("TRNumSteps: " + String(TRNumSteps));
+
+    //Give the step a direction
+    double TLStep = (TLEndPosition - TLStartPosition > 0) ? 0.15 : -0.15;
+    double TRStep = (TREndPosition - TRStartPosition > 0) ? 0.15 : -0.15;
+
+    int numberOfStepsTaken = 0;
+
+    while(TLNumSteps > 0 || TRNumSteps > 0){
+
+        TLNumSteps--;
+        TRNumSteps--;
+        numberOfStepsTaken++;
+      
+        // Move TL to position i
+        // Move TR to position j
+        if(TLNumSteps > 0){
+            axisTL.setTarget(TLStartPosition + TLStep * numberOfStepsTaken);
         }
-        if(TRDist > 0){
-            TRDist = TRDist - stepSize;
-            axisTR.setTarget((axisTR.getTarget() - (stepSize*TRDir)));
+        else{
+            axisTL.setTarget(TLEndPosition);
         }
+        if(TRNumSteps > 0){
+            axisTR.setTarget(TRStartPosition + TRStep * numberOfStepsTaken);
+        }
+        else{
+            axisTR.setTarget(TREndPosition);
+        }
+
+        log_info("TL Target: " + String(axisTL.getTarget()) + " TR Target: " + String(axisTR.getTarget()));
+        
+        //Take one step towards the goal
         axisTR.recomputePID();
         axisTL.recomputePID();
+        
+        //Set the lower axis to be compliant (if withSlack == true). PID is recomputed in comply()
+        if(withSlack){
+            axisBL.comply(&timeLastMoved1, &lastPosition1, &amtToMove1, 1);
+            axisBR.comply(&timeLastMoved2, &lastPosition2, &amtToMove2, 1);
+        }
+        else{
+            axisBL.stop();
+            axisBR.stop();
+            axisBL.updateEncoderPosition();
+            axisBR.updateEncoderPosition();
+        }
 
+        //This maintains FluidNC stuff like wifi
         (*_sys_rt)();
         
         // Delay without blocking
@@ -783,7 +807,7 @@ void Maslow_::moveWithSlack(float x, float y){
     axisTL.stop();
     
     //Take up the internal slack to remove any slop between the spool and roller
-    takeUpInternalSlack();
+    //takeUpInternalSlack();
 }
 
 //This function removes any slack in the belt between the spool and the roller. 
