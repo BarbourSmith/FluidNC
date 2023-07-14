@@ -57,16 +57,16 @@ void Maslow_::begin(void (*sys_rt)()) {
   axisTRHomed = false;
   axisTLHomed = false;
 
-  tlX = -8.339;
-  tlY = 2209;
+  tlX = -16.02;
+  tlY = 2145.93;
   tlZ = 172;
-  trX = 3505; 
-  trY = 2209;
+  trX = 3447.04; 
+  trY = 2222.18;
   trZ = 111;
   blX = 0;
   blY = 0;
   blZ = 96;
-  brX = 3505;
+  brX = 3484.53;
   brY = 0;
   brZ = 131;
 
@@ -364,132 +364,18 @@ void Maslow_::setTargets(float xTarget, float yTarget, float zTarget){
 
 //Runs the calibration sequence to determine the machine's dimensions
 void Maslow_::runCalibration(){
-    
-    log_info( "Beginning calibration\n");
-    Serial.println("Beginning calibration");
-    
+
     calibrationInProgress = true;
-    
+
     //Undoes any calls by the system to move these to (0,0)
     axisBL.setTarget(axisBL.getPosition());
     axisBR.setTarget(axisBR.getPosition());
     axisTR.setTarget(axisTR.getPosition());
     axisTL.setTarget(axisTL.getPosition());
-    
-    float lengths1[4];
-    float lengths2[4];
-    float lengths3[4];
-    float lengths4[4];
-    float lengths5[4];
-    float lengths6[4];
-    float lengths7[4];
-    float lengths8[4];
-    float lengths9[4];
-    
-    //------------------------------------------------------Take measurements
-    
-    takeMeasurementAvgWithCheck(lengths1);
-    
-    moveWithSlack(-200, 0);
-    
-    takeMeasurementAvgWithCheck(lengths2);
-    
-    moveWithSlack(-200, -200);
-    
-    takeMeasurementAvgWithCheck(lengths3);
 
-    lowerBeltsGoSlack();
-    lowerBeltsGoSlack();
-    moveWithSlack(0, 200);
-    
-    takeMeasurementAvgWithCheck(lengths4);
-    
-    moveWithSlack(0, 0);
-    
-    takeMeasurementAvgWithCheck(lengths5);
-    
-    moveWithSlack(0, -200);
-    
-    takeMeasurementAvgWithCheck(lengths6);
-    
-    lowerBeltsGoSlack();
-    lowerBeltsGoSlack();
-    moveWithSlack(200, 200);
-    
-    takeMeasurementAvgWithCheck(lengths7);
-    
-    moveWithSlack(200, 0);
-    
-    takeMeasurementAvgWithCheck(lengths8);
-    
-    moveWithSlack(200, -200);
-    
-    takeMeasurementAvgWithCheck(lengths9);
-    
-    lowerBeltsGoSlack();
-    lowerBeltsGoSlack();
-    moveWithSlack(0, 0);  //Go back to the center. This will pull the lower belts tight too
-    
-    axisBL.stop();
-    axisBR.stop();
-    axisTR.stop();
-    axisTL.stop();
-    
-    //----------------------------------------------------------Do the computation
-    
-    printMeasurements(lengths1);
-    printMeasurements(lengths2);
-    printMeasurements(lengths3);
-    printMeasurements(lengths4);
-    printMeasurements(lengths5);
-    printMeasurements(lengths6);
-    printMeasurements(lengths7);
-    printMeasurements(lengths8);
-    printMeasurements(lengths9);
-    
-    double measurements[][4] = {
-        //TL              TR           BL           BR
-        {lengths1[3], lengths1[2], lengths1[0], lengths1[1]},
-        {lengths2[3], lengths2[2], lengths2[0], lengths2[1]},
-        {lengths3[3], lengths3[2], lengths3[0], lengths3[1]},
-        {lengths4[3], lengths4[2], lengths4[0], lengths4[1]},
-        {lengths5[3], lengths5[2], lengths5[0], lengths5[1]},
-        {lengths6[3], lengths6[2], lengths6[0], lengths6[1]},
-        {lengths7[3], lengths7[2], lengths7[0], lengths7[1]},
-        {lengths8[3], lengths8[2], lengths8[0], lengths8[1]},
-        {lengths9[3], lengths9[2], lengths9[0], lengths9[1]},
-    };
-    double results[6] = {0,0,0,0,0,0};
-
-    calibrationInProgress = false; //Turn off motors while computing
-    computeCalibration(measurements, results, printToWeb, tlX, tlY, trX, trY, brX, tlZ, trZ, blZ, brZ);
-    calibrationInProgress = true;
-    
-    log_info( "After computing calibration " + String(results[5]));
-    
-    if(results[5] < 2){
-        log_info( "Calibration successful with precision: " + String(results[5]));
-        tlX = results[0];
-        tlY = results[1];
-        trX = results[2];
-        trY = results[3];
-        blX = 0;
-        blY = 0;
-        brX = results[4];
-        brY = 0;
-        updateCenterXY();
-        //log_info( "tlx: %f tly: %f trx: %f try: %f blx: %f bly: %f brx: %f bry: %f \n", tlX, tlY, trX, trY, blX, blY, brX, brY);
-    }
-    else{
-        log_info( "Calibration failed: " + String(results[5]));
-    }
-    
-    //---------------------------------------------------------Finish
-    
-    
     //Move back to center after the results are applied
     moveWithSlack(0, 0);
-    
+    float lengths1[4];
     //For safety we should pull tight here and verify that the results are basically what we expect before handing things over to the controller.
     takeMeasurementAvg(lengths1);
     takeMeasurementAvg(lengths1);
