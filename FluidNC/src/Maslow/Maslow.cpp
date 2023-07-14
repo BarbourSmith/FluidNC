@@ -483,7 +483,10 @@ void Maslow_::runCalibration(){
         brX = results[4];
         brY = 0;
         updateCenterXY();
-        //log_info( "tlx: %f tly: %f trx: %f try: %f blx: %f bly: %f brx: %f bry: %f \n", tlX, tlY, trX, trY, blX, blY, brX, brY);
+        log_info( "tlx: " + String(tlX) + " tly: " + String(tlY) + 
+            "\ntrX: " + String(trX) + " trY: " + String(trY) + 
+            "\nblX: " + String(blX) + " blY: " + String(blY) + 
+            "\nbrx: " + String(brX) + " brY: " + String(brY));
     }
     else{
         log_info( "Calibration failed: " + String(results[5]));
