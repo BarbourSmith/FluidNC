@@ -105,15 +105,15 @@ void Maslow_::home(int axis) {
   switch(axis) {
     case 0:
       log_info("Bottom left");
-      axisBLHomed = axisBL.retract(computeBL(-200, 300, 0));
+      axisBLHomed = axisBL.retract(computeBL(-800, 500, 0));
       break;
     case 1:
       log_info("Top left");
-      axisTLHomed = axisTL.retract(computeTL(-200, 200, 0));
+      axisTLHomed = axisTL.retract(computeTL(-800, 400, 0));
       break;
     case 2:
       log_info("Top right");
-      axisTRHomed = axisTR.retract(computeTR(-200, 200, 0));
+      axisTRHomed = axisTR.retract(computeTR(-800, 400, 0));
       break;
     case 4:
       log_info("Bottom right");
@@ -122,7 +122,7 @@ void Maslow_::home(int axis) {
         runCalibration();
       }
       else {
-        axisBRHomed = axisBR.retract(computeBR(-200, 300, 0));
+        axisBRHomed = axisBR.retract(computeBR(-800, 500, 0));
       }
       break;
     default:
@@ -396,42 +396,51 @@ void Maslow_::runCalibration(){
     
     //------------------------------------------------------Take measurements
     
+    log_info("Measurement 1");
     takeMeasurementAvgWithCheck(lengths1);
     
-    moveWithSlack(-200, 0);
+    moveWithSlack(-800, 0);
     
+    log_info("Measurement 2");
     takeMeasurementAvgWithCheck(lengths2);
     
-    moveWithSlack(-200, -200);
+    moveWithSlack(-800, -400);
     
+    log_info("Measurement 3");
     takeMeasurementAvgWithCheck(lengths3);
 
     lowerBeltsGoSlack();
     lowerBeltsGoSlack();
-    moveWithSlack(0, 200);
+    moveWithSlack(0, 400);
     
+    log_info("Measurement 4");
     takeMeasurementAvgWithCheck(lengths4);
     
     moveWithSlack(0, 0);
     
+    log_info("Measurement 5");
     takeMeasurementAvgWithCheck(lengths5);
     
-    moveWithSlack(0, -200);
+    moveWithSlack(0, -400);
     
+    log_info("Measurement 6");
     takeMeasurementAvgWithCheck(lengths6);
     
     lowerBeltsGoSlack();
     lowerBeltsGoSlack();
-    moveWithSlack(200, 200);
+    moveWithSlack(800, 400);
     
+    log_info("Measurement 7");
     takeMeasurementAvgWithCheck(lengths7);
     
-    moveWithSlack(200, 0);
+    moveWithSlack(800, 0);
     
+    log_info("Measurement 8");
     takeMeasurementAvgWithCheck(lengths8);
     
-    moveWithSlack(200, -200);
+    moveWithSlack(800, -400);
     
+    log_info("Measurement 9");
     takeMeasurementAvgWithCheck(lengths9);
     
     lowerBeltsGoSlack();
@@ -657,17 +666,6 @@ void Maslow_::takeMeasurement(float lengths[]){
         
         //If any of the current values are over the threshold then stop and exit, otherwise pull each axis a little bit tighter by incrementing the target position
         int currentThreshold = 1500;
-        Serial.print("Current: ");
-        Serial.print(axisBL.getCurrent());
-        Serial.print(" BLDist: ");
-        Serial.print(BLDist);
-        Serial.print(" BRDist: ");
-        Serial.print(BRDist);
-        Serial.print(" Calibration: ");
-        Serial.print(calibrationInProgress);
-        Serial.print(" Sys:State==Alarm: ");
-        Serial.println(sys.state == State::Alarm);
-
         
         if(axisBL.getCurrent() > currentThreshold || axisBLDone){  //Check if the current threshold is hit
             axisBLDone = true;
@@ -714,6 +712,7 @@ void Maslow_::takeMeasurement(float lengths[]){
     lengths[3] = axisTL.getPosition()+_beltEndExtension+_armLength;
     
     log_info("Measurement finished");
+    log_info("{bl:" + String(lengths[0]) + ", br:" + String(lengths[1]) + ",   tr:" + String(lengths[2]) + ",  tl:" + String(lengths[3]) + "}");
     //log_info( "Measured:\n%f, %f \n%f %f \n",lengths[3], lengths[2], lengths[0], lengths[1]);
     
     return;
