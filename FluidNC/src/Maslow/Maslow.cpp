@@ -34,9 +34,6 @@
 #define brIn2Channel 7
 #define brADCPin 7
 
-#define DC_TOP_LEFT_MM_PER_REV 44
-#define DC_Z_AXIS_MM_PER_REV 1
-
 void Maslow_::begin(void (*sys_rt)()) {
   initialized = 1;
 

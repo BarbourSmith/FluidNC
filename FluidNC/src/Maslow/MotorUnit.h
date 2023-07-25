@@ -38,7 +38,7 @@ class MotorUnit {
     MiniPID positionPID; //These are the P,I,D values for the servo motors
     DCMotor motor;
     double setpoint = 0.0;
-    double _mmPerRevolution = 44.0;
+    double _mmPerRevolution = 43.7935;
     int _stallThreshold = 25; //The number of times in a row needed to trigger a warning
     int _stallCurrent = 27;   //The current threshold needed to count
     int _stallCount = 0;
