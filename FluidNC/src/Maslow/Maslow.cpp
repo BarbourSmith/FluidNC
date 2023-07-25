@@ -57,13 +57,13 @@ void Maslow_::begin(void (*sys_rt)()) {
   tlX = -8.339;
   tlY = 2209;
   tlZ = 172;
-  trX = 3505; 
+  trX = 3048; 
   trY = 2209;
   trZ = 111;
   blX = 0;
   blY = 0;
   blZ = 96;
-  brX = 3505;
+  brX = 3048;
   brY = 0;
   brZ = 131;
 

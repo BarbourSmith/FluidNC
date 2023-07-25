@@ -344,8 +344,8 @@ bool MotorUnit::retract(double targetLength){
 
             //Print how much the length of the belt changed compared to memory
             //_webPrint(0xFF,"Belt position after retract: %f\n", getPosition());
-            Serial.print("Belt positon after retract: ");
-            Serial.println(getPosition());
+            log_info("Belt positon after retract: ");
+            log_info(getPosition());
 
             zero();
             
@@ -395,6 +395,11 @@ bool MotorUnit::retract(double targetLength){
                 }
                 
                 motor.stop();
+
+                log_info("Belt positon after extend: ");
+                log_info(getPosition());
+                log_info("Expected measured: ");
+                log_info(getPosition() + 153.4);
                 return true;
             }
             else{
