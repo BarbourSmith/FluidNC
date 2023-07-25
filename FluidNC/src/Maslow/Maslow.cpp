@@ -34,9 +34,6 @@
 #define brIn2Channel 7
 #define brADCPin 7
 
-#define DC_TOP_LEFT_MM_PER_REV 44
-#define DC_Z_AXIS_MM_PER_REV 1
-
 void Maslow_::begin(void (*sys_rt)()) {
   initialized = 1;
 
@@ -57,16 +54,16 @@ void Maslow_::begin(void (*sys_rt)()) {
   axisTRHomed = false;
   axisTLHomed = false;
 
-  tlX = -16.02;
-  tlY = 2145.93;
+  tlX = -29.65422084274537;
+  tlY = 2142.02630450746;
   tlZ = 172;
-  trX = 3447.04; 
-  trY = 2222.18;
+  trX = 3420.4258015002088; 
+  trY = 2216.87592590863;
   trZ = 111;
   blX = 0;
   blY = 0;
   blZ = 96;
-  brX = 3484.53;
+  brX = 3470.6202627559014;
   brY = 0;
   brZ = 131;
 
