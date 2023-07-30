@@ -367,6 +367,24 @@ void Maslow_::setTargets(float xTarget, float yTarget, float zTarget){
     }
 }
 
+void Maslow_::printMeasurementSet(float allLengths[][4]){
+
+    log_info("{bl:" + String(allLengths[0][0]) + ",   br:" + String(allLengths[0][1]) + ",   tr:" + String(allLengths[0][2]) + ",   tl:" + String(allLengths[0][3]) + "}");
+    log_info("{bl:" + String(allLengths[1][0]) + ",   br:" + String(allLengths[1][1]) + ",   tr:" + String(allLengths[1][2]) + ",   tl:" + String(allLengths[1][3]) + "}");
+    log_info("{bl:" + String(allLengths[2][0]) + ",   br:" + String(allLengths[2][1]) + ",   tr:" + String(allLengths[2][2]) + ",   tl:" + String(allLengths[2][3]) + "}");
+    log_info("{bl:" + String(allLengths[3][0]) + ",   br:" + String(allLengths[3][1]) + ",   tr:" + String(allLengths[3][2]) + ",   tl:" + String(allLengths[3][3]) + "}");
+
+    (*_sys_rt)();
+        
+    // Delay without blocking
+    unsigned long time = millis();
+    unsigned long elapsedTime = millis()-time;
+    while(elapsedTime < 10){
+        elapsedTime = millis()-time;
+        (*_sys_rt)();
+    }
+}
+
 //Runs the calibration sequence to determine the machine's dimensions
 void Maslow_::runCalibration(){
     
@@ -390,59 +408,100 @@ void Maslow_::runCalibration(){
     float lengths7[4];
     float lengths8[4];
     float lengths9[4];
-    
+
+    float allLengths1[5][4] = {0};
+    float allLengths2[5][4] = {0};
+    float allLengths3[5][4] = {0};
+    float allLengths4[5][4] = {0};
+    float allLengths5[5][4] = {0};
+    float allLengths6[5][4] = {0};
+    float allLengths7[5][4] = {0};
+    float allLengths8[5][4] = {0};
+    float allLengths9[5][4] = {0};
+
     //------------------------------------------------------Take measurements
     
+    retractBL(); //Retract the bottom left belt first to tension the system
+    retractBL();
     log_info("Measurement 1");
-    takeMeasurementAvgWithCheck(lengths1);
+    takeMeasurementAvgWithCheck(lengths1, allLengths1);
     
-    moveWithSlack(-800, 0);
+    moveWithSlack(-800, 0, false, false);
     
+    retractBL();
+    retractBL();
     log_info("Measurement 2");
-    takeMeasurementAvgWithCheck(lengths2);
+    takeMeasurementAvgWithCheck(lengths2, allLengths2);
     
-    moveWithSlack(-800, -400);
     
+    moveWithSlack(-800, -400, false, false);
+    
+    retractBL();
+    retractBL();
     log_info("Measurement 3");
-    takeMeasurementAvgWithCheck(lengths3);
+    takeMeasurementAvgWithCheck(lengths3, allLengths3);
+    
 
     lowerBeltsGoSlack();
     lowerBeltsGoSlack();
-    moveWithSlack(0, 400);
+    moveWithSlack(0, 400, true, false);
     
     log_info("Measurement 4");
-    takeMeasurementAvgWithCheck(lengths4);
+    takeMeasurementAvgWithCheck(lengths4, allLengths4);
     
-    moveWithSlack(0, 0);
+    
+    moveWithSlack(0, 0, false, false);
     
     log_info("Measurement 5");
-    takeMeasurementAvgWithCheck(lengths5);
+    takeMeasurementAvgWithCheck(lengths5, allLengths5);
     
-    moveWithSlack(0, -400);
+    
+    moveWithSlack(0, -400, false, false);
     
     log_info("Measurement 6");
-    takeMeasurementAvgWithCheck(lengths6);
+    takeMeasurementAvgWithCheck(lengths6, allLengths6);
+    
     
     lowerBeltsGoSlack();
     lowerBeltsGoSlack();
-    moveWithSlack(800, 400);
+    moveWithSlack(800, 400, true, false);
     
+    retractBR();
+    retractBR();
     log_info("Measurement 7");
-    takeMeasurementAvgWithCheck(lengths7);
+    takeMeasurementAvgWithCheck(lengths7, allLengths7);
     
-    moveWithSlack(800, 0);
     
+    moveWithSlack(800, 0, false, false);
+    
+    retractBR();
+    retractBR();
     log_info("Measurement 8");
-    takeMeasurementAvgWithCheck(lengths8);
+    takeMeasurementAvgWithCheck(lengths8, allLengths8);
     
-    moveWithSlack(800, -400);
     
+    moveWithSlack(800, -400, false, false);
+    
+    retractBR();
+    retractBR();
     log_info("Measurement 9");
-    takeMeasurementAvgWithCheck(lengths9);
+    takeMeasurementAvgWithCheck(lengths9, allLengths9);
+
+    log_info("Printing all measurements: ");
+    printMeasurementSet(allLengths1);
+    printMeasurementSet(allLengths2);
+    printMeasurementSet(allLengths3);
+    printMeasurementSet(allLengths4);
+    printMeasurementSet(allLengths5);
+    printMeasurementSet(allLengths6);
+    printMeasurementSet(allLengths7);
+    printMeasurementSet(allLengths8);
+    printMeasurementSet(allLengths9);
+    
     
     lowerBeltsGoSlack();
     lowerBeltsGoSlack();
-    moveWithSlack(0, 0);  //Go back to the center. This will pull the lower belts tight too
+    moveWithSlack(0, 0, true, true);  //Go back to the center. This will pull the lower belts tight too
     
     axisBL.stop();
     axisBR.stop();
@@ -502,11 +561,12 @@ void Maslow_::runCalibration(){
     
     
     //Move back to center after the results are applied
-    moveWithSlack(0, 0);
+    moveWithSlack(0, 0, true, true);
     
     //For safety we should pull tight here and verify that the results are basically what we expect before handing things over to the controller.
-    takeMeasurementAvg(lengths1);
-    takeMeasurementAvg(lengths1);
+    float allLengths[5][4];
+    takeMeasurementAvg(lengths1, allLengths);
+    takeMeasurementAvg(lengths1, allLengths);
     
     double blError = (lengths1[0]-(_beltEndExtension+_armLength))-computeBL(0,0,0);
     double brError = (lengths1[1]-(_beltEndExtension+_armLength))-computeBR(0,0,0);
@@ -590,12 +650,12 @@ float Maslow_::printMeasurementMetrics(double avg, double m1, double m2, double 
 }
 
 //Checks to make sure the deviation within the measurement avg looks good before moving on
-void Maslow_::takeMeasurementAvgWithCheck(float lengths[]){
+void Maslow_::takeMeasurementAvgWithCheck(float lengths[], float allLengths[][4]){
     log_info( "Beginning takeMeasurementAvg\n");
     Serial.println( "Beginning takeMeasurementAvg\n");
     float threshold = 0.9;
     while(true){
-        float repeatability = takeMeasurementAvg(lengths);
+        float repeatability = takeMeasurementAvg(lengths, allLengths);
         if(repeatability < threshold){
             log_info( "Using measurement with precision:");
             log_info(repeatability);
@@ -605,21 +665,21 @@ void Maslow_::takeMeasurementAvgWithCheck(float lengths[]){
     }
 }
 
-//Takes 5 measurements and return how consistent they are
-float Maslow_::takeMeasurementAvg(float avgLengths[]){
-    log_info( "Beginning to take averaged measurement.\n");
-    Serial.println( "Beginning to take averaged measurement.");
-    
-    //Where our five measurements will be stored
+// Takes 5 measurements and returns how consistent they are
+float Maslow_::takeMeasurementAvg(float avgLengths[], float allLengths[][4]) {
+    log_info("Beginning to take averaged measurement.\n");
+    Serial.println("Beginning to take averaged measurement.");
+
+    // Where our five measurements will be stored
     float lengths1[4];
     float lengths2[4];
     float lengths3[4];
     float lengths4[4];
     float lengths5[4];
-    
+
     takeMeasurement(lengths1);
     lowerBeltsGoSlack();
-    takeMeasurement(lengths1);  //Repeat the first measurement to discard the one before everything was pulled taught
+    takeMeasurement(lengths1);  // Repeat the first measurement to discard the one before everything was pulled taught
     lowerBeltsGoSlack();
     takeMeasurement(lengths2);
     lowerBeltsGoSlack();
@@ -628,20 +688,41 @@ float Maslow_::takeMeasurementAvg(float avgLengths[]){
     takeMeasurement(lengths4);
     lowerBeltsGoSlack();
     takeMeasurement(lengths5);
-    
-    avgLengths[0] = (lengths1[0]+lengths2[0]+lengths3[0]+lengths4[0]+lengths5[0])/5.0;
-    avgLengths[1] = (lengths1[1]+lengths2[1]+lengths3[1]+lengths4[1]+lengths5[1])/5.0;
-    avgLengths[2] = (lengths1[2]+lengths2[2]+lengths3[2]+lengths4[2]+lengths5[2])/5.0;
-    avgLengths[3] = (lengths1[3]+lengths2[3]+lengths3[3]+lengths4[3]+lengths5[3])/5.0;
-    
+
+    allLengths[0][0] = lengths1[0];
+    allLengths[0][1] = lengths1[1];
+    allLengths[0][2] = lengths1[2];
+    allLengths[0][3] = lengths1[3];
+    allLengths[1][0] = lengths2[0];
+    allLengths[1][1] = lengths2[1];
+    allLengths[1][2] = lengths2[2];
+    allLengths[1][3] = lengths2[3];
+    allLengths[2][0] = lengths3[0];
+    allLengths[2][1] = lengths3[1];
+    allLengths[2][2] = lengths3[2];
+    allLengths[2][3] = lengths3[3];
+    allLengths[3][0] = lengths4[0];
+    allLengths[3][1] = lengths4[1];
+    allLengths[3][2] = lengths4[2];
+    allLengths[3][3] = lengths4[3];
+    allLengths[4][0] = lengths5[0];
+    allLengths[4][1] = lengths5[1];
+    allLengths[4][2] = lengths5[2];
+    allLengths[4][3] = lengths5[3];
+
+    avgLengths[0] = (lengths1[0] + lengths2[0] + lengths3[0] + lengths4[0] + lengths5[0]) / 5.0;
+    avgLengths[1] = (lengths1[1] + lengths2[1] + lengths3[1] + lengths4[1] + lengths5[1]) / 5.0;
+    avgLengths[2] = (lengths1[2] + lengths2[2] + lengths3[2] + lengths4[2] + lengths5[2]) / 5.0;
+    avgLengths[3] = (lengths1[3] + lengths2[3] + lengths3[3] + lengths4[3] + lengths5[3]) / 5.0;
+
     float m1 = printMeasurementMetrics(avgLengths[0], lengths1[0], lengths2[0], lengths3[0], lengths4[0], lengths5[0]);
     float m2 = printMeasurementMetrics(avgLengths[1], lengths1[1], lengths2[1], lengths3[1], lengths4[1], lengths5[1]);
     float m3 = printMeasurementMetrics(avgLengths[2], lengths1[2], lengths2[2], lengths3[2], lengths4[2], lengths5[2]);
     float m4 = printMeasurementMetrics(avgLengths[3], lengths1[3], lengths2[3], lengths3[3], lengths4[3], lengths5[3]);
 
     float maxDeviation = std::max({m1, m2, m3, m4});
-    
-    log_info( "Max Deviation: " + String(maxDeviation));
+
+    log_info("Max Deviation: " + String(maxDeviation));
 
     return maxDeviation;
 }
@@ -715,8 +796,98 @@ void Maslow_::takeMeasurement(float lengths[]){
     return;
 }
 
+//Retract the lower right belt
+void Maslow_::retractBR(){
+
+    axisBL.stop();
+    axisBR.stop();
+
+    bool axisBRDone = false;
+
+    float BRDist = .01;
+    
+    while(!axisBRDone){  //As long as one axis is still pulling
+        
+        //If any of the current values are over the threshold then stop and exit, otherwise pull each axis a little bit tighter by incrementing the target position
+        int currentThreshold = 1500;
+        
+        if(axisBR.getCurrent() > currentThreshold || axisBRDone){
+            if(axisBRDone == false){
+                log_info( "BR Trip Current: " + String(axisBR.getCurrent()) + "\n");
+            }
+            axisBRDone = true;
+        }
+        else{
+            axisBR.setTarget(axisBR.getPosition() - BRDist);
+            BRDist = min(0.2, BRDist + .01);
+        }
+        
+        // Delay without blocking
+        unsigned long time = millis();
+        unsigned long elapsedTime = millis()-time;
+        while(elapsedTime < 25){
+            elapsedTime = millis()-time;
+            recomputePID(4);  //This recomputes the PID four all four servos
+            (*_sys_rt)();
+        }
+    }
+    axisBR.setTarget(axisBR.getPosition());
+    
+    axisBL.stop();
+    axisBR.stop();
+    axisTR.stop();
+    axisTL.stop();
+
+    return;
+}
+
+//Retract the lower left belt
+void Maslow_::retractBL(){
+
+    axisBL.stop();
+    axisBR.stop();
+
+    bool axisBLDone = false;
+
+    float BLDist = .01;
+    
+    while(!axisBLDone){  //As long as one axis is still pulling
+        
+        //If any of the current values are over the threshold then stop and exit, otherwise pull each axis a little bit tighter by incrementing the target position
+        int currentThreshold = 1500;
+        
+        if(axisBL.getCurrent() > currentThreshold || axisBLDone){
+            if(axisBLDone == false){
+                log_info( "BL Trip Current: " + String(axisBL.getCurrent()) + "\n");
+            }
+            axisBLDone = true;
+        }
+        else{
+            axisBL.setTarget(axisBL.getPosition() - BLDist);
+            BLDist = min(0.2, BLDist + .01);
+        }
+        
+        // Delay without blocking
+        unsigned long time = millis();
+        unsigned long elapsedTime = millis()-time;
+        while(elapsedTime < 25){
+            elapsedTime = millis()-time;
+            recomputePID(4);  //This recomputes the PID four all four servos
+            (*_sys_rt)();
+        }
+    }
+    axisBL.setTarget(axisBL.getPosition());
+    
+    axisBL.stop();
+    axisBR.stop();
+    axisTR.stop();
+    axisTL.stop();
+
+    return;
+}
+
 //Reposition the sled without knowing the machine dimensions
-void Maslow_::moveWithSlack(float x, float y){
+void Maslow_::moveWithSlack(float x, float y, bool leftBelt, bool rightBelt){
     
     log_info( "Moving to with slack");
     
@@ -745,9 +916,22 @@ void Maslow_::moveWithSlack(float x, float y){
     
     while(TLDist > 0 || TRDist > 0){
         
-        //Set the lower axis to be compliant. PID is recomputed in comply()
-        axisBL.comply(&timeLastMoved1, &lastPosition1, &amtToMove1, 3);
-        axisBR.comply(&timeLastMoved2, &lastPosition2, &amtToMove2, 3);
+        //Set the lower axis to be compliant (if we should be). PID is recomputed in comply()
+        if(leftBelt){
+            axisBL.comply(&timeLastMoved1, &lastPosition1, &amtToMove1, 3);
+        }
+        else{
+            axisBL.updateEncoderPosition();
+            axisBL.stop();
+        }
+
+        if(rightBelt){
+            axisBR.comply(&timeLastMoved2, &lastPosition2, &amtToMove2, 3);
+        }
+        else{
+            axisBR.updateEncoderPosition();
+            axisBR.stop();
+        }
         
         // grbl_sendf( "BRPos: %f, BRamt: %f, BRtime: %l\n", lastPosition2, amtToMove2, timeLastMoved2);
         
