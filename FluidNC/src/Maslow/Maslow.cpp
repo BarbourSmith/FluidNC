@@ -54,16 +54,17 @@ void Maslow_::begin(void (*sys_rt)()) {
   axisTRHomed = false;
   axisTLHomed = false;
 
-  tlX = -8.339;
-  tlY = 2209;
+
+  tlX = -0.6948090610228441;
+  tlY =  2131.275233532367;
   tlZ = 172;
-  trX = 3048; 
-  trY = 2209;
+  trX = 3034.4072793128926; 
+  trY = 2127.1780972406527;
   trZ = 111;
   blX = 0;
   blY = 0;
   blZ = 96;
-  brX = 3048;
+  brX = 3034.960970894897;
   brY = 0;
   brZ = 131;
 
@@ -102,15 +103,15 @@ void Maslow_::home(int axis) {
   switch(axis) {
     case 0:
       log_info("Bottom left");
-      axisBLHomed = axisBL.retract(computeBL(-800, 500, 0));
+      axisBLHomed = axisBL.retract(computeBL(0, 300, 0));
       break;
     case 1:
       log_info("Top left");
-      axisTLHomed = axisTL.retract(computeTL(-800, 400, 0));
+      axisTLHomed = axisTL.retract(computeTL(0, 0, 0));
       break;
     case 2:
       log_info("Top right");
-      axisTRHomed = axisTR.retract(computeTR(-800, 400, 0));
+      axisTRHomed = axisTR.retract(computeTR(0, 0, 0));
       break;
     case 4:
       log_info("Bottom right");
@@ -119,7 +120,7 @@ void Maslow_::home(int axis) {
         runCalibration();
       }
       else {
-        axisBRHomed = axisBR.retract(computeBR(-800, 500, 0));
+        axisBRHomed = axisBR.retract(computeBR(0, 300, 0));
       }
       break;
     default:
@@ -309,7 +310,7 @@ float Maslow_::computeBL(float x, float y, float z){
     //     grbl_sendf( "BL Slack By: %f\n", extraSlack);
     // }
 
-    return length + extraSlack;
+    return length;
 }
 
 //Bottom right belt
@@ -329,7 +330,7 @@ float Maslow_::computeBR(float x, float y, float z){
     //     grbl_sendf( "BR Slack By: %f\n", extraSlack);
     // }
 
-    return length + extraSlack;
+    return length;
 }
 
 //Top right belt
@@ -400,232 +401,232 @@ void Maslow_::runCalibration(){
     axisTL.setTarget(axisTL.getPosition());
     
 
-    float allLengths1[5][4] = {0};
-    float allLengths2[5][4] = {0};
-    float allLengths3[5][4] = {0};
-    float allLengths4[5][4] = {0};
-    float allLengths5[5][4] = {0};
-    float allLengths6[5][4] = {0};
-    float allLengths7[5][4] = {0};
-    float allLengths8[5][4] = {0};
-    float allLengths9[5][4] = {0};
-    float allLengths10[5][4] = {0};
-    float allLengths11[5][4] = {0};
-    float allLengths12[5][4] = {0};
-    float allLengths13[5][4] = {0};
-    float allLengths14[5][4] = {0};
-    float allLengths15[5][4] = {0};
-    float allLengths16[5][4] = {0};
-    float allLengths17[5][4] = {0};
-    float allLengths18[5][4] = {0};
-    float allLengths19[5][4] = {0};
-    float allLengths20[5][4] = {0};
-    float allLengths21[5][4] = {0};
-    float allLengths22[5][4] = {0};
-    float allLengths23[5][4] = {0};
-    float allLengths24[5][4] = {0};
-    float allLengths25[5][4] = {0};
+//     float allLengths1[5][4] = {0};
+//     float allLengths2[5][4] = {0};
+//     float allLengths3[5][4] = {0};
+//     float allLengths4[5][4] = {0};
+//     float allLengths5[5][4] = {0};
+//     float allLengths6[5][4] = {0};
+//     float allLengths7[5][4] = {0};
+//     float allLengths8[5][4] = {0};
+//     float allLengths9[5][4] = {0};
+//     float allLengths10[5][4] = {0};
+//     float allLengths11[5][4] = {0};
+//     float allLengths12[5][4] = {0};
+//     float allLengths13[5][4] = {0};
+//     float allLengths14[5][4] = {0};
+//     float allLengths15[5][4] = {0};
+//     float allLengths16[5][4] = {0};
+//     float allLengths17[5][4] = {0};
+//     float allLengths18[5][4] = {0};
+//     float allLengths19[5][4] = {0};
+//     float allLengths20[5][4] = {0};
+//     float allLengths21[5][4] = {0};
+//     float allLengths22[5][4] = {0};
+//     float allLengths23[5][4] = {0};
+//     float allLengths24[5][4] = {0};
+//     float allLengths25[5][4] = {0};
 
-    //---------------------------------------------------Take measurements----------------------------
+//     //---------------------------------------------------Take measurements----------------------------
     
 
-    //-----------------------------First column------------------------------
+//     //-----------------------------First column------------------------------
 
-    //First measurement where we started
-    retractBL(); //Retract the bottom left belt first to tension the system
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths1);
+//     //First measurement where we started
+//     retractBL(); //Retract the bottom left belt first to tension the system
+//     retractBL();
+//     takeMeasurementAvgWithCheck(allLengths1);
     
-    //Second measurmement
-    moveWithSlack(-800, 200, false, false);
-    retractBL();
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths2);
+//     //Second measurmement
+//     moveWithSlack(-800, 200, false, false);
+//     retractBL();
+//     retractBL();
+//     takeMeasurementAvgWithCheck(allLengths2);
 
-    //Third measurmement
-    moveWithSlack(-800, 0, false, false);
-    retractBL();
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths3);
+//     //Third measurmement
+//     moveWithSlack(-800, 0, false, false);
+//     retractBL();
+//     retractBL();
+//     takeMeasurementAvgWithCheck(allLengths3);
 
-    //Fourth measurement
-    moveWithSlack(-800, -200, false, false);
-    retractBL();
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths4);
+//     //Fourth measurement
+//     moveWithSlack(-800, -200, false, false);
+//     retractBL();
+//     retractBL();
+//     takeMeasurementAvgWithCheck(allLengths4);
     
-    //Fifth measurement
-    moveWithSlack(-800, -400, false, false);
-    retractBL();
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths5);
+//     //Fifth measurement
+//     moveWithSlack(-800, -400, false, false);
+//     retractBL();
+//     retractBL();
+//     takeMeasurementAvgWithCheck(allLengths5);
     
 
-    //------------------------------Second column--------------------------------
+//     //------------------------------Second column--------------------------------
 
-    //First measurement
-    lowerBeltsGoSlack();
-    lowerBeltsGoSlack();
-    moveWithSlack(-400, 400, true, true);
-    retractBL();
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths6);
+//     //First measurement
+//     lowerBeltsGoSlack();
+//     lowerBeltsGoSlack();
+//     moveWithSlack(-400, 400, true, true);
+//     retractBL();
+//     retractBL();
+//     takeMeasurementAvgWithCheck(allLengths6);
     
-    //Second measurement
-    moveWithSlack(-400, 200, false, false);
-    retractBL();
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths7);
+//     //Second measurement
+//     moveWithSlack(-400, 200, false, false);
+//     retractBL();
+//     retractBL();
+//     takeMeasurementAvgWithCheck(allLengths7);
 
-    //Third measurement
-    moveWithSlack(-400, 0, false, false);
-    retractBL();
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths8);
+//     //Third measurement
+//     moveWithSlack(-400, 0, false, false);
+//     retractBL();
+//     retractBL();
+//     takeMeasurementAvgWithCheck(allLengths8);
 
-    //Forth measurement
-    moveWithSlack(-400, -200, false, false);
-    retractBL();
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths9);
+//     //Forth measurement
+//     moveWithSlack(-400, -200, false, false);
+//     retractBL();
+//     retractBL();
+//     takeMeasurementAvgWithCheck(allLengths9);
     
-    //Fifth measurement
-    moveWithSlack(-400, -400, false, false);
-    retractBL();
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths10);
+//     //Fifth measurement
+//     moveWithSlack(-400, -400, false, false);
+//     retractBL();
+//     retractBL();
+//     takeMeasurementAvgWithCheck(allLengths10);
 
-    //------------------------------Third column--------------------------------
+//     //------------------------------Third column--------------------------------
 
-    //First measurement
-    lowerBeltsGoSlack();
-    lowerBeltsGoSlack();
-    moveWithSlack(0, 400, true, true);
-    takeMeasurementAvgWithCheck(allLengths11);
+//     //First measurement
+//     lowerBeltsGoSlack();
+//     lowerBeltsGoSlack();
+//     moveWithSlack(0, 400, true, true);
+//     takeMeasurementAvgWithCheck(allLengths11);
     
-    //Second measurement
-    moveWithSlack(0, 200, false, false);
-    takeMeasurementAvgWithCheck(allLengths12);
+//     //Second measurement
+//     moveWithSlack(0, 200, false, false);
+//     takeMeasurementAvgWithCheck(allLengths12);
 
-    //Third measurement
-    moveWithSlack(0, 0, false, false);
-    takeMeasurementAvgWithCheck(allLengths13);
+//     //Third measurement
+//     moveWithSlack(0, 0, false, false);
+//     takeMeasurementAvgWithCheck(allLengths13);
 
-    //Forth measurement
-    moveWithSlack(0, -200, false, false);
-    takeMeasurementAvgWithCheck(allLengths14);
+//     //Forth measurement
+//     moveWithSlack(0, -200, false, false);
+//     takeMeasurementAvgWithCheck(allLengths14);
     
-    //Fifth measurement
-    moveWithSlack(0, -400, false, false);
-    takeMeasurementAvgWithCheck(allLengths15);
+//     //Fifth measurement
+//     moveWithSlack(0, -400, false, false);
+//     takeMeasurementAvgWithCheck(allLengths15);
 
-//----------------------Forth column---------------------------------
+// //----------------------Forth column---------------------------------
     
-    //First measurement
-    lowerBeltsGoSlack();
-    lowerBeltsGoSlack();
-    moveWithSlack(400, 400, true, true);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths16);
+//     //First measurement
+//     lowerBeltsGoSlack();
+//     lowerBeltsGoSlack();
+//     moveWithSlack(400, 400, true, true);
+//     retractBR();
+//     retractBR();
+//     takeMeasurementAvgWithCheck(allLengths16);
     
-    //Second measurement
-    moveWithSlack(400, 200, false, false);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths17);
+//     //Second measurement
+//     moveWithSlack(400, 200, false, false);
+//     retractBR();
+//     retractBR();
+//     takeMeasurementAvgWithCheck(allLengths17);
 
-    //Thrid measurement
-    moveWithSlack(400, 0, false, false);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths18);
+//     //Thrid measurement
+//     moveWithSlack(400, 0, false, false);
+//     retractBR();
+//     retractBR();
+//     takeMeasurementAvgWithCheck(allLengths18);
 
-    //Fourth measurement
-    moveWithSlack(400, -200, false, false);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths19);
+//     //Fourth measurement
+//     moveWithSlack(400, -200, false, false);
+//     retractBR();
+//     retractBR();
+//     takeMeasurementAvgWithCheck(allLengths19);
     
-    //Fifth measurement
-    moveWithSlack(400, -400, false, false);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths20);
+//     //Fifth measurement
+//     moveWithSlack(400, -400, false, false);
+//     retractBR();
+//     retractBR();
+//     takeMeasurementAvgWithCheck(allLengths20);
 
-    //----------------------Fifth column---------------------------------
+//     //----------------------Fifth column---------------------------------
     
-    //First measurement
-    lowerBeltsGoSlack();
-    lowerBeltsGoSlack();
-    moveWithSlack(800, 400, true, true);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths21);
+//     //First measurement
+//     lowerBeltsGoSlack();
+//     lowerBeltsGoSlack();
+//     moveWithSlack(800, 400, true, true);
+//     retractBR();
+//     retractBR();
+//     takeMeasurementAvgWithCheck(allLengths21);
     
-    //Second measurement
-    moveWithSlack(800, 200, false, false);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths22);
+//     //Second measurement
+//     moveWithSlack(800, 200, false, false);
+//     retractBR();
+//     retractBR();
+//     takeMeasurementAvgWithCheck(allLengths22);
 
-    //Thrid measurement
-    moveWithSlack(800, 0, false, false);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths23);
+//     //Thrid measurement
+//     moveWithSlack(800, 0, false, false);
+//     retractBR();
+//     retractBR();
+//     takeMeasurementAvgWithCheck(allLengths23);
 
-    //Fourth measurement
-    moveWithSlack(800, -200, false, false);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths24);
+//     //Fourth measurement
+//     moveWithSlack(800, -200, false, false);
+//     retractBR();
+//     retractBR();
+//     takeMeasurementAvgWithCheck(allLengths24);
     
-    //Fifth measurement
-    moveWithSlack(800, -400, false, false);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths25);
+//     //Fifth measurement
+//     moveWithSlack(800, -400, false, false);
+//     retractBR();
+//     retractBR();
+//     takeMeasurementAvgWithCheck(allLengths25);
 
 
-    //----------------------End of measurements---------------------------
+//     //----------------------End of measurements---------------------------
 
-    //Print out the resulting measurements, sometimes this crashes everything :/
-    log_info("Printing all measurements: ");
-    printMeasurementSet(allLengths1);
-    printMeasurementSet(allLengths2);
-    printMeasurementSet(allLengths3);
-    printMeasurementSet(allLengths4);
-    printMeasurementSet(allLengths5);
-    printMeasurementSet(allLengths6);
-    printMeasurementSet(allLengths7);
-    printMeasurementSet(allLengths8);
-    printMeasurementSet(allLengths9);
-    printMeasurementSet(allLengths10);
-    printMeasurementSet(allLengths11);
-    printMeasurementSet(allLengths12);
-    printMeasurementSet(allLengths13);
-    printMeasurementSet(allLengths14);
-    printMeasurementSet(allLengths15);
-    printMeasurementSet(allLengths16);
-    printMeasurementSet(allLengths17);
-    printMeasurementSet(allLengths18);
-    printMeasurementSet(allLengths19);
-    printMeasurementSet(allLengths20);
-    printMeasurementSet(allLengths21);
-    printMeasurementSet(allLengths23);
-    printMeasurementSet(allLengths24);
-    printMeasurementSet(allLengths25);
+//     //Print out the resulting measurements, sometimes this crashes everything :/
+//     log_info("Printing all measurements: ");
+//     printMeasurementSet(allLengths1);
+//     printMeasurementSet(allLengths2);
+//     printMeasurementSet(allLengths3);
+//     printMeasurementSet(allLengths4);
+//     printMeasurementSet(allLengths5);
+//     printMeasurementSet(allLengths6);
+//     printMeasurementSet(allLengths7);
+//     printMeasurementSet(allLengths8);
+//     printMeasurementSet(allLengths9);
+//     printMeasurementSet(allLengths10);
+//     printMeasurementSet(allLengths11);
+//     printMeasurementSet(allLengths12);
+//     printMeasurementSet(allLengths13);
+//     printMeasurementSet(allLengths14);
+//     printMeasurementSet(allLengths15);
+//     printMeasurementSet(allLengths16);
+//     printMeasurementSet(allLengths17);
+//     printMeasurementSet(allLengths18);
+//     printMeasurementSet(allLengths19);
+//     printMeasurementSet(allLengths20);
+//     printMeasurementSet(allLengths21);
+//     printMeasurementSet(allLengths23);
+//     printMeasurementSet(allLengths24);
+//     printMeasurementSet(allLengths25);
     
     
-    lowerBeltsGoSlack();
-    lowerBeltsGoSlack();
-    moveWithSlack(0, 0, true, true);  //Go back to the center. This will pull the lower belts tight too
+//     lowerBeltsGoSlack();
+//     lowerBeltsGoSlack();
+//     moveWithSlack(0, 0, true, true);  //Go back to the center. This will pull the lower belts tight too
     
-    axisBL.stop();
-    axisBR.stop();
-    axisTR.stop();
-    axisTL.stop();
+//     axisBL.stop();
+//     axisBR.stop();
+//     axisTR.stop();
+//     axisTL.stop();
     
     //----------------------------------------------------------Do the computation
     
@@ -679,21 +680,21 @@ void Maslow_::runCalibration(){
     // //---------------------------------------------------------Finish
     
     
-    // //Move back to center after the results are applied
-    // moveWithSlack(0, 0, true, true);
+    //Move back to center after the results are applied
+    moveWithSlack(0, 0, true, true);
     
-    // //For safety we should pull tight here and verify that the results are basically what we expect before handing things over to the controller.
-    // float allLengths[5][4];
-    // takeMeasurementAvg(lengths1, allLengths);
-    // takeMeasurementAvg(lengths1, allLengths);
+    //For safety we should pull tight here and verify that the results are basically what we expect before handing things over to the controller.
+    float allLengths[5][4];
+    takeMeasurementAvg(allLengths);
+    takeMeasurementAvg(allLengths);
     
-    // double blError = (lengths1[0]-(_beltEndExtension+_armLength))-computeBL(0,0,0);
-    // double brError = (lengths1[1]-(_beltEndExtension+_armLength))-computeBR(0,0,0);
+    double blError = (allLengths[3][0]-(_beltEndExtension+_armLength))-computeBL(0,0,0);
+    double brError = (allLengths[3][1]-(_beltEndExtension+_armLength))-computeBR(0,0,0);
     
-    // log_info( "Lower belt length mismatch: " + String(blError) + ", " +String(brError));
+    log_info( "Lower belt length mismatch: " + String(blError) + ", " +String(brError));
     
-    // calibrationInProgress = false;
-    // log_info( "Calibration finished");
+    calibrationInProgress = false;
+    log_info( "Calibration finished");
     
 }
 
