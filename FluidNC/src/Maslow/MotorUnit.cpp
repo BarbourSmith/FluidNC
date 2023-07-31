@@ -124,8 +124,12 @@ void MotorUnit::updateEncoderPosition(){
 
     tcaselect(_encoderAddress);
 
-    mostRecentCumulativeEncoderReading = encoder.getCumulativePosition(); //This updates and returns the encoder value
-
+    if(encoder.isConnected()){
+        mostRecentCumulativeEncoderReading = encoder.getCumulativePosition(); //This updates and returns the encoder value
+    }
+    else{
+        log_info("Encoder read failure on " + _encoderAddress);
+    }
 }
 
 /*!
