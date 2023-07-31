@@ -379,7 +379,7 @@ void Maslow_::printMeasurementSet(float allLengths[][4]){
     // Delay without blocking
     unsigned long time = millis();
     unsigned long elapsedTime = millis()-time;
-    while(elapsedTime < 10){
+    while(elapsedTime < 250){
         elapsedTime = millis()-time;
         (*_sys_rt)();
     }
@@ -399,15 +399,6 @@ void Maslow_::runCalibration(){
     axisTR.setTarget(axisTR.getPosition());
     axisTL.setTarget(axisTL.getPosition());
     
-    float lengths1[4];
-    float lengths2[4];
-    float lengths3[4];
-    float lengths4[4];
-    float lengths5[4];
-    float lengths6[4];
-    float lengths7[4];
-    float lengths8[4];
-    float lengths9[4];
 
     float allLengths1[5][4] = {0};
     float allLengths2[5][4] = {0};
@@ -418,75 +409,188 @@ void Maslow_::runCalibration(){
     float allLengths7[5][4] = {0};
     float allLengths8[5][4] = {0};
     float allLengths9[5][4] = {0};
+    float allLengths10[5][4] = {0};
+    float allLengths11[5][4] = {0};
+    float allLengths12[5][4] = {0};
+    float allLengths13[5][4] = {0};
+    float allLengths14[5][4] = {0};
+    float allLengths15[5][4] = {0};
+    float allLengths16[5][4] = {0};
+    float allLengths17[5][4] = {0};
+    float allLengths18[5][4] = {0};
+    float allLengths19[5][4] = {0};
+    float allLengths20[5][4] = {0};
+    float allLengths21[5][4] = {0};
+    float allLengths22[5][4] = {0};
+    float allLengths23[5][4] = {0};
+    float allLengths24[5][4] = {0};
+    float allLengths25[5][4] = {0};
 
-    //------------------------------------------------------Take measurements
+    //---------------------------------------------------Take measurements----------------------------
     
+
+    //-----------------------------First column------------------------------
+
+    //First measurement where we started
     retractBL(); //Retract the bottom left belt first to tension the system
     retractBL();
-    log_info("Measurement 1");
-    takeMeasurementAvgWithCheck(lengths1, allLengths1);
+    takeMeasurementAvgWithCheck(allLengths1);
     
+    //Second measurmement
+    moveWithSlack(-800, 200, false, false);
+    retractBL();
+    retractBL();
+    takeMeasurementAvgWithCheck(allLengths2);
+
+    //Third measurmement
     moveWithSlack(-800, 0, false, false);
-    
     retractBL();
     retractBL();
-    log_info("Measurement 2");
-    takeMeasurementAvgWithCheck(lengths2, allLengths2);
+    takeMeasurementAvgWithCheck(allLengths3);
+
+    //Fourth measurement
+    moveWithSlack(-800, -200, false, false);
+    retractBL();
+    retractBL();
+    takeMeasurementAvgWithCheck(allLengths4);
     
-    
+    //Fifth measurement
     moveWithSlack(-800, -400, false, false);
-    
     retractBL();
     retractBL();
-    log_info("Measurement 3");
-    takeMeasurementAvgWithCheck(lengths3, allLengths3);
+    takeMeasurementAvgWithCheck(allLengths5);
     
 
+    //------------------------------Second column--------------------------------
+
+    //First measurement
     lowerBeltsGoSlack();
     lowerBeltsGoSlack();
-    moveWithSlack(0, 400, true, false);
+    moveWithSlack(-400, 400, true, true);
+    retractBL();
+    retractBL();
+    takeMeasurementAvgWithCheck(allLengths6);
     
-    log_info("Measurement 4");
-    takeMeasurementAvgWithCheck(lengths4, allLengths4);
+    //Second measurement
+    moveWithSlack(-400, 200, false, false);
+    retractBL();
+    retractBL();
+    takeMeasurementAvgWithCheck(allLengths7);
+
+    //Third measurement
+    moveWithSlack(-400, 0, false, false);
+    retractBL();
+    retractBL();
+    takeMeasurementAvgWithCheck(allLengths8);
+
+    //Forth measurement
+    moveWithSlack(-400, -200, false, false);
+    retractBL();
+    retractBL();
+    takeMeasurementAvgWithCheck(allLengths9);
     
+    //Fifth measurement
+    moveWithSlack(-400, -400, false, false);
+    retractBL();
+    retractBL();
+    takeMeasurementAvgWithCheck(allLengths10);
+
+    //------------------------------Third column--------------------------------
+
+    //First measurement
+    lowerBeltsGoSlack();
+    lowerBeltsGoSlack();
+    moveWithSlack(0, 400, true, true);
+    takeMeasurementAvgWithCheck(allLengths11);
     
+    //Second measurement
+    moveWithSlack(0, 200, false, false);
+    takeMeasurementAvgWithCheck(allLengths12);
+
+    //Third measurement
     moveWithSlack(0, 0, false, false);
-    
-    log_info("Measurement 5");
-    takeMeasurementAvgWithCheck(lengths5, allLengths5);
-    
-    
-    moveWithSlack(0, -400, false, false);
-    
-    log_info("Measurement 6");
-    takeMeasurementAvgWithCheck(lengths6, allLengths6);
-    
-    
-    lowerBeltsGoSlack();
-    lowerBeltsGoSlack();
-    moveWithSlack(800, 400, true, false);
-    
-    retractBR();
-    retractBR();
-    log_info("Measurement 7");
-    takeMeasurementAvgWithCheck(lengths7, allLengths7);
-    
-    
-    moveWithSlack(800, 0, false, false);
-    
-    retractBR();
-    retractBR();
-    log_info("Measurement 8");
-    takeMeasurementAvgWithCheck(lengths8, allLengths8);
-    
-    
-    moveWithSlack(800, -400, false, false);
-    
-    retractBR();
-    retractBR();
-    log_info("Measurement 9");
-    takeMeasurementAvgWithCheck(lengths9, allLengths9);
+    takeMeasurementAvgWithCheck(allLengths13);
 
+    //Forth measurement
+    moveWithSlack(0, -200, false, false);
+    takeMeasurementAvgWithCheck(allLengths14);
+    
+    //Fifth measurement
+    moveWithSlack(0, -400, false, false);
+    takeMeasurementAvgWithCheck(allLengths15);
+
+//----------------------Forth column---------------------------------
+    
+    //First measurement
+    lowerBeltsGoSlack();
+    lowerBeltsGoSlack();
+    moveWithSlack(400, 400, true, true);
+    retractBR();
+    retractBR();
+    takeMeasurementAvgWithCheck(allLengths16);
+    
+    //Second measurement
+    moveWithSlack(400, 200, false, false);
+    retractBR();
+    retractBR();
+    takeMeasurementAvgWithCheck(allLengths17);
+
+    //Thrid measurement
+    moveWithSlack(400, 0, false, false);
+    retractBR();
+    retractBR();
+    takeMeasurementAvgWithCheck(allLengths18);
+
+    //Fourth measurement
+    moveWithSlack(400, -200, false, false);
+    retractBR();
+    retractBR();
+    takeMeasurementAvgWithCheck(allLengths19);
+    
+    //Fifth measurement
+    moveWithSlack(400, -400, false, false);
+    retractBR();
+    retractBR();
+    takeMeasurementAvgWithCheck(allLengths20);
+
+    //----------------------Fifth column---------------------------------
+    
+    //First measurement
+    lowerBeltsGoSlack();
+    lowerBeltsGoSlack();
+    moveWithSlack(800, 400, true, true);
+    retractBR();
+    retractBR();
+    takeMeasurementAvgWithCheck(allLengths21);
+    
+    //Second measurement
+    moveWithSlack(800, 200, false, false);
+    retractBR();
+    retractBR();
+    takeMeasurementAvgWithCheck(allLengths22);
+
+    //Thrid measurement
+    moveWithSlack(800, 0, false, false);
+    retractBR();
+    retractBR();
+    takeMeasurementAvgWithCheck(allLengths23);
+
+    //Fourth measurement
+    moveWithSlack(800, -200, false, false);
+    retractBR();
+    retractBR();
+    takeMeasurementAvgWithCheck(allLengths24);
+    
+    //Fifth measurement
+    moveWithSlack(800, -400, false, false);
+    retractBR();
+    retractBR();
+    takeMeasurementAvgWithCheck(allLengths25);
+
+
+    //----------------------End of measurements---------------------------
+
+    //Print out the resulting measurements, sometimes this crashes everything :/
     log_info("Printing all measurements: ");
     printMeasurementSet(allLengths1);
     printMeasurementSet(allLengths2);
@@ -497,6 +601,21 @@ void Maslow_::runCalibration(){
     printMeasurementSet(allLengths7);
     printMeasurementSet(allLengths8);
     printMeasurementSet(allLengths9);
+    printMeasurementSet(allLengths10);
+    printMeasurementSet(allLengths11);
+    printMeasurementSet(allLengths12);
+    printMeasurementSet(allLengths13);
+    printMeasurementSet(allLengths14);
+    printMeasurementSet(allLengths15);
+    printMeasurementSet(allLengths16);
+    printMeasurementSet(allLengths17);
+    printMeasurementSet(allLengths18);
+    printMeasurementSet(allLengths19);
+    printMeasurementSet(allLengths20);
+    printMeasurementSet(allLengths21);
+    printMeasurementSet(allLengths23);
+    printMeasurementSet(allLengths24);
+    printMeasurementSet(allLengths25);
     
     
     lowerBeltsGoSlack();
@@ -510,71 +629,71 @@ void Maslow_::runCalibration(){
     
     //----------------------------------------------------------Do the computation
     
-    printMeasurements(lengths1);
-    printMeasurements(lengths2);
-    printMeasurements(lengths3);
-    printMeasurements(lengths4);
-    printMeasurements(lengths5);
-    printMeasurements(lengths6);
-    printMeasurements(lengths7);
-    printMeasurements(lengths8);
-    printMeasurements(lengths9);
+    // printMeasurements(lengths1);
+    // printMeasurements(lengths2);
+    // printMeasurements(lengths3);
+    // printMeasurements(lengths4);
+    // printMeasurements(lengths5);
+    // printMeasurements(lengths6);
+    // printMeasurements(lengths7);
+    // printMeasurements(lengths8);
+    // printMeasurements(lengths9);
     
-    double measurements[][4] = {
-        //TL              TR           BL           BR
-        {lengths1[3], lengths1[2], lengths1[0], lengths1[1]},
-        {lengths2[3], lengths2[2], lengths2[0], lengths2[1]},
-        {lengths3[3], lengths3[2], lengths3[0], lengths3[1]},
-        {lengths4[3], lengths4[2], lengths4[0], lengths4[1]},
-        {lengths5[3], lengths5[2], lengths5[0], lengths5[1]},
-        {lengths6[3], lengths6[2], lengths6[0], lengths6[1]},
-        {lengths7[3], lengths7[2], lengths7[0], lengths7[1]},
-        {lengths8[3], lengths8[2], lengths8[0], lengths8[1]},
-        {lengths9[3], lengths9[2], lengths9[0], lengths9[1]},
-    };
-    double results[6] = {0,0,0,0,0,0};
-    computeCalibration(measurements, results, printToWeb, tlX, tlY, trX, trY, brX, tlZ, trZ, blZ, brZ);
+    // double measurements[][4] = {
+    //     //TL              TR           BL           BR
+    //     {lengths1[3], lengths1[2], lengths1[0], lengths1[1]},
+    //     {lengths2[3], lengths2[2], lengths2[0], lengths2[1]},
+    //     {lengths3[3], lengths3[2], lengths3[0], lengths3[1]},
+    //     {lengths4[3], lengths4[2], lengths4[0], lengths4[1]},
+    //     {lengths5[3], lengths5[2], lengths5[0], lengths5[1]},
+    //     {lengths6[3], lengths6[2], lengths6[0], lengths6[1]},
+    //     {lengths7[3], lengths7[2], lengths7[0], lengths7[1]},
+    //     {lengths8[3], lengths8[2], lengths8[0], lengths8[1]},
+    //     {lengths9[3], lengths9[2], lengths9[0], lengths9[1]},
+    // };
+    // double results[6] = {0,0,0,0,0,0};
+    // computeCalibration(measurements, results, printToWeb, tlX, tlY, trX, trY, brX, tlZ, trZ, blZ, brZ);
     
-    log_info( "After computing calibration " + String(results[5]));
+    // log_info( "After computing calibration " + String(results[5]));
     
-    if(results[5] < 2){
-        log_info( "Calibration successful with precision: " + String(results[5]));
-        tlX = results[0];
-        tlY = results[1];
-        trX = results[2];
-        trY = results[3];
-        blX = 0;
-        blY = 0;
-        brX = results[4];
-        brY = 0;
-        updateCenterXY();
-        log_info( "tlx: " + String(tlX) + " tly: " + String(tlY) + 
-            "\ntrX: " + String(trX) + " trY: " + String(trY) + 
-            "\nblX: " + String(blX) + " blY: " + String(blY) + 
-            "\nbrx: " + String(brX) + " brY: " + String(brY));
-    }
-    else{
-        log_info( "Calibration failed: " + String(results[5]));
-    }
+    // if(results[5] < 2){
+    //     log_info( "Calibration successful with precision: " + String(results[5]));
+    //     tlX = results[0];
+    //     tlY = results[1];
+    //     trX = results[2];
+    //     trY = results[3];
+    //     blX = 0;
+    //     blY = 0;
+    //     brX = results[4];
+    //     brY = 0;
+    //     updateCenterXY();
+    //     log_info( "tlx: " + String(tlX) + " tly: " + String(tlY) + 
+    //         "\ntrX: " + String(trX) + " trY: " + String(trY) + 
+    //         "\nblX: " + String(blX) + " blY: " + String(blY) + 
+    //         "\nbrx: " + String(brX) + " brY: " + String(brY));
+    // }
+    // else{
+    //     log_info( "Calibration failed: " + String(results[5]));
+    // }
     
-    //---------------------------------------------------------Finish
+    // //---------------------------------------------------------Finish
     
     
-    //Move back to center after the results are applied
-    moveWithSlack(0, 0, true, true);
+    // //Move back to center after the results are applied
+    // moveWithSlack(0, 0, true, true);
     
-    //For safety we should pull tight here and verify that the results are basically what we expect before handing things over to the controller.
-    float allLengths[5][4];
-    takeMeasurementAvg(lengths1, allLengths);
-    takeMeasurementAvg(lengths1, allLengths);
+    // //For safety we should pull tight here and verify that the results are basically what we expect before handing things over to the controller.
+    // float allLengths[5][4];
+    // takeMeasurementAvg(lengths1, allLengths);
+    // takeMeasurementAvg(lengths1, allLengths);
     
-    double blError = (lengths1[0]-(_beltEndExtension+_armLength))-computeBL(0,0,0);
-    double brError = (lengths1[1]-(_beltEndExtension+_armLength))-computeBR(0,0,0);
+    // double blError = (lengths1[0]-(_beltEndExtension+_armLength))-computeBL(0,0,0);
+    // double brError = (lengths1[1]-(_beltEndExtension+_armLength))-computeBR(0,0,0);
     
-    log_info( "Lower belt length mismatch: " + String(blError) + ", " +String(brError));
+    // log_info( "Lower belt length mismatch: " + String(blError) + ", " +String(brError));
     
-    calibrationInProgress = false;
-    log_info( "Calibration finished");
+    // calibrationInProgress = false;
+    // log_info( "Calibration finished");
     
 }
 
@@ -650,12 +769,12 @@ float Maslow_::printMeasurementMetrics(double avg, double m1, double m2, double 
 }
 
 //Checks to make sure the deviation within the measurement avg looks good before moving on
-void Maslow_::takeMeasurementAvgWithCheck(float lengths[], float allLengths[][4]){
+void Maslow_::takeMeasurementAvgWithCheck(float allLengths[][4]){
     log_info( "Beginning takeMeasurementAvg\n");
     Serial.println( "Beginning takeMeasurementAvg\n");
     float threshold = 0.9;
     while(true){
-        float repeatability = takeMeasurementAvg(lengths, allLengths);
+        float repeatability = takeMeasurementAvg(allLengths);
         if(repeatability < threshold){
             log_info( "Using measurement with precision:");
             log_info(repeatability);
@@ -666,7 +785,7 @@ void Maslow_::takeMeasurementAvgWithCheck(float lengths[], float allLengths[][4]
 }
 
 // Takes 5 measurements and returns how consistent they are
-float Maslow_::takeMeasurementAvg(float avgLengths[], float allLengths[][4]) {
+float Maslow_::takeMeasurementAvg(float allLengths[][4]) {
     log_info("Beginning to take averaged measurement.\n");
     Serial.println("Beginning to take averaged measurement.");
 
@@ -676,6 +795,9 @@ float Maslow_::takeMeasurementAvg(float avgLengths[], float allLengths[][4]) {
     float lengths3[4];
     float lengths4[4];
     float lengths5[4];
+
+    //Where the average lengths will be stored
+    float avgLengths[4];
 
     takeMeasurement(lengths1);
     lowerBeltsGoSlack();
