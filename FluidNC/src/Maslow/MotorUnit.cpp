@@ -113,6 +113,13 @@ void MotorUnit::stop(){
     motor.stop();
 }
 
+/*!
+ *  @brief  Runs the motor at a constant speed
+ */
+void MotorUnit::runAtPWM(int pwm){
+    motor.runAtPWM(pwm);
+}
+
 //---------------------Functions related to maintaining the PID controllers-----------------------------------------
 
 

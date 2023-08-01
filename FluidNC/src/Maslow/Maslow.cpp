@@ -449,13 +449,13 @@ void Maslow_::runCalibration(){
     takeMeasurementAvgWithCheck(allLengths3);
 
     //Fourth measurement
-    moveWithSlack(-800, -200, false, false);
+    moveWithSlack(-800, -200, false, true);
     retractBL();
     retractBL();
     takeMeasurementAvgWithCheck(allLengths4);
     
     //Fifth measurement
-    moveWithSlack(-800, -400, false, false);
+    moveWithSlack(-800, -400, false, true);
     retractBL();
     retractBL();
     takeMeasurementAvgWithCheck(allLengths5);
@@ -576,13 +576,13 @@ void Maslow_::runCalibration(){
     takeMeasurementAvgWithCheck(allLengths23);
 
     //Fourth measurement
-    moveWithSlack(800, -200, false, false);
+    moveWithSlack(800, -200, false, true);
     retractBR();
     retractBR();
     takeMeasurementAvgWithCheck(allLengths24);
     
     //Fifth measurement
-    moveWithSlack(800, -400, false, false);
+    moveWithSlack(800, -400, false, true);
     retractBR();
     retractBR();
     takeMeasurementAvgWithCheck(allLengths25);
@@ -1022,7 +1022,7 @@ void Maslow_::moveWithSlack(float x, float y, bool leftBelt, bool rightBelt){
     double TLDir  = constrain(TLDist, -1, 1);
     double TRDir  = constrain(TRDist, -1, 1);
     
-    double stepSize = .15;
+    double stepSize = .3;
     
     //Only use positive dist for incrementing counter (float int conversion issue?)
     TLDist = abs(TLDist);
@@ -1045,7 +1045,7 @@ void Maslow_::moveWithSlack(float x, float y, bool leftBelt, bool rightBelt){
         }
         else{
             axisBL.updateEncoderPosition();
-            axisBL.stop();
+            axisBL.runAtPWM(-100);
         }
 
         if(rightBelt){
@@ -1053,7 +1053,7 @@ void Maslow_::moveWithSlack(float x, float y, bool leftBelt, bool rightBelt){
         }
         else{
             axisBR.updateEncoderPosition();
-            axisBR.stop();
+            axisBR.runAtPWM(-100);
         }
         
         // grbl_sendf( "BRPos: %f, BRamt: %f, BRtime: %l\n", lastPosition2, amtToMove2, timeLastMoved2);

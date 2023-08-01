@@ -25,6 +25,7 @@ class MotorUnit {
     double getCurrent();
     double getError();
     void stop();
+    void runAtPWM(int pwm);
     void updateEncoderPosition();
     double recomputePID();
     void decompressBelt();
