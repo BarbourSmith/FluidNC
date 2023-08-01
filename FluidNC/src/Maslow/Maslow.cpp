@@ -55,15 +55,15 @@ void Maslow_::begin(void (*sys_rt)()) {
   axisTLHomed = false;
 
   tlX = -8.339;
-  tlY = 2209;
+  tlY = 2160;
   tlZ = 172;
-  trX = 3048; 
-  trY = 2209;
+  trX = 3000; 
+  trY = 2160;
   trZ = 111;
   blX = 0;
   blY = 0;
   blZ = 96;
-  brX = 3048;
+  brX = 3000;
   brY = 0;
   brZ = 131;
 
@@ -613,6 +613,7 @@ void Maslow_::runCalibration(){
     printMeasurementSet(allLengths19);
     printMeasurementSet(allLengths20);
     printMeasurementSet(allLengths21);
+    printMeasurementSet(allLengths22);
     printMeasurementSet(allLengths23);
     printMeasurementSet(allLengths24);
     printMeasurementSet(allLengths25);
@@ -865,7 +866,7 @@ void Maslow_::takeMeasurement(float lengths[]){
     while(!axisBLDone || !axisBRDone){  //As long as one axis is still pulling
         
         //If any of the current values are over the threshold then stop and exit, otherwise pull each axis a little bit tighter by incrementing the target position
-        int currentThreshold = 1500;
+        int currentThreshold = 2500;
         
         if(axisBL.getCurrent() > currentThreshold || axisBLDone){  //Check if the current threshold is hit
             axisBLDone = true;
@@ -931,7 +932,7 @@ void Maslow_::retractBR(){
     while(!axisBRDone){  //As long as one axis is still pulling
         
         //If any of the current values are over the threshold then stop and exit, otherwise pull each axis a little bit tighter by incrementing the target position
-        int currentThreshold = 1500;
+        int currentThreshold = 2500;
         
         if(axisBR.getCurrent() > currentThreshold || axisBRDone){
             if(axisBRDone == false){
@@ -976,7 +977,7 @@ void Maslow_::retractBL(){
     while(!axisBLDone){  //As long as one axis is still pulling
         
         //If any of the current values are over the threshold then stop and exit, otherwise pull each axis a little bit tighter by incrementing the target position
-        int currentThreshold = 1500;
+        int currentThreshold = 2500;
         
         if(axisBL.getCurrent() > currentThreshold || axisBLDone){
             if(axisBLDone == false){
