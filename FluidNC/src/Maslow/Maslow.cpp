@@ -78,6 +78,8 @@ void Maslow_::begin(void (*sys_rt)()) {
 
   _sys_rt = sys_rt;
 
+  currentThreshold = 1500;
+
 }
 
 void printToWeb (double precision){
@@ -576,13 +578,13 @@ void Maslow_::runCalibration(){
     takeMeasurementAvgWithCheck(allLengths23);
 
     //Fourth measurement
-    moveWithSlack(800, -200, false, true);
+    moveWithSlack(800, -200, true, false);
     retractBR();
     retractBR();
     takeMeasurementAvgWithCheck(allLengths24);
     
     //Fifth measurement
-    moveWithSlack(800, -400, false, true);
+    moveWithSlack(800, -400, true, false);
     retractBR();
     retractBR();
     takeMeasurementAvgWithCheck(allLengths25);
@@ -866,7 +868,6 @@ void Maslow_::takeMeasurement(float lengths[]){
     while(!axisBLDone || !axisBRDone){  //As long as one axis is still pulling
         
         //If any of the current values are over the threshold then stop and exit, otherwise pull each axis a little bit tighter by incrementing the target position
-        int currentThreshold = 2500;
         
         if(axisBL.getCurrent() > currentThreshold || axisBLDone){  //Check if the current threshold is hit
             axisBLDone = true;
@@ -932,7 +933,6 @@ void Maslow_::retractBR(){
     while(!axisBRDone){  //As long as one axis is still pulling
         
         //If any of the current values are over the threshold then stop and exit, otherwise pull each axis a little bit tighter by incrementing the target position
-        int currentThreshold = 2500;
         
         if(axisBR.getCurrent() > currentThreshold || axisBRDone){
             if(axisBRDone == false){
@@ -977,7 +977,6 @@ void Maslow_::retractBL(){
     while(!axisBLDone){  //As long as one axis is still pulling
         
         //If any of the current values are over the threshold then stop and exit, otherwise pull each axis a little bit tighter by incrementing the target position
-        int currentThreshold = 2500;
         
         if(axisBL.getCurrent() > currentThreshold || axisBLDone){
             if(axisBLDone == false){
