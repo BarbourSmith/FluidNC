@@ -457,7 +457,7 @@ void Maslow_::runCalibration(){
     takeMeasurementAvgWithCheck(allLengths4);
     
     //Fifth measurement
-    moveWithSlack(-800, -400, false, true);
+    moveWithSlack(-800, -500, false, true);
     retractBL();
     retractBL();
     takeMeasurementAvgWithCheck(allLengths5);
@@ -468,7 +468,7 @@ void Maslow_::runCalibration(){
     //First measurement
     lowerBeltsGoSlack();
     lowerBeltsGoSlack();
-    moveWithSlack(-400, 400, true, true);
+    moveWithSlack(-400, 450, true, true);
     retractBL();
     retractBL();
     takeMeasurementAvgWithCheck(allLengths6);
@@ -492,7 +492,7 @@ void Maslow_::runCalibration(){
     takeMeasurementAvgWithCheck(allLengths9);
     
     //Fifth measurement
-    moveWithSlack(-400, -400, false, false);
+    moveWithSlack(-400, -500, false, false);
     retractBL();
     retractBL();
     takeMeasurementAvgWithCheck(allLengths10);
@@ -502,7 +502,7 @@ void Maslow_::runCalibration(){
     //First measurement
     lowerBeltsGoSlack();
     lowerBeltsGoSlack();
-    moveWithSlack(0, 400, true, true);
+    moveWithSlack(0, 450, true, true);
     takeMeasurementAvgWithCheck(allLengths11);
     
     //Second measurement
@@ -518,7 +518,7 @@ void Maslow_::runCalibration(){
     takeMeasurementAvgWithCheck(allLengths14);
     
     //Fifth measurement
-    moveWithSlack(0, -400, false, false);
+    moveWithSlack(0, -500, false, false);
     takeMeasurementAvgWithCheck(allLengths15);
 
 //----------------------Forth column---------------------------------
@@ -526,7 +526,7 @@ void Maslow_::runCalibration(){
     //First measurement
     lowerBeltsGoSlack();
     lowerBeltsGoSlack();
-    moveWithSlack(400, 400, true, true);
+    moveWithSlack(400, 450, true, true);
     retractBR();
     retractBR();
     takeMeasurementAvgWithCheck(allLengths16);
@@ -550,7 +550,7 @@ void Maslow_::runCalibration(){
     takeMeasurementAvgWithCheck(allLengths19);
     
     //Fifth measurement
-    moveWithSlack(400, -400, false, false);
+    moveWithSlack(400, -500, false, false);
     retractBR();
     retractBR();
     takeMeasurementAvgWithCheck(allLengths20);
@@ -560,7 +560,7 @@ void Maslow_::runCalibration(){
     //First measurement
     lowerBeltsGoSlack();
     lowerBeltsGoSlack();
-    moveWithSlack(800, 400, true, true);
+    moveWithSlack(800, 450, true, true);
     retractBR();
     retractBR();
     takeMeasurementAvgWithCheck(allLengths21);
@@ -584,7 +584,7 @@ void Maslow_::runCalibration(){
     takeMeasurementAvgWithCheck(allLengths24);
     
     //Fifth measurement
-    moveWithSlack(800, -400, true, false);
+    moveWithSlack(800, -500, true, false);
     retractBR();
     retractBR();
     takeMeasurementAvgWithCheck(allLengths25);
