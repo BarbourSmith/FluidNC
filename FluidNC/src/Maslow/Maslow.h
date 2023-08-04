@@ -31,8 +31,9 @@ class Maslow_ {
     void lowerBeltsGoSlack();
     void printMeasurementSet(float allLengths[][4]);
     float printMeasurementMetrics(double avg, double m1, double m2, double m3, double m4, double m5);
-    void takeMeasurementAvgWithCheck(float allLengths[][4]);
-    float takeMeasurementAvg(float allLengths[][4]);
+    void takeColumnOfMeasurements(float x, float measurments[][4]);
+    void takeMeasurementAvgWithCheck(float allLengths[4]);
+    float takeMeasurementAvg(float allLengths[4]);
     void takeMeasurement(float lengths[]);
     void moveWithSlack(float x, float y, bool leftBelt, bool rightBelt);
     void takeUpInternalSlack();

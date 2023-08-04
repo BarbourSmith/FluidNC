@@ -375,6 +375,12 @@ void Maslow_::printMeasurementSet(float allLengths[][4]){
     log_info("{bl:" + String(allLengths[1][0]) + ",   br:" + String(allLengths[1][1]) + ",   tr:" + String(allLengths[1][2]) + ",   tl:" + String(allLengths[1][3]) + "}");
     log_info("{bl:" + String(allLengths[2][0]) + ",   br:" + String(allLengths[2][1]) + ",   tr:" + String(allLengths[2][2]) + ",   tl:" + String(allLengths[2][3]) + "}");
     log_info("{bl:" + String(allLengths[3][0]) + ",   br:" + String(allLengths[3][1]) + ",   tr:" + String(allLengths[3][2]) + ",   tl:" + String(allLengths[3][3]) + "}");
+    log_info("{bl:" + String(allLengths[4][0]) + ",   br:" + String(allLengths[4][1]) + ",   tr:" + String(allLengths[4][2]) + ",   tl:" + String(allLengths[4][3]) + "}");
+    log_info("{bl:" + String(allLengths[5][0]) + ",   br:" + String(allLengths[5][1]) + ",   tr:" + String(allLengths[5][2]) + ",   tl:" + String(allLengths[5][3]) + "}");
+    log_info("{bl:" + String(allLengths[6][0]) + ",   br:" + String(allLengths[6][1]) + ",   tr:" + String(allLengths[6][2]) + ",   tl:" + String(allLengths[6][3]) + "}");
+    log_info("{bl:" + String(allLengths[7][0]) + ",   br:" + String(allLengths[7][1]) + ",   tr:" + String(allLengths[7][2]) + ",   tl:" + String(allLengths[7][3]) + "}");
+    log_info("{bl:" + String(allLengths[8][0]) + ",   br:" + String(allLengths[8][1]) + ",   tr:" + String(allLengths[8][2]) + ",   tl:" + String(allLengths[8][3]) + "}");
+    log_info("{bl:" + String(allLengths[9][0]) + ",   br:" + String(allLengths[9][1]) + ",   tr:" + String(allLengths[9][2]) + ",   tl:" + String(allLengths[9][3]) + "}");
 
     (*_sys_rt)();
         
@@ -385,6 +391,87 @@ void Maslow_::printMeasurementSet(float allLengths[][4]){
         elapsedTime = millis()-time;
         (*_sys_rt)();
     }
+}
+
+//Takes one column of 10 measurements
+void Maslow_::takeColumnOfMeasurements(float x, float measurments[][4]){
+
+    float measurement1[4] = {0};
+    float measurement2[4] = {0};
+    float measurement3[4] = {0};
+    float measurement4[4] = {0};
+    float measurement5[4] = {0};
+    float measurement6[4] = {0};
+    float measurement7[4] = {0};
+    float measurement8[4] = {0};
+    float measurement9[4] = {0};
+    float measurement10[4] = {0};
+
+    //Introduce some slack to make the move easier
+    lowerBeltsGoSlack();
+    lowerBeltsGoSlack();
+    //Move to where we need to begin
+    moveWithSlack(x, 450, true, true);
+
+    //First measurmement
+    if(x < 0) { retractBL(); retractBL(); } //If we are on the left side of the sheet tension the left belt first
+    if(x > 0) { retractBR(); retractBR(); } //If we are on the right side of the sheet tension the right belt first
+    takeMeasurementAvgWithCheck(measurments[0]);
+    
+    //Second measurmement
+    moveWithSlack(x, 325, false, false);
+    if(x < 0) { retractBL(); retractBL(); }
+    if(x > 0) { retractBR(); retractBR(); }
+    takeMeasurementAvgWithCheck(measurments[1]);
+
+    //Third measurmement
+    moveWithSlack(x, 200, false, false);
+    if(x < 0) { retractBL(); retractBL(); }
+    if(x > 0) { retractBR(); retractBR(); }
+    takeMeasurementAvgWithCheck(measurments[2]);
+
+    //Fourth measurement
+    moveWithSlack(x, 100, false, true);
+    if(x < 0) { retractBL(); retractBL(); }
+    if(x > 0) { retractBR(); retractBR(); }
+    takeMeasurementAvgWithCheck(measurments[3]);
+    
+    //Fifth measurement
+    moveWithSlack(x, 0, false, true);
+    if(x < 0) { retractBL(); retractBL(); }
+    if(x > 0) { retractBR(); retractBR(); }
+    takeMeasurementAvgWithCheck(measurments[4]);
+
+    //Sixth measurmement
+    moveWithSlack(x, -100, false, false);
+    if(x < 0) { retractBL(); retractBL(); }
+    if(x > 0) { retractBR(); retractBR(); }
+    takeMeasurementAvgWithCheck(measurments[5]);
+
+    //Sevent measurmement
+    moveWithSlack(x, -200, false, false);
+    if(x < 0) { retractBL(); retractBL(); }
+    if(x > 0) { retractBR(); retractBR(); }
+    takeMeasurementAvgWithCheck(measurments[6]);
+
+    //Eigth measurement
+    moveWithSlack(x, -300, false, true);
+    if(x < 0) { retractBL(); retractBL(); }
+    if(x > 0) { retractBR(); retractBR(); }
+    takeMeasurementAvgWithCheck(measurments[7]);
+    
+    //Ninth measurement
+    moveWithSlack(x, -400, false, true);
+    if(x < 0) { retractBL(); retractBL(); }
+    if(x > 0) { retractBR(); retractBR(); }
+    takeMeasurementAvgWithCheck(measurments[8]);
+
+    //Tenth measurement
+    moveWithSlack(x, -500, false, true);
+    if(x < 0) { retractBL(); retractBL(); }
+    if(x > 0) { retractBR(); retractBR(); }
+    takeMeasurementAvgWithCheck(measurments[9]);
+    
 }
 
 //Runs the calibration sequence to determine the machine's dimensions
@@ -401,234 +488,48 @@ void Maslow_::runCalibration(){
     axisTR.setTarget(axisTR.getPosition());
     axisTL.setTarget(axisTL.getPosition());
     
+    //Take the measurements
+    float column1[10][4] = {0};
+    float column2[10][4] = {0};
+    float column3[10][4] = {0};
+    float column4[10][4] = {0};
+    float column5[10][4] = {0};
+    float column6[10][4] = {0};
+    float column7[10][4] = {0};
+    float column8[10][4] = {0};
+    float column9[10][4] = {0};
+    float column10[10][4] = {0};
+    float column11[10][4] = {0};
 
-    float allLengths1[5][4] = {0};
-    float allLengths2[5][4] = {0};
-    float allLengths3[5][4] = {0};
-    float allLengths4[5][4] = {0};
-    float allLengths5[5][4] = {0};
-    float allLengths6[5][4] = {0};
-    float allLengths7[5][4] = {0};
-    float allLengths8[5][4] = {0};
-    float allLengths9[5][4] = {0};
-    float allLengths10[5][4] = {0};
-    float allLengths11[5][4] = {0};
-    float allLengths12[5][4] = {0};
-    float allLengths13[5][4] = {0};
-    float allLengths14[5][4] = {0};
-    float allLengths15[5][4] = {0};
-    float allLengths16[5][4] = {0};
-    float allLengths17[5][4] = {0};
-    float allLengths18[5][4] = {0};
-    float allLengths19[5][4] = {0};
-    float allLengths20[5][4] = {0};
-    float allLengths21[5][4] = {0};
-    float allLengths22[5][4] = {0};
-    float allLengths23[5][4] = {0};
-    float allLengths24[5][4] = {0};
-    float allLengths25[5][4] = {0};
+    takeColumnOfMeasurements(-800, column1);
+    takeColumnOfMeasurements(-640, column2);
+    takeColumnOfMeasurements(-480, column3);
+    takeColumnOfMeasurements(-320, column4);
+    takeColumnOfMeasurements(-160, column5);
+    takeColumnOfMeasurements(0, column6);
+    takeColumnOfMeasurements(160, column7);
+    takeColumnOfMeasurements(320, column8);
+    takeColumnOfMeasurements(480, column9);
+    takeColumnOfMeasurements(640, column10);
+    takeColumnOfMeasurements(800, column11);
 
-    //---------------------------------------------------Take measurements----------------------------
-    
-
-    //-----------------------------First column------------------------------
-
-    //First measurement where we started
-    retractBL(); //Retract the bottom left belt first to tension the system
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths1);
-    
-    //Second measurmement
-    moveWithSlack(-800, 200, false, false);
-    retractBL();
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths2);
-
-    //Third measurmement
-    moveWithSlack(-800, 0, false, false);
-    retractBL();
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths3);
-
-    //Fourth measurement
-    moveWithSlack(-800, -200, false, true);
-    retractBL();
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths4);
-    
-    //Fifth measurement
-    moveWithSlack(-800, -500, false, true);
-    retractBL();
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths5);
-    
-
-    //------------------------------Second column--------------------------------
-
-    //First measurement
-    lowerBeltsGoSlack();
-    lowerBeltsGoSlack();
-    moveWithSlack(-400, 450, true, true);
-    retractBL();
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths6);
-    
-    //Second measurement
-    moveWithSlack(-400, 200, false, false);
-    retractBL();
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths7);
-
-    //Third measurement
-    moveWithSlack(-400, 0, false, false);
-    retractBL();
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths8);
-
-    //Forth measurement
-    moveWithSlack(-400, -200, false, false);
-    retractBL();
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths9);
-    
-    //Fifth measurement
-    moveWithSlack(-400, -500, false, false);
-    retractBL();
-    retractBL();
-    takeMeasurementAvgWithCheck(allLengths10);
-
-    //------------------------------Third column--------------------------------
-
-    //First measurement
-    lowerBeltsGoSlack();
-    lowerBeltsGoSlack();
-    moveWithSlack(0, 450, true, true);
-    takeMeasurementAvgWithCheck(allLengths11);
-    
-    //Second measurement
-    moveWithSlack(0, 200, false, false);
-    takeMeasurementAvgWithCheck(allLengths12);
-
-    //Third measurement
-    moveWithSlack(0, 0, false, false);
-    takeMeasurementAvgWithCheck(allLengths13);
-
-    //Forth measurement
-    moveWithSlack(0, -200, false, false);
-    takeMeasurementAvgWithCheck(allLengths14);
-    
-    //Fifth measurement
-    moveWithSlack(0, -500, false, false);
-    takeMeasurementAvgWithCheck(allLengths15);
-
-//----------------------Forth column---------------------------------
-    
-    //First measurement
-    lowerBeltsGoSlack();
-    lowerBeltsGoSlack();
-    moveWithSlack(400, 450, true, true);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths16);
-    
-    //Second measurement
-    moveWithSlack(400, 200, false, false);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths17);
-
-    //Thrid measurement
-    moveWithSlack(400, 0, false, false);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths18);
-
-    //Fourth measurement
-    moveWithSlack(400, -200, false, false);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths19);
-    
-    //Fifth measurement
-    moveWithSlack(400, -500, false, false);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths20);
-
-    //----------------------Fifth column---------------------------------
-    
-    //First measurement
-    lowerBeltsGoSlack();
-    lowerBeltsGoSlack();
-    moveWithSlack(800, 450, true, true);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths21);
-    
-    //Second measurement
-    moveWithSlack(800, 200, false, false);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths22);
-
-    //Thrid measurement
-    moveWithSlack(800, 0, false, false);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths23);
-
-    //Fourth measurement
-    moveWithSlack(800, -200, true, false);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths24);
-    
-    //Fifth measurement
-    moveWithSlack(800, -500, true, false);
-    retractBR();
-    retractBR();
-    takeMeasurementAvgWithCheck(allLengths25);
-
-
-    //----------------------End of measurements---------------------------
-
-    //Print out the resulting measurements, sometimes this crashes everything :/
-    log_info("Printing all measurements: ");
-    printMeasurementSet(allLengths1);
-    printMeasurementSet(allLengths2);
-    printMeasurementSet(allLengths3);
-    printMeasurementSet(allLengths4);
-    printMeasurementSet(allLengths5);
-    printMeasurementSet(allLengths6);
-    printMeasurementSet(allLengths7);
-    printMeasurementSet(allLengths8);
-    printMeasurementSet(allLengths9);
-    printMeasurementSet(allLengths10);
-    printMeasurementSet(allLengths11);
-    printMeasurementSet(allLengths12);
-    printMeasurementSet(allLengths13);
-    printMeasurementSet(allLengths14);
-    printMeasurementSet(allLengths15);
-    printMeasurementSet(allLengths16);
-    printMeasurementSet(allLengths17);
-    printMeasurementSet(allLengths18);
-    printMeasurementSet(allLengths19);
-    printMeasurementSet(allLengths20);
-    printMeasurementSet(allLengths21);
-    printMeasurementSet(allLengths22);
-    printMeasurementSet(allLengths23);
-    printMeasurementSet(allLengths24);
-    printMeasurementSet(allLengths25);
-    
-    
-    lowerBeltsGoSlack();
-    lowerBeltsGoSlack();
-    moveWithSlack(0, 0, true, true);  //Go back to the center. This will pull the lower belts tight too
     
     axisBL.stop();
     axisBR.stop();
     axisTR.stop();
     axisTL.stop();
+
+    printMeasurementSet(column1);
+    printMeasurementSet(column2);
+    printMeasurementSet(column3);
+    printMeasurementSet(column4);
+    printMeasurementSet(column5);
+    printMeasurementSet(column6);
+    printMeasurementSet(column7);
+    printMeasurementSet(column8);
+    printMeasurementSet(column9);
+    printMeasurementSet(column10);
+    printMeasurementSet(column11);
     
     //----------------------------------------------------------Do the computation
     
@@ -682,8 +583,8 @@ void Maslow_::runCalibration(){
     // //---------------------------------------------------------Finish
     
     
-    // //Move back to center after the results are applied
-    // moveWithSlack(0, 0, true, true);
+    //Move back to center after the results are applied
+    moveWithSlack(0, 0, true, true);
     
     // //For safety we should pull tight here and verify that the results are basically what we expect before handing things over to the controller.
     // float allLengths[5][4];
@@ -695,8 +596,8 @@ void Maslow_::runCalibration(){
     
     // log_info( "Lower belt length mismatch: " + String(blError) + ", " +String(brError));
     
-    // calibrationInProgress = false;
-    // log_info( "Calibration finished");
+    calibrationInProgress = false;
+    log_info( "Calibration finished");
     
 }
 
@@ -772,10 +673,10 @@ float Maslow_::printMeasurementMetrics(double avg, double m1, double m2, double 
 }
 
 //Checks to make sure the deviation within the measurement avg looks good before moving on
-void Maslow_::takeMeasurementAvgWithCheck(float allLengths[][4]){
+void Maslow_::takeMeasurementAvgWithCheck(float allLengths[4]){
     log_info( "Beginning takeMeasurementAvg\n");
     Serial.println( "Beginning takeMeasurementAvg\n");
-    float threshold = 0.9;
+    float threshold = 0.5;
     while(true){
         float repeatability = takeMeasurementAvg(allLengths);
         if(repeatability < threshold){
@@ -788,7 +689,7 @@ void Maslow_::takeMeasurementAvgWithCheck(float allLengths[][4]){
 }
 
 // Takes 5 measurements and returns how consistent they are
-float Maslow_::takeMeasurementAvg(float allLengths[][4]) {
+float Maslow_::takeMeasurementAvg(float allLengths[4]) {
     log_info("Beginning to take averaged measurement.\n");
     Serial.println("Beginning to take averaged measurement.");
 
@@ -803,37 +704,32 @@ float Maslow_::takeMeasurementAvg(float allLengths[][4]) {
     float avgLengths[4];
 
     takeMeasurement(lengths1);
-    lowerBeltsGoSlack();
     takeMeasurement(lengths1);  // Repeat the first measurement to discard the one before everything was pulled taught
-    lowerBeltsGoSlack();
     takeMeasurement(lengths2);
-    lowerBeltsGoSlack();
     takeMeasurement(lengths3);
-    lowerBeltsGoSlack();
     takeMeasurement(lengths4);
-    lowerBeltsGoSlack();
     takeMeasurement(lengths5);
 
-    allLengths[0][0] = lengths1[0];
-    allLengths[0][1] = lengths1[1];
-    allLengths[0][2] = lengths1[2];
-    allLengths[0][3] = lengths1[3];
-    allLengths[1][0] = lengths2[0];
-    allLengths[1][1] = lengths2[1];
-    allLengths[1][2] = lengths2[2];
-    allLengths[1][3] = lengths2[3];
-    allLengths[2][0] = lengths3[0];
-    allLengths[2][1] = lengths3[1];
-    allLengths[2][2] = lengths3[2];
-    allLengths[2][3] = lengths3[3];
-    allLengths[3][0] = lengths4[0];
-    allLengths[3][1] = lengths4[1];
-    allLengths[3][2] = lengths4[2];
-    allLengths[3][3] = lengths4[3];
-    allLengths[4][0] = lengths5[0];
-    allLengths[4][1] = lengths5[1];
-    allLengths[4][2] = lengths5[2];
-    allLengths[4][3] = lengths5[3];
+    // allLengths[0][0] = lengths1[0];
+    // allLengths[0][1] = lengths1[1];
+    // allLengths[0][2] = lengths1[2];
+    // allLengths[0][3] = lengths1[3];
+    // allLengths[1][0] = lengths2[0];
+    // allLengths[1][1] = lengths2[1];
+    // allLengths[1][2] = lengths2[2];
+    // allLengths[1][3] = lengths2[3];
+    // allLengths[2][0] = lengths3[0];
+    // allLengths[2][1] = lengths3[1];
+    // allLengths[2][2] = lengths3[2];
+    // allLengths[2][3] = lengths3[3];
+    // allLengths[3][0] = lengths4[0];
+    // allLengths[3][1] = lengths4[1];
+    // allLengths[3][2] = lengths4[2];
+    // allLengths[3][3] = lengths4[3];
+    allLengths[0] = lengths5[0];
+    allLengths[1] = lengths5[1];
+    allLengths[2] = lengths5[2];
+    allLengths[3] = lengths5[3];
 
     avgLengths[0] = (lengths1[0] + lengths2[0] + lengths3[0] + lengths4[0] + lengths5[0]) / 5.0;
     avgLengths[1] = (lengths1[1] + lengths2[1] + lengths3[1] + lengths4[1] + lengths5[1]) / 5.0;
