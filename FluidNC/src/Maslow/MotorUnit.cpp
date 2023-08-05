@@ -2,8 +2,8 @@
 #include "../Report.h"
 
 
-#define P 360 //260
-#define I 5
+#define P 300 //260
+#define I 35
 #define D 0
 
 #define TCAADDR 0x70
@@ -142,6 +142,10 @@ double MotorUnit::recomputePID(){
     double commandPWM = positionPID.getOutput(getPosition(),setpoint);
 
     motor.runAtPWM(commandPWM);
+
+    // if(random(50) == 1){
+    //     log_info("PWM: " + String(commandPWM));
+    // }
 
     return commandPWM;
 

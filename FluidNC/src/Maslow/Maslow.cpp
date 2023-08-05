@@ -54,19 +54,18 @@ void Maslow_::begin(void (*sys_rt)()) {
   axisTRHomed = false;
   axisTLHomed = false;
 
-
-  tlX = -0.6948090610228441;
-  tlY =  2131.275233532367;
-  tlZ = 172;
-  trX = 3034.4072793128926; 
-  trY = 2127.1780972406527;
-  trZ = 111;
+  tlX = -1.2775505926851451;
+  tlY =  2125.411304076909;
+  tlZ = 116;
+  trX = 3036.051941957454; 
+  trY = 2127.91394620096;
+  trZ = 69;
   blX = 0;
   blY = 0;
-  blZ = 96;
-  brX = 3034.960970894897;
+  blZ = 47;
+  brX = 3041.4964766419607;
   brY = 0;
-  brZ = 131;
+  brZ = 89;
 
   tlTension = 0;
   trTension = 0;
@@ -159,6 +158,10 @@ void Maslow_::recomputePID(int encoderNumber2Compute){
     //We want to update the encoders at most ever 10ms to avoid it hogging the processor time
     if(timeSinceLastCall < 10){
       return;
+    }
+
+    if(random(50) == 0){
+        log_info("TL Error: " + String(axisTL.getError()) + " TR Error: " + String(axisTR.getError()));
     }
 
     //Stop everything but keep track of the encoder positions if we are idle or alarm. Unless doing calibration.
