@@ -760,6 +760,8 @@ void Maslow_::takeMeasurement(float lengths[]){
 
     float BLDist = .01;
     float BRDist = .01;
+
+    double maxSpeed = 0.3;
     
     while(!axisBLDone || !axisBRDone){  //As long as one axis is still pulling
         
@@ -770,7 +772,7 @@ void Maslow_::takeMeasurement(float lengths[]){
         }
         else{                                                       //If not
             axisBL.setTarget(axisBL.getPosition() - BLDist);                  //Pull in a little more
-            BLDist = min(0.2, BLDist + .01);                                     //Slowly ramp up the speed
+            BLDist = min(maxSpeed, BLDist + .01);                                     //Slowly ramp up the speed
         }
         
         if(axisBR.getCurrent() > currentThreshold || axisBRDone){
@@ -781,7 +783,7 @@ void Maslow_::takeMeasurement(float lengths[]){
         }
         else{
             axisBR.setTarget(axisBR.getPosition() - BRDist);
-            BRDist = min(0.2, BRDist + .01);
+            BRDist = min(maxSpeed, BRDist + .01);
         }
         
         // Delay without blocking
