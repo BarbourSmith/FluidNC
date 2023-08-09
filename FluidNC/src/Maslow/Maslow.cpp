@@ -56,16 +56,16 @@ void Maslow_::begin(void (*sys_rt)()) {
 
   tlX = -1.2775505926851451;
   tlY =  2125.411304076909;
-  tlZ = 116 + 34;
+  tlZ = 116 + 38;
   trX = 3036.051941957454; 
   trY = 2127.91394620096;
-  trZ = 69 + 34;
+  trZ = 69 + 38;
   blX = 0;
   blY = 0;
-  blZ = 47 + 34;
+  blZ = 47 + 38;
   brX = 3041.4964766419607;
   brY = 0;
-  brZ = 89 + 34;
+  brZ = 89 + 38;
 
   tlTension = 0;
   trTension = 0;
