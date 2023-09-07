@@ -411,7 +411,7 @@ void Maslow_::takeColumnOfMeasurements(float x, float measurments[][4]){
     lowerBeltsGoSlack();
     lowerBeltsGoSlack();
     //Move to where we need to begin
-    moveWithSlack(x, 450, true, true);
+    moveWithSlack(x, 550, true, true);
 
     //First measurmement
     if(x < 0) { retractBL(); retractBL(); } //If we are on the left side of the sheet tension the left belt first
@@ -419,55 +419,55 @@ void Maslow_::takeColumnOfMeasurements(float x, float measurments[][4]){
     takeMeasurementAvgWithCheck(measurments[0]);
     
     //Second measurmement
-    moveWithSlack(x, 325, false, false);
+    moveWithSlack(x, 425, false, false);
     if(x < 0) { retractBL(); retractBL(); }
     if(x > 0) { retractBR(); retractBR(); }
     takeMeasurementAvgWithCheck(measurments[1]);
 
     //Third measurmement
-    moveWithSlack(x, 200, false, false);
+    moveWithSlack(x, 300, false, false);
     if(x < 0) { retractBL(); retractBL(); }
     if(x > 0) { retractBR(); retractBR(); }
     takeMeasurementAvgWithCheck(measurments[2]);
 
     //Fourth measurement
-    moveWithSlack(x, 100, false, true);
+    moveWithSlack(x, 200, false, true);
     if(x < 0) { retractBL(); retractBL(); }
     if(x > 0) { retractBR(); retractBR(); }
     takeMeasurementAvgWithCheck(measurments[3]);
     
     //Fifth measurement
-    moveWithSlack(x, 0, false, true);
+    moveWithSlack(x, 100, false, true);
     if(x < 0) { retractBL(); retractBL(); }
     if(x > 0) { retractBR(); retractBR(); }
     takeMeasurementAvgWithCheck(measurments[4]);
 
     //Sixth measurmement
-    moveWithSlack(x, -100, false, false);
+    moveWithSlack(x, 0, false, false);
     if(x < 0) { retractBL(); retractBL(); }
     if(x > 0) { retractBR(); retractBR(); }
     takeMeasurementAvgWithCheck(measurments[5]);
 
     //Sevent measurmement
-    moveWithSlack(x, -200, false, false);
+    moveWithSlack(x, -100, false, false);
     if(x < 0) { retractBL(); retractBL(); }
     if(x > 0) { retractBR(); retractBR(); }
     takeMeasurementAvgWithCheck(measurments[6]);
 
     //Eigth measurement
-    moveWithSlack(x, -300, false, true);
+    moveWithSlack(x, -200, false, true);
     if(x < 0) { retractBL(); retractBL(); }
     if(x > 0) { retractBR(); retractBR(); }
     takeMeasurementAvgWithCheck(measurments[7]);
     
     //Ninth measurement
-    moveWithSlack(x, -400, false, true);
+    moveWithSlack(x, -300, false, true);
     if(x < 0) { retractBL(); retractBL(); }
     if(x > 0) { retractBR(); retractBR(); }
     takeMeasurementAvgWithCheck(measurments[8]);
 
     //Tenth measurement
-    moveWithSlack(x, -500, false, true);
+    moveWithSlack(x, -400, false, true);
     if(x < 0) { retractBL(); retractBL(); }
     if(x > 0) { retractBR(); retractBR(); }
     takeMeasurementAvgWithCheck(measurments[9]);
