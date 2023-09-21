@@ -243,13 +243,22 @@ void Maslow_::recomputePID(){
         digitalWrite(coolingFanPin, HIGH); //Turn on the cooling fan
     }
 
-    if(random(100) == 0){
-        log_info("Currents:" << axisBL.getCurrent() << " , " << axisBR.getCurrent());
+    if(random(10) == 0){
+        //get BR encoder position and print it only if its position has changed
+        static float temp = -100;
+        float v = axisBR.getPosition();
+        if(v != temp){
+            temp = v;
+            log_info("BR Encoder: " << v);
+        }
+        
+        //log_info("Currents:" << axisBL.getCurrent() << " , " << axisBR.getCurrent());
     }
 
     if(digitalRead(SERVOFAULT) == 1){
         log_info("Servo fault!");
     }
+    
 
 
     // int looptime = millis() - lastCallToPID;
