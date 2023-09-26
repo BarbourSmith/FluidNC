@@ -44,7 +44,7 @@ int callsSinceDelay = 0;
 void Maslow_::begin(void (*sys_rt)()) {
   initialized = 1;
 
-  Serial.begin(115200);
+  //Serial.begin(115200);
 
   axisTL.begin(tlIn1Pin, tlIn2Pin, tlADCPin, TLEncoderLine, tlIn1Channel, tlIn2Channel);
   axisTR.begin(trIn1Pin, trIn2Pin, trADCPin, TREncoderLine, trIn1Channel, trIn2Channel);

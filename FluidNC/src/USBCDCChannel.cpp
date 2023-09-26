@@ -119,6 +119,7 @@ USBCDCChannel Uart0(true);  // Primary serial channel with LF to CRLF conversion
 void uartInit() {
     Serial.begin(115200);
     Uart0.init();
+     Serial.println("SETUP");
 }
 #endif
 #endif

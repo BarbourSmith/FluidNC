@@ -70,6 +70,7 @@ void setup() {
         make_user_commands();
 
         if (configOkay) {
+            Serial.println("CONFIG OK");
             log_info("Machine " << config->_name);
             log_info("Board " << config->_board);
 
@@ -126,7 +127,7 @@ void setup() {
 
             config->_kinematics->init();
         }
-
+        Serial.println("CONFIG DONE");
         // Initialize system state.
         if (sys.state() != State::ConfigAlarm) {
             if (FORCE_INITIALIZATION_ALARM) {

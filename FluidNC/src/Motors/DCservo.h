@@ -26,7 +26,7 @@ namespace MotorDrivers {
         uint8_t _id;
 
         static int _timer_ms;
-
+        
         static uint8_t _tx_message[100];  // outgoing to dynamixel
         static uint8_t _msg_index;
         static uint8_t _rx_message[50];  // received from dynamixel
@@ -37,11 +37,14 @@ namespace MotorDrivers {
 
         int _axis_index;
 
+
         bool        _disabled;
         static bool _has_errors;
 
     public:
         DCservo() : _id(255), _disabled(true) {}
+
+        
 
         // Overrides for inherited methods
         void        init() override;
