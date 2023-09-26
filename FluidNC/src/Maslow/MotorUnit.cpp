@@ -3,18 +3,11 @@
 
 
 #define P 300 //260
-#define I 35
+#define I 0
 #define D 0
 
 #define TCAADDR 0x70
 
-void tcaselect(uint8_t i) {
-  if (i > 7) return;
- 
-  Wire.beginTransmission(TCAADDR);
-  Wire.write(1 << i);
-  Wire.endTransmission();  
-}
 
 void MotorUnit::begin(int forwardPin,
                int backwardPin,
@@ -22,12 +15,12 @@ void MotorUnit::begin(int forwardPin,
                int encoderAddress,
                int channel1,
                int channel2){
-    Serial.println("Beginning motor unit");
 
     _encoderAddress = encoderAddress;
 
     Wire.begin(5,4, 200000);
-    tcaselect(_encoderAddress);
+    I2CMux.begin(TCAADDR, Wire);
+    I2CMux.setPort(_encoderAddress);
     encoder.begin();
     zero();
 
@@ -39,20 +32,8 @@ void MotorUnit::begin(int forwardPin,
     
 }
 
-void MotorUnit::readEncoder(){
-    tcaselect(_encoderAddress);
-
-    if(encoder.isConnected()){
-        //log_info("Connected:");
-        //log_info(_encoderAddress);
-    } else {
-        //log_info("Not connected:");
-        //log_info(_encoderAddress);
-    }
-}
-
 void MotorUnit::zero(){
-    tcaselect(_encoderAddress);
+    I2CMux.setPort(_encoderAddress);
     encoder.resetCumulativePosition();
 }
 
@@ -60,6 +41,11 @@ void MotorUnit::zero(){
  *  @brief  Sets the target location
  */
 void MotorUnit::setTarget(double newTarget){
+    // if(abs(newTarget - setpoint) > 1){
+    //     log_info("Step change in target detected on " << _encoderAddress);
+    //     log_info("Old target: " << setpoint);
+    //     log_info("New target: " << newTarget);
+    // }
     setpoint = newTarget;
 }
 
@@ -75,7 +61,7 @@ double MotorUnit::getTarget(){
  */
 int MotorUnit::setPosition(double newPosition){
     int angleTotal = (newPosition*4096)/_mmPerRevolution;
-    tcaselect(_encoderAddress);
+    I2CMux.setPort(_encoderAddress);
     encoder.resetCumulativePosition(angleTotal);
 
     return true;
@@ -85,7 +71,17 @@ int MotorUnit::setPosition(double newPosition){
  *  @brief  Reads the current position of the axis
  */
 double MotorUnit::getPosition(){
-    return (mostRecentCumulativeEncoderReading/4096.0)*_mmPerRevolution*-1;
+    double positionNow = (mostRecentCumulativeEncoderReading/4096.0)*_mmPerRevolution*-1;
+
+    // if(abs(positionNow - _lastPosition) > 1){
+    //     log_info("Position jump detected on "  << _encoderAddress << " of " << positionNow - _lastPosition);
+    //     int timeElapsed = millis() - lastCallGetPos;
+    //     log_info("Time since last call: " << timeElapsed);
+    // }
+    // lastCallGetPos = millis();
+    // _lastPosition = positionNow;
+
+    return positionNow;
 }
 
 /*!
@@ -122,13 +118,13 @@ void MotorUnit::stop(){
  */
 void MotorUnit::updateEncoderPosition(){
 
-    tcaselect(_encoderAddress);
+    I2CMux.setPort(_encoderAddress);
 
     if(encoder.isConnected()){
         mostRecentCumulativeEncoderReading = encoder.getCumulativePosition(); //This updates and returns the encoder value
     }
-    else if(!encoderReadFailurePrint){
-        encoderReadFailurePrint = true;
+    else if(millis() - encoderReadFailurePrintTime > 1000){
+        encoderReadFailurePrintTime = millis();
         log_info("Encoder read failure on " << _encoderAddress);
     }
 }
@@ -138,92 +134,19 @@ void MotorUnit::updateEncoderPosition(){
  */
 double MotorUnit::recomputePID(){
     
-    double commandPWM = positionPID.getOutput(getPosition(),setpoint);
+    _commandPWM = positionPID.getOutput(getPosition(),setpoint);
 
-    motor.runAtPWM(commandPWM);
+    motor.runAtPWM(_commandPWM);
 
-    // if(random(50) == 1){
-    //     log_info("PWM: " + String(commandPWM));
-    // }
+    return _commandPWM;
 
-    return commandPWM;
+}
 
-    //Read the motor current and check for stalls
-    // double currentNow = getCurrent();
-    // if(currentNow > _stallCurrent){
-    //     _stallCount = _stallCount + 1;
-    // }
-    // else{
-    //     _stallCount = 0;
-    // }
-    // if(_stallCount > _stallThreshold){
-        // if(_axisID == 1){    
-        //     _webPrint(0xFF,"BR stalled at current: %f\n", currentNow);
-        // }
-        // else if(_axisID == 3){    
-        //     _webPrint(0xFF,"TR stalled at current: %f\n", currentNow);
-        // }
-        // else if(_axisID == 7){    
-        //     _webPrint(0xFF,"BL stalled at current: %f\n", currentNow);
-        // }
-        // else if(_axisID == 9){    
-        //     _webPrint(0xFF,"TL stalled at current: %f\n", currentNow);
-        // }
-        // else{    
-        //     _webPrint(0xFF,"%i stalled at current: %f\n",_axisID, currentNow);
-        // }
-    //     _stallCount = 0;
-    // }
-    
-    
-
-    //Add some monitoring to the top right axis...this can crash the processor because it prints out so much data
-    // if(_axisID == 3){
-    //     _webPrint(0xFF,"TR PID: %f\n", commandPWM);
-    // }
-
-    // if(abs(getPosition() - setpoint ) > 5){
-    //     _numPosErrors = _numPosErrors + 1;
-
-        // if(_numPosErrors > 2){
-        //     if(_axisID == 1){    
-        //         _webPrint(0xFF,"BR position error of %fmm ", getPosition() - setpoint);
-        //         _webPrint(0xFF,"BR current draw %i ", currentMeasurement);
-        //         _webPrint(0xFF,"BR PID output %f\n", commandPWM);
-        //     }
-        //     else if(_axisID == 3){
-        //         _webPrint(0xFF,"TR position error of %fmm ", getPosition() - setpoint);
-        //         _webPrint(0xFF,"TR current draw %i ", currentMeasurement);
-        //         _webPrint(0xFF,"TR PID output %f\n", commandPWM);
-        //     }
-        //     else if(_axisID == 7){
-        //         _webPrint(0xFF,"BL position error of %fmm ", getPosition() - setpoint);
-        //         _webPrint(0xFF,"BL current draw %i ", currentMeasurement);
-        //         _webPrint(0xFF,"BL PID output %f\n", commandPWM);
-        //     }
-        //     else if(_axisID == 9){
-        //         _webPrint(0xFF,"TL position error of %fmm ", getPosition() - setpoint);
-        //         _webPrint(0xFF,"TL current draw %i ", currentMeasurement);
-        //         _webPrint(0xFF,"TL PID output %f\n", commandPWM);
-        //     }
-        //     else{
-        //         _webPrint(0xFF,"%i position error of %fmm\n",_axisID, getPosition() - setpoint);
-        //     }
-        // }
-    //}
-    // else{
-    //     _numPosErrors = 0;
-    // }
-
-    //This code adds an offiset to remove the deadband. It needs to be tuned for the new 0-1023 values
-    // if(commandPWM > 0){
-    //     commandPWM = commandPWM + 7000;
-    // }
-
-    // if(commandPWM > 1023){
-    //     commandPWM = 1023;
-    // }
-
+/*
+*  @brief  Gets the last command PWM
+*/
+double MotorUnit::getCommandPWM(){
+    return _commandPWM;
 }
 
 /*!
@@ -235,7 +158,6 @@ void MotorUnit::decompressBelt(){
     while(elapsedTime < 500){
         elapsedTime = millis()-time;
         motor.fullOut();
-        updateEncoderPosition();
     }
 }
 
@@ -250,11 +172,6 @@ bool MotorUnit::comply(unsigned long *timeLastMoved, double *lastPosition, doubl
     //If we've moved any, then drive the motor outwards to extend the belt
     float positionNow = getPosition();
     float distMoved = positionNow - *lastPosition;
-
-    Serial.print("Dist moved: ");
-    Serial.print(distMoved);
-    Serial.print("  Target: ");
-    Serial.println(getTarget());
 
     //If the belt is moving out, let's keep it moving out
     if( distMoved > .001){
@@ -298,8 +215,8 @@ bool MotorUnit::comply(unsigned long *timeLastMoved, double *lastPosition, doubl
  */
 bool MotorUnit::retract(double targetLength){
     
-    Serial.println("Retracting");
-    log_info("Retracting called within MotorUnit!");
+    log_info("Retracting");
+
     int absoluteCurrentThreshold = 1900;
     int incrementalThreshold = 75;
     int incrementalThresholdHits = 0;
@@ -321,25 +238,13 @@ bool MotorUnit::retract(double targetLength){
         }
         motor.backward(speed);
 
-        updateEncoderPosition();
         //When taught
         int currentMeasurement = motor.readCurrent();
-
-        Serial.print("Current: ");
-        Serial.print(currentMeasurement);
-        Serial.print("  Baseline: ");
-        Serial.print(baseline);
-        Serial.print("  Difference: ");
-        Serial.print(currentMeasurement - baseline);
-        Serial.print("  Hits: ");
-        Serial.println(incrementalThresholdHits);
 
         //_webPrint(0xFF,"Current: %i, Baseline: %f, difference: %f \n", currentMeasurement, baseline, currentMeasurement - baseline);
         baseline = alpha * float(currentMeasurement) + (1-alpha) * baseline;
 
         if(currentMeasurement - baseline > incrementalThreshold){
-            Serial.println("Dynamic thershold hit");
-            //_webPrint(0xFF,"Dynamic threshold hit\n");
             incrementalThresholdHits = incrementalThresholdHits + 1;
         }
         else{
@@ -359,19 +264,14 @@ bool MotorUnit::retract(double targetLength){
             //If we hit the current limit immediately because there wasn't any slack we will extend
             elapsedTime = millis()-time;
             if(elapsedTime < 1500){
-
-                Serial.println("Immediate hit detected");
                 
                 //Extend some belt to get things started
                 decompressBelt();
-
-                Serial.println("After decompress belt");
                 
                 unsigned long timeLastMoved = millis();
                 double lastPosition = getPosition();
                 double amtToMove = 0.1;
                 
-                Serial.println("Got to the comply part");
                 while(getPosition() < targetLength){
                     //Check for timeout
                     if(!comply(&timeLastMoved, &lastPosition, &amtToMove, 500)){//Comply updates the encoder position and does the actual moving
@@ -390,7 +290,6 @@ bool MotorUnit::retract(double targetLength){
                         elapsedTime = millis()-time;
                     }
                 }
-                Serial.println("After the comply part");
                 
                 //Position hold for 2 seconds to make sure we are in the right place
                 setTarget(targetLength);
