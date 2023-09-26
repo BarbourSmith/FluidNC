@@ -12,10 +12,11 @@ verbose = '-v' in sys.argv
 environ = dict(os.environ)
 
 platformio = r"C:\Users\User\.platformio\penv\Scripts\platformio.exe"
-version = "0.0.1"
+version = "26-sep-23"
 os.chdir(os.path.dirname(os.path.realpath(r"C:\Users\User\Documents\GitHub\FluidNC\.pio")))
 #change path to the project folder (the folder with platformio.ini)
-
+tag = "maslow4-"+version
+sharedPath = 'install_scripts'
 
 
 def buildEmbeddedPage():
@@ -63,8 +64,7 @@ def buildFs(pioEnv, verbose=verbose, extraArgs=None):
 #     .decode("utf-8")
 # )
 
-tag = "maslow4-"+version
-sharedPath = 'install_scripts'
+
 
 def copyToZip(zipObj, platform, fileName, destPath, mode=0o100755):
     sourcePath = os.path.join(sharedPath, platform, fileName)
