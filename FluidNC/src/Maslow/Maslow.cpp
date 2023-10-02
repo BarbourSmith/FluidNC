@@ -179,7 +179,7 @@ void Maslow_::recomputePID(){
         return;
     }
 
-    int timeSinceLastCall = millis() - lastCallToPID;s
+    int timeSinceLastCall = millis() - lastCallToPID;
     
     if(timeSinceLastCall > 20){
         int elapsedTimeLastMiss = millis() - lastMiss;
@@ -233,9 +233,6 @@ void Maslow_::recomputePID(){
         digitalWrite(coolingFanPin, LOW); //Turn off the cooling fan
     }
     else{  //Normal operation...drive the motors to the target positions
-        if(random(50) == 0){
-            log_info("Recomputing PID called");
-        }
         axisBL.recomputePID();
         axisBR.recomputePID();
         axisTR.recomputePID();
