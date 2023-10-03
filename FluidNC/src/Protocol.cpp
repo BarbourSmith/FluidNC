@@ -372,8 +372,7 @@ void protocol_execute_realtime() {
         protocol_exec_rt_suspend();
     }
     
-    Maslow.setTargets(steps_to_mpos(get_axis_motor_steps(0),0), steps_to_mpos(get_axis_motor_steps(1),1), steps_to_mpos(get_axis_motor_steps(2),2));
-
+   
 }
 
 static void alarm_msg(ExecAlarm alarm_code) {
@@ -832,7 +831,7 @@ void protocol_exec_rt_system() {
     //Maslow.recomputePID(); //This one works as an alternative to having recomputePID called in DCServo.cpp
 
     protocol_handle_events();
-
+    Maslow.setTargets(steps_to_mpos(get_axis_motor_steps(0),0), steps_to_mpos(get_axis_motor_steps(1),1), steps_to_mpos(get_axis_motor_steps(2),2));
     // Reload step segment buffer
     switch (sys.state()) {
         case State::ConfigAlarm:
