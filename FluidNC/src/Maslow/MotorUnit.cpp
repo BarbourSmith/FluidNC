@@ -176,37 +176,22 @@ bool MotorUnit::comply( double maxSpeed){
     if(millis() - lastCallToComply < 25){
         return true;
     }
-    //Update position and PID loop
-    //recomputePID();
 
     //If we've moved any, then drive the motor outwards to extend the belt
     float positionNow = getPosition();
     float distMoved = positionNow - lastPosition;
 
     //If the belt is moving out, let's keep it moving out
-    if( distMoved > .001){
-        //Increment the target
-        //setTarget(positionNow + amtToMove);
-        
-        motor.forward(amtToMove);
-
+    if( distMoved > .001){      
         if(amtToMove < 100) amtToMove = 100;
-        amtToMove = amtToMove*1.75;
-        
+        amtToMove = amtToMove*1.55;
         amtToMove = min(amtToMove, 1023.0);
+        motor.forward(amtToMove);
     }
-    //If the belt is moving in we need to stop it from moving in
-    // }else if(distMoved < -.04){
-    //     amtToMove = 0;
-    //     //setTarget(positionNow + .1);
-    //     //stop();
-    // }
-    //Finally if the belt is not moving we want to spool things down
+    //if the belt is not moving we want to spool things down
     else{
         amtToMove = amtToMove / 1.25;
         motor.forward(amtToMove);
-        //setTarget(positionNow);
-        //stop();
     }
     
 
@@ -249,27 +234,16 @@ bool MotorUnit::pull_tight(){
         else{
             incrementalThresholdHits = 0;
         }
-        //EXPERIMENTAL, added because my BR current sensor is faulty, but might be an OK precaution
-        //monitor the position change speed  
-         bool beltStalled = false;
-        // if(retract_speed > 450 ){ // skip the start, might create problems if the belt is slackking a lot, but you can always run it many times
-        //     if(abs(beltSpeed) < 0.1){
-        //         beltStalled = true;
-        //     }
-        // }
+
+
         if (retract_speed > 75) {
-            if (currentMeasurement > absoluteCurrentThreshold || incrementalThresholdHits > 2 ||
-                beltStalled) {  //changed from 4 to 2 to prevent overtighting
+            if (currentMeasurement > absoluteCurrentThreshold || incrementalThresholdHits > 2) {  //changed from 4 to 2 to prevent overtighting
                 //stop motor, reset variables
                 motor.stop();
                 retract_speed    = 0;
                 retract_baseline = 700;
                 return true;
-            } else {
-                if (_encoderAddress == 2 && retract_speed < 50)
-                    log_info("Motor current: " << currentMeasurement);
-                return false;
-            }
+            } 
         }
         return false;
 }

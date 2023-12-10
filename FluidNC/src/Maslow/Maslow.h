@@ -32,28 +32,17 @@ class Maslow_ {
 
     //math 
     void updateCenterXY();
-    void computeTensions(float x, float y);
     float computeBL(float x, float y, float z);
     float computeBR(float x, float y, float z);
     float computeTR(float x, float y, float z);
     float computeTL(float x, float y, float z);
 
     //calibration functions 
-    void runCalibration_(); // temporary
     void runCalibration();
-    void printMeasurementSet(float allLengths[][4]);
-    void takeColumnOfMeasurements(float x, float measurments[][4]);
-    float printMeasurementMetrics(double avg, double m1, double m2, double m3, double m4, double m5);
-    void takeMeasurementAvgWithCheck(float allLengths[4]);
-    float takeMeasurementAvg(float allLengths[4]);
-    void takeMeasurement(float lengths[]);
-    void moveWithSlack(float x, float y, bool leftBelt, bool rightBelt);
-    void takeUpInternalSlack();
-    void retractBR_CAL();
-    void retractBL_CAL();
 
+    //utility functions
+    //user commands 
     void stopMotors();
-
     void retractTL();
     void retractTR();
     void retractBL();
@@ -62,14 +51,16 @@ class Maslow_ {
     void extendALL();
     void comply();
     void stop();
+    void set_frame_width(double width);
+    void set_frame_height(double height);
+
     void panic();
     void setSafety(bool state);
     String axis_id_to_label(int axis_id);
     bool all_axis_homed();
     void safety_control();
-    void set_frame_width(double width);
-    void set_frame_height(double height);
     void update_frame_xyz();
+
     bool axis_homed[4] = {false, false, false, false};
     bool retractingTL = false;
     bool retractingTR = false;
@@ -95,7 +86,6 @@ class Maslow_ {
     MotorUnit axisTR;
     MotorUnit axisBL;
     MotorUnit axisBR;
-    int initialized = 0;
 
     bool axisBLHomed;
     bool axisBRHomed;
@@ -155,9 +145,6 @@ class Maslow_ {
     float brZ;
     float centerX;
     float centerY;
-
-    float tlTension;
-    float trTension;
 
     float _beltEndExtension;
     float _armLength;
