@@ -2094,3 +2094,10 @@ void Maslow_::takeUpInternalSlack(){
     axisTL.stop();
 }
 
+//Raises the z-axis up 75mm and then back down by 28mm so that it is at a known height. The z-axis is then set to zero.
+void Maslow_::homeZ(){
+    float* mpos = get_mpos();
+    mpos[2] = 0;
+    set_motor_steps_from_mpos(mpos);
+}
+

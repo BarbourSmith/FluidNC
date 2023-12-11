@@ -51,6 +51,7 @@ class Maslow_ {
     void takeUpInternalSlack();
     void retractBR_CAL();
     void retractBL_CAL();
+    void homeZ();
 
     void stopMotors();
 
