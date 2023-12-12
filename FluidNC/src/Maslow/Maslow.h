@@ -52,6 +52,7 @@ class Maslow_ {
     void retractBR_CAL();
     void retractBL_CAL();
     void homeZ();
+    void pullBeltsTight();
 
     void stopMotors();
 

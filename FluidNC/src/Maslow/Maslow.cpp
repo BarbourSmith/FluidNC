@@ -545,7 +545,6 @@ void Maslow_::calibration_loop(){
                 y = calibrationGrid[0][1];
                 hold(250);
             }
-
         }
 
         //perform the calibrartion steps in the grid
@@ -558,7 +557,6 @@ void Maslow_::calibration_loop(){
                 y = calibrationGrid[waypoint][1];
                 hold(250);
             }
-
         }
 }
 
@@ -856,6 +854,12 @@ void Maslow_::safety_control() {
         spamTimer = millis();
     }
 }
+
+//This moves the machine with slack belts to (0,0) and then takes a single measurement to check that the machine is calibrated
+void Maslow_::pullBeltsTight() {
+
+}
+
 // Maslow main loop
 void Maslow_::update(){
 
