@@ -1014,6 +1014,11 @@ void Maslow_::extendALL(){
     extendCallTimer = millis();
     log_info("Extending All");
 }
+
+void Maslow_::pullBeltsTight(){
+    log_info("Would pull belts tight");
+}
+
 void Maslow_::runCalibration(){
 
     stop();

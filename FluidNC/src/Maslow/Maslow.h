@@ -56,6 +56,7 @@ class Maslow_ {
     void retractBR();
     void retractALL();
     void extendALL();
+    void pullBeltsTight();
     void comply();
     void stop();
     void panic();
