@@ -130,8 +130,8 @@ void Maslow_::update(){
         else if (holding) return;
 
 
-        //temp test function
-        if(test){
+        //Remove the slack from the belts after attaching to the frame
+        if(takeSlack){
             if(take_measurement_avg_with_check(0,UP)){
                 //print the measurements and expected measurements for center point:
                 double off = _beltEndExtension+_armLength;
@@ -140,8 +140,8 @@ void Maslow_::update(){
                 log_info("Center point expected (0,0,0): TL: " << computeTL(0,0,0) << " TR: " << computeTR(0,0,0) << " BL: " << computeBL(0,0,0) << " BR: " << computeBR(0,0,0));
                 //log deviation of the measurements from the expected values
                 log_info("Center point deviation: TL: " << calibration_data[0][0]-off - computeTL(0,0,0) << " TR: " << calibration_data[1][0]-off - computeTR(0,0,0) << " BL: " << calibration_data[2][0]-off - computeBL(0,0,0) << " BR: " << calibration_data[3][0]-off - computeBR(0,0,0));
-                test = false;
-                log_info("Test complete");
+                takeSlack = false;
+                log_info("Take up slack complete");
             }
         }
 
@@ -1016,7 +1016,9 @@ void Maslow_::extendALL(){
 }
 
 void Maslow_::pullBeltsTight(){
-    log_info("Would pull belts tight");
+    x = 0;
+    y = 0;
+    takeSlack = true;
 }
 
 void Maslow_::runCalibration(){
@@ -1057,10 +1059,8 @@ void Maslow_::setSafety(bool state){
     safetyOn = state;
 }
 void Maslow_::test_(){
-
-
-            x = 0;
-            y = 0;
+    x = 0;
+    y = 0;
     test = true;
 }
 void Maslow_::set_frame_width(double width){
@@ -1137,7 +1137,7 @@ void Maslow_::stop(){
     extendingALL = false;
     complyALL = false;
     calibrationInProgress = false;
-    test = false; 
+    takeSlack = false; 
     axisTL.reset();
     axisTR.reset();
     axisBL.reset();

@@ -122,6 +122,7 @@ class Maslow_ {
     void calibration_loop();
     void print_calibration_data();
     void reset_all_axis();
+    bool takeSlack = false;
     bool test = false;
     bool orientation;
     double calibration_data[4][CALIBRATION_GRID_SIZE] = {0}; 
