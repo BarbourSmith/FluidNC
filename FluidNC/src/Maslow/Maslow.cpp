@@ -141,6 +141,7 @@ void Maslow_::update(){
                 //log deviation of the measurements from the expected values
                 log_info("Center point deviation: TL: " << calibration_data[0][0]-off - computeTL(0,0,0) << " TR: " << calibration_data[1][0]-off - computeTR(0,0,0) << " BL: " << calibration_data[2][0]-off - computeBL(0,0,0) << " BR: " << calibration_data[3][0]-off - computeBR(0,0,0));
                 takeSlack = false;
+                sys.set_state(State::Idle);
                 log_info("Take up slack complete");
             }
         }
@@ -1019,6 +1020,7 @@ void Maslow_::pullBeltsTight(){
     x = 0;
     y = 0;
     takeSlack = true;
+    sys.set_state(State::Homing);
 }
 
 void Maslow_::runCalibration(){
