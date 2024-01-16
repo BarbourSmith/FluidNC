@@ -71,7 +71,10 @@ void Maslow_::begin(void (*sys_rt)()) {
 
   //Serial.begin(115200);
   Wire.begin(5,4, 200000);
-  I2CMux.begin(TCAADDR, Wire);
+  if(!I2CMux.begin(TCAADDR, Wire)){
+    error = true;
+    log_error("Failed to start I2C Mux");
+  }
 
   axisTL.begin(tlIn1Pin, tlIn2Pin, tlADCPin, TLEncoderLine, tlIn1Channel, tlIn2Channel);
   axisTR.begin(trIn1Pin, trIn2Pin, trADCPin, TREncoderLine, trIn1Channel, trIn2Channel);
@@ -141,7 +144,9 @@ void Maslow_::begin(void (*sys_rt)()) {
   currentThreshold = 1500;
   lastCallToUpdate = millis();
   orientation = VERTICAL;
-  log_info("Starting Maslow v 1.00");
+  
+  if (error) log_error("Maslow failed to initialize - fix errors and restart");
+  else log_info("Starting Maslow v 1.00");
 }
 
 bool Maslow_::all_axis_homed(){
@@ -705,7 +710,10 @@ void Maslow_::safety_control() {
 }
 // Maslow main loop
 void Maslow_::update(){
-
+    if(error){
+        digitalWrite(REDLED, HIGH);
+        return;
+    }
     if(random(10000) == 0){
         digitalWrite(ETHERNETLEDPIN, LOW);
     }

@@ -19,7 +19,11 @@ void MotorUnit::begin(int forwardPin,
     _encoderAddress = encoderAddress;
 
     Maslow.I2CMux.setPort(_encoderAddress);
-    encoder.begin();
+    if( !encoder.begin() ) {
+        log_error("Encoder not found on " << Maslow.axis_id_to_label( _encoderAddress).c_str());
+        Maslow.error = true;
+    }
+
     zero();
 
     motor.begin(forwardPin, backwardPin, readbackPin, channel1, channel2);
@@ -27,7 +31,26 @@ void MotorUnit::begin(int forwardPin,
     positionPID.setPID(P,I,D);
     positionPID.setOutputLimits(-1023,1023);
 
+    if( !motor_test()){
+        log_error("Motor not found on " << Maslow.axis_id_to_label( _encoderAddress).c_str());
+        Maslow.error = true;
+    }
     
+}
+bool MotorUnit::motor_test(){
+    //run motor for 100ms and check if the current gets above zero
+    unsigned long time = millis();
+    unsigned long elapsedTime = millis()-time;
+    while(elapsedTime < 100){
+        elapsedTime = millis()-time;
+        motor.forward(1023);
+        if(motor.readCurrent() > 0){
+            motor.stop();
+            return true;
+        }
+    }
+    motor.stop();
+    return false;
 }
 
 void MotorUnit::zero(){
