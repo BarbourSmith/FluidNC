@@ -115,6 +115,7 @@ class Maslow_ {
     int frame_dimention_MAX = 5000;
 
     double calibrationGrid[100][2] = {0};
+    bool error = false;
 
     void generate_calibration_grid();
     bool onTarget(double targetX, double targetY, double currentX, double currentY, double tolerance);
