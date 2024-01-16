@@ -145,7 +145,7 @@ void Maslow_::begin(void (*sys_rt)()) {
   lastCallToUpdate = millis();
   orientation = VERTICAL;
   
-  if (error) log_error("Maslow failed to initialize - fix errors and restart");
+  if (error) {log_error("Maslow failed to initialize - fix errors and restart");}
   else log_info("Starting Maslow v 1.00");
 }
 
