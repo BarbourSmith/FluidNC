@@ -59,13 +59,24 @@ bool MotorUnit::updateEncoderPosition(){
     if( !Maslow.I2CMux.setPort(_encoderAddress) ) return false;
 
     if(encoder.isConnected()){ //this func has 50ms timeout (or worse?, hard to tell)
+        if(!encoder.detectMagnet())  log_error("No magnet detected on" << _encoderAddress);
+        if(encoder.magnetTooWeak())  log_error("Magnet too weak on" << _encoderAddress);
+        if(encoder.magnetTooStrong())  log_error("Magnet too strong on" << _encoderAddress);
         mostRecentCumulativeEncoderReading = encoder.getCumulativePosition(); //This updates and returns the encoder value
+        static int n = 0;
+        if(_encoderAddress == 3 && !Maslow.test){
+            n++;
+         if( n%100 == 0) log_data(mostRecentCumulativeEncoderReading);
+        }
         return true;
     }
-    else if(millis() - encoderReadFailurePrintTime > 5000){
+    else {
+        log_error("Encoder connection failure on" << _encoderAddress);
+        if(millis() - encoderReadFailurePrintTime > 5000){
         encoderReadFailurePrintTime = millis();
         log_warn("Encoder read failure on " << _encoderAddress);
         Maslow.panic();
+        }
     }
     return false;
 }
