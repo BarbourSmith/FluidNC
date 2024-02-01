@@ -113,6 +113,13 @@ bool MotorUnit::updateEncoderPosition(){
 
     if(encoder.isConnected()){ //this func has 50ms timeout (or worse?, hard to tell)
         mostRecentCumulativeEncoderReading = encoder.getCumulativePosition(); //This updates and returns the encoder value
+        if(_encoderAddress == 3){
+            static int n = 0;
+            n++;
+            if(n%100 == 0){
+                log_data( mostRecentCumulativeEncoderReading);
+            }
+        }
         return true;
     }
     else if(millis() - encoderReadFailurePrintTime > 5000){

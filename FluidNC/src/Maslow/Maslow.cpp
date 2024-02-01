@@ -50,7 +50,7 @@
 #define REDLED 14
 
 #define MEASUREMENTSPEED 1.0 //The max speed at which we move the motors when taking measurements
-int ENCODER_READ_FREQUENCY_HZ = 100;
+int ENCODER_READ_FREQUENCY_HZ = 1000;
 
 int lowerBeltsExtra = 0;
 int callsSinceDelay = 0;
@@ -710,10 +710,10 @@ void Maslow_::safety_control() {
 }
 // Maslow main loop
 void Maslow_::update(){
-    if(error){
-        digitalWrite(REDLED, HIGH);
-        return;
-    }
+    // if(error){
+    //     digitalWrite(REDLED, HIGH);
+    //     return;
+    // }
     if(random(10000) == 0){
         digitalWrite(ETHERNETLEDPIN, LOW);
     }
