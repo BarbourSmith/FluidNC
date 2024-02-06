@@ -88,16 +88,16 @@ void Maslow_::begin(void (*sys_rt)()) {
   axisTRHomed = false;
   axisTLHomed = false;
 
-  tlX = 25.4253399079432;
-  tlY = 2062.799317466706;
+  tlX = -0.1172040820887045;
+  tlY = 2060.518487285115;
   tlZ = 116 + 38;
-  trX = 2976.989226934371; 
-  trY = 2065.5158023062427;
+  trX = 1460.504103831509; 
+  trY = 2061.4934109079113;
   trZ = 69 + 38;
   blX = 0;
   blY = 0;
   blZ = 47 + 38;
-  brX = 2960.520761172446;
+  brX = 1454.1261365915532;
   brY = 0;
   brZ = 89 + 38;
 
@@ -350,8 +350,8 @@ bool Maslow_::take_measurement_avg_with_check(int waypoint) {
           for (int i = 0; i < 4; i++) {
               maxDeviationAbs = max(maxDeviationAbs, maxDeviation[i]);
           }
-          if (maxDeviationAbs > 1.5) {
-              log_error("Measurement error, measurements are not within 1.5 mm of each other, trying again");
+          if (maxDeviationAbs > 3.5) {
+              log_error("Measurement error, measurements are not within 1.5 mm of each other, trying again " << maxDeviationAbs);
               //print all the measurements in readable form:
               for (int i = 0; i < 4; i++) {
                     for (int j = 0; j < 4; j++) {
@@ -482,8 +482,8 @@ void Maslow_::hold(unsigned long time){
 void Maslow_::generate_calibration_grid() {
   log_info("Generating calibration grid");
 
-  int gridSizeX = 10;
-  int gridSizeY = 9;
+  int gridSizeX = 5;
+  int gridSizeY = 8;
   int xSpacing = 175;
   int ySpacing = 100;
   int pointCount = 0;
