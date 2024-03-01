@@ -91,11 +91,11 @@ bool MotorUnit::updateEncoderPosition(){
         mostRecentCumulativeEncoderReading = encoder.getCumulativePosition(); //This updates and returns the encoder value
         return true;
     }
-    else if(millis() - encoderReadFailurePrintTime > 5000){
-        encoderReadFailurePrintTime = millis();
-        log_warn("Encoder read failure on " << _encoderAddress);
-        Maslow.panic();
-    }
+    // else if(millis() - encoderReadFailurePrintTime > 5000){
+    //     encoderReadFailurePrintTime = millis();
+    //     log_warn("Encoder read failure on " << _encoderAddress);
+    //     Maslow.panic();
+    // }
     return false;
 }
 
