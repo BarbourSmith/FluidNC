@@ -66,7 +66,7 @@ private:
     unsigned long motorCurrentTimer = millis();
 
     //These are used when retracting the belts for storage
-    int      absoluteCurrentThreshold = 1300;
+    int      absoluteCurrentThreshold = 2000;
     int      incrementalThreshold     = 125;
     int      incrementalThresholdHits = 0;
     float    alpha                    = .2;
