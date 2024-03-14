@@ -91,16 +91,16 @@ void Maslow_::begin(void (*sys_rt)()) {
 
 // Maslow main loop, everything is processed here
 void Maslow_::update() {
-    if (error) {
-        static unsigned long timer = millis();
-        static bool          st    = true;
-        if (millis() - timer > 300) {
-            st = !st;
-            digitalWrite(REDLED, st);
-            timer = millis();
-        }
-        return;
-    }
+    // if (error) {
+    //     static unsigned long timer = millis();
+    //     static bool          st    = true;
+    //     if (millis() - timer > 300) {
+    //         st = !st;
+    //         digitalWrite(REDLED, st);
+    //         timer = millis();
+    //     }
+    //     return;
+    // }
     if (random(10000) == 0) {
         digitalWrite(ETHERNETLEDPIN, LOW);
     }
@@ -478,9 +478,9 @@ bool Maslow_::updateEncoderPositions() {
             String label = axis_id_to_label(i);
             if (encoderFailCounter[i] > 0.1 * ENCODER_READ_FREQUENCY_HZ) {
                 // log error statement with appropriate label
-                log_error("Failure on " << label.c_str() << " encoder, failed to read " << encoderFailCounter[i]
-                                        << " times in the last second");
-                Maslow.panic();
+                // log_error("Failure on " << label.c_str() << " encoder, failed to read " << encoderFailCounter[i]
+                //                         << " times in the last second");
+                // Maslow.panic();
             } else if (encoderFailCounter[i] > 0) {  //0.01*ENCODER_READ_FREQUENCY_HZ){
                 log_warn("Bad connection on " << label.c_str() << " encoder, failed to read " << encoderFailCounter[i]
                                               << " times in the last second");
