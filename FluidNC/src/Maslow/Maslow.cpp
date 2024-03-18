@@ -883,6 +883,10 @@ bool Maslow_::move_with_slack(double fromX, double fromY, double toX, double toY
    
     int direction = get_direction(fromX, fromY, toX, toY);
 
+    if(random(100) == 1){
+        log_info("Moving from " << fromX << ", " << fromY << " to " << toX << ", " << toY << " direction: " << direction);
+    }
+
     //We only want to decompress at the beginning of each move
     if (decompress) {
         decompressTimer = millis();
@@ -968,6 +972,9 @@ bool Maslow_::move_with_slack(double fromX, double fromY, double toX, double toY
                 return true;
             }
             break;
+        default:
+            log_error("Invalid direction invoked in move_with_slack");
+            return true; //Maybe this will fix things? Returning false is probably more correct, but then we're stuck
     }
     return false;  //We have not yet reached our target position
 }
