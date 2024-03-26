@@ -883,7 +883,6 @@ bool Maslow_::move_with_slack(double fromX, double fromY, double toX, double toY
     //We only want to decompress at the beginning of each move
     if (decompress) {
         moveBeginTimer = millis();
-        log_info("Beginning move");
         decompress = false;
         direction = get_direction(fromX, fromY, toX, toY);
     }
@@ -926,61 +925,77 @@ bool Maslow_::move_with_slack(double fromX, double fromY, double toX, double toY
         return false;
     }
 
-    //This system of setting the final target and then waiting until we get there doesn't feel good to me
+    //Tighten and slack the aproprate belts depending on the direction of the move
+    if(orientation == VERTICAL){ //In the vertical orientation we always want to move using the top belts
+        axisTL.recomputePID();
+        axisTR.recomputePID();
+        axisBL.comply();
+        axisBR.comply();
+    }
+    else{ //In the horizontal orientation we switch around which belts we are using to move
+        switch (direction){
+            case UP:
+                axisTL.recomputePID();
+                axisTR.recomputePID();
+                axisBL.comply();
+                axisBR.comply();
+                break;
+            case DOWN:
+                axisTL.comply();
+                axisTR.comply();
+                axisBL.recomputePID();
+                axisBR.recomputePID();
+                break;
+            case LEFT:
+                axisTL.comply();
+                axisTR.recomputePID();
+                axisBL.comply();
+                axisBR.recomputePID();
+                break;
+            case RIGHT:
+                axisTL.recomputePID();
+                axisTR.comply();
+                axisBL.recomputePID();
+                axisBR.comply();
+                break;
+        }
+    }
+
+    //Move the targets and check if we are there
     switch (direction) {
         case UP:
             setTargets(toX, getTargetY() + stepSize, 0);
-            axisTL.recomputePID();
-            axisTR.recomputePID();
-            axisBL.comply();
-            axisBR.comply();
             if (getTargetY() > toY) {
                 stopMotors();
                 reset_all_axis();
                 decompress = true;  //Reset for the next pass
-                log_info("Move completed");
                 return true;
             }
             break;
         case DOWN:
             setTargets(toX, getTargetY() - stepSize, 0);
-            axisTL.comply();
-            axisTR.comply();
-            axisBL.recomputePID();
-            axisBR.recomputePID();
             if (getTargetY() < toY) {
                 stopMotors();
                 reset_all_axis();
                 decompress = true;  //Reset for the next pass
-                log_info("Move completed");
                 return true;
             }
             break;
         case LEFT:
             setTargets(getTargetX() - stepSize, toY, 0);
-            axisTL.recomputePID();
-            axisTR.comply();
-            axisBL.recomputePID();
-            axisBR.comply();
             if (getTargetX() < toX){
                 stopMotors();
                 reset_all_axis();
                 decompress = true;  //Reset for the next pass
-                log_info("Move completed");
                 return true;
             }
             break;
         case RIGHT:
             setTargets(getTargetX() + stepSize, toY, 0);
-            axisTL.comply();
-            axisTR.recomputePID();
-            axisBL.comply();
-            axisBR.recomputePID();
             if (getTargetX() > toX){
                 stopMotors();
                 reset_all_axis();
                 decompress = true;  //Reset for the next pass
-                log_info("Move completed");
                 return true;
             }
             break;
@@ -991,10 +1006,6 @@ bool Maslow_::move_with_slack(double fromX, double fromY, double toX, double toY
 // Direction from maslow current coordinates to the target coordinates
 int Maslow_::get_direction(double x, double y, double targetX, double targetY) {
     int direction = UP;
-
-    if (orientation == VERTICAL){
-        return UP;
-    }
 
     if (targetX - x > 1) {
         direction = RIGHT;
