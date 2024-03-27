@@ -283,14 +283,10 @@ void Maslow_::home() {
     // $EXT - extend mode
     if (extendingALL) {
         //decompress belts for the first half second
-        if (millis() - extendCallTimer < 700) {
-            if (millis() - extendCallTimer > 0)
+        if (millis() - extendCallTimer < 400) {
                 axisBR.decompressBelt();
-            if (millis() - extendCallTimer > 150)
                 axisBL.decompressBelt();
-            if (millis() - extendCallTimer > 250)
                 axisTR.decompressBelt();
-            if (millis() - extendCallTimer > 350)
                 axisTL.decompressBelt();
         }
         //then make all the belts comply until they are extended fully, or user terminates it
@@ -1125,7 +1121,9 @@ void Maslow_::extendALL() {
 
     stop();
     extendingALL = true;
-    //extendCallTimer = millis();
+    if(slackOnExtend){
+        extendCallTimer = millis();
+    }
 }
 void Maslow_::runCalibration() {
     if(!generate_calibration_grid()){

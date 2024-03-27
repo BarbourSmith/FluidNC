@@ -135,6 +135,7 @@ public:
     void   reset_all_axis();
     bool   test = false;
     bool   orientation;
+    bool   slackOnExtend = false; //If true the machine will automatically introduce some slack when extending the belts
     double calibration_data[4][CALIBRATION_GRID_SIZE_MAX] = { 0 };
     int    pointCount                                 = 0;  //number of actual points in the grid,  < GRID_SIZE_MAX
     int    calibrationGridSizeX                       = 10;

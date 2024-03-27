@@ -63,6 +63,8 @@ namespace Machine {
         handler.item("Maslow_Retract_Current_Threshold", Maslow.retractCurrentThreshold, 0, 3500);
         handler.item("Maslow_Calibration_Current_Threshold", Maslow.calibrationCurrentThreshold, 0, 3500);
 
+        handler.item("Slack_On_Extend", Maslow.slackOnExtend);
+
         handler.section("stepping", _stepping);
 
         handler.section("uart1", _uarts[1], 1);
