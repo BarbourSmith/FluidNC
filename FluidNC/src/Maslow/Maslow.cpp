@@ -283,7 +283,7 @@ void Maslow_::home() {
     // $EXT - extend mode
     if (extendingALL) {
         //decompress belts for the first half second
-        if (millis() - extendCallTimer < 400) {
+        if (millis() - extendCallTimer < 75) {
                 axisBR.decompressBelt();
                 axisBL.decompressBelt();
                 axisTR.decompressBelt();
