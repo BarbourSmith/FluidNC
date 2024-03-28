@@ -990,10 +990,6 @@ bool Maslow_::move_with_slack(double fromX, double fromY, double toX, double toY
 int Maslow_::get_direction(double x, double y, double targetX, double targetY) {
     int direction = UP;
 
-    if (orientation == VERTICAL){
-        return UP;
-    }
-
     if (targetX - x > 1) {
         direction = RIGHT;
     } else if (targetX - x < -1) {
