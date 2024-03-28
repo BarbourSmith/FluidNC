@@ -908,7 +908,6 @@ bool Maslow_::move_with_slack(double fromX, double fromY, double toX, double toY
     //We only want to decompress at the beginning of each move
     if (decompress) {
         moveBeginTimer = millis();
-        //log_info("decompressing at " << int(millis()));
         decompress = false;
     }
 
