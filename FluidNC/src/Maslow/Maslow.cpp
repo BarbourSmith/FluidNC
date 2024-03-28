@@ -901,6 +901,7 @@ bool Maslow_::move_with_slack(double fromX, double fromY, double toX, double toY
     //This is where we want to introduce some slack so the system
     static unsigned long moveBeginTimer = millis();
     static bool          decompress      = true;
+    const float          stepSize       = 0.04;
    
     int direction = get_direction(fromX, fromY, toX, toY);
 
@@ -949,15 +950,47 @@ bool Maslow_::move_with_slack(double fromX, double fromY, double toX, double toY
         return false;
     }
 
-    //This system of setting the final target and then waiting until we get there doesn't feel good to me
+    //Tighten and slack the aproprate belts depending on the direction of the move
+    if(orientation == VERTICAL){ //In the vertical orientation we always want to move using the top belts
+        axisTL.recomputePID();
+        axisTR.recomputePID();
+        axisBL.comply();
+        axisBR.comply();
+    }
+    else{ //In the horizontal orientation we switch around which belts we are using to move
+        switch (direction){
+            case UP:
+                axisTL.recomputePID();
+                axisTR.recomputePID();
+                axisBL.comply();
+                axisBR.comply();
+                break;
+            case DOWN:
+                axisTL.comply();
+                axisTR.comply();
+                axisBL.recomputePID();
+                axisBR.recomputePID();
+                break;
+            case LEFT:
+                axisTL.comply();
+                axisTR.recomputePID();
+                axisBL.comply();
+                axisBR.recomputePID();
+                break;
+            case RIGHT:
+                axisTL.recomputePID();
+                axisTR.comply();
+                axisBL.recomputePID();
+                axisBR.comply();
+                break;
+        }
+    }
+
+    //Move the targets and check if we are there
     switch (direction) {
         case UP:
-            setTargets(toX, toY, 0);
-            axisTL.recomputePID(500);
-            axisTR.recomputePID(500);
-            axisBL.comply();
-            axisBR.comply();
-            if (axisTL.onTarget(1) && axisTR.onTarget(1)) {
+            setTargets(toX, getTargetY() + stepSize, 0);
+            if (getTargetY() > toY) {
                 stopMotors();
                 reset_all_axis();
                 decompress = true;  //Reset for the next pass
@@ -965,12 +998,8 @@ bool Maslow_::move_with_slack(double fromX, double fromY, double toX, double toY
             }
             break;
         case DOWN:
-            setTargets(toX, toY, 0);
-            axisTL.comply();
-            axisTR.comply();
-            axisBL.recomputePID(500);
-            axisBR.recomputePID(500);
-            if (axisBL.onTarget(1) && axisBR.onTarget(1)) {
+            setTargets(toX, getTargetY() - stepSize, 0);
+            if (getTargetY() < toY) {
                 stopMotors();
                 reset_all_axis();
                 decompress = true;  //Reset for the next pass
@@ -978,12 +1007,8 @@ bool Maslow_::move_with_slack(double fromX, double fromY, double toX, double toY
             }
             break;
         case LEFT:
-            setTargets(toX, toY, 0);
-            axisTL.recomputePID(500);
-            axisTR.comply();
-            axisBL.recomputePID(500);
-            axisBR.comply();
-            if (axisTL.onTarget(1) && axisBL.onTarget(1)) {
+            setTargets(getTargetX() - stepSize, toY, 0);
+            if (getTargetX() < toX){
                 stopMotors();
                 reset_all_axis();
                 decompress = true;  //Reset for the next pass
@@ -991,12 +1016,8 @@ bool Maslow_::move_with_slack(double fromX, double fromY, double toX, double toY
             }
             break;
         case RIGHT:
-            setTargets(toX, toY, 0);
-            axisTL.comply();
-            axisTR.recomputePID(500);
-            axisBL.comply();
-            axisBR.recomputePID(500);
-            if (axisBR.onTarget(1) && axisTR.onTarget(1)) {
+            setTargets(getTargetX() + stepSize, toY, 0);
+            if (getTargetX() > toX){
                 stopMotors();
                 reset_all_axis();
                 decompress = true;  //Reset for the next pass
@@ -1010,10 +1031,6 @@ bool Maslow_::move_with_slack(double fromX, double fromY, double toX, double toY
 // Direction from maslow current coordinates to the target coordinates
 int Maslow_::get_direction(double x, double y, double targetX, double targetY) {
     int direction = UP;
-
-    if (orientation == VERTICAL){
-        return UP;
-    }
 
     if (targetX - x > 1) {
         direction = RIGHT;
