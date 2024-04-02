@@ -113,6 +113,13 @@ void Maslow_::update() {
         digitalWrite(ETHERNETLEDPIN, HIGH);
     }
 
+    if(random(1000) == 0){
+        log_info(axis_id_to_label(TLEncoderLine).c_str() << " position is " << axisTL.getPosition());
+        log_info(axis_id_to_label(TREncoderLine).c_str() << " position is " << axisTR.getPosition());
+        log_info(axis_id_to_label(BLEncoderLine).c_str() << " position is " << axisBL.getPosition());
+        log_info(axis_id_to_label(BREncoderLine).c_str() << " position is " << axisBR.getPosition());
+    }
+
     blinkIPAddress();
 
     heartBeat();
