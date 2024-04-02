@@ -244,8 +244,7 @@ bool MotorUnit::extend(double targetLength) {
     setTarget(getPosition());
     stop();
 
-    //log_info("Belt positon after extend: ");
-    //log_info(getPosition());
+    log_info(Maslow.axis_id_to_label(_encoderAddress) << " Belt positon after extend: " << getPosition());
     return true;
 }
 
