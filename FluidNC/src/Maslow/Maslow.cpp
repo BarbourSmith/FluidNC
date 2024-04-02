@@ -297,13 +297,13 @@ void Maslow_::home() {
         //then make all the belts comply until they are extended fully, or user terminates it
         else {
             if (!extendedTL)
-                extendedTL = axisTL.extend(computeTL(0, 0, 0));
+                extendedTL = axisTL.extend(1000);
             if (!extendedTR)
-                extendedTR = axisTR.extend(computeTR(0, 0, 0));
+                extendedTR = axisTR.extend(1000);
             if (!extendedBL)
-                extendedBL = axisBL.extend(computeBL(0, 300, 0));
+                extendedBL = axisBL.extend(1000);
             if (!extendedBR)
-                extendedBR = axisBR.extend(computeBR(0, 300, 0));
+                extendedBR = axisBR.extend(1000);
             if (extendedTL && extendedTR && extendedBL && extendedBR) {
                 extendingALL = false;
                 log_info("All belts extended to center position");
