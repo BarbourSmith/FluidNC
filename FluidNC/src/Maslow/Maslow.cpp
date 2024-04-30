@@ -418,6 +418,7 @@ void Maslow_::calibration_loop() {
     if(waypoint > pointCount){
         calibrationInProgress = false;
         waypoint              = 0;
+        recomputeCountIndex   = 0;
         log_info("Calibration complete");
         return;
     }
@@ -503,7 +504,7 @@ bool Maslow_::updateEncoderPositions() {
     }
 
     // if more than 1% of readings fail, warn user, if more than 10% fail, stop the machine and raise alarm
-    if (millis() - encoderFailTimer > 1000) {
+    if (millis() - encoderFailTimer > 1000) { //Print the information out at most once ever second
         for (int i = 0; i < 4; i++) {
             //turn i into proper label
             String label = axis_id_to_label(i);

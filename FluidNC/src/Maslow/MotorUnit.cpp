@@ -112,7 +112,7 @@ bool MotorUnit::updateEncoderPosition() {
         return false;
 
     if (encoder.isConnected()) {                                               //this func has 50ms timeout (or worse?, hard to tell)
-        mostRecentCumulativeEncoderReading = encoder.getCumulativePosition();  //This updates and returns the encoder value
+        mostRecentCumulativeEncoderReading = encoder.getCumulativePosition();  //This updates and returns the xvalue
         return true;
     } else if (millis() - encoderReadFailurePrintTime > 5000) {
         encoderReadFailurePrintTime = millis();
@@ -148,10 +148,18 @@ bool MotorUnit::comply() {
     if (millis() - lastCallToComply < 25) {
         return true;
     }
+    if(millis() - lastCallToComply > 35 && millis() - lastCallToComply < 10000){
+        log_warn("Comply not being called often enough");
+    }
 
     //If we've moved any, then drive the motor outwards to extend the belt
     float positionNow = getPosition();
     float distMoved   = positionNow - lastPosition;
+
+    //Print out the position and the distance moved
+    if(random(2) == 0 && _encoderAddress == 2){
+        log_info("Position: " << positionNow << " Distance moved: " << distMoved << " on axis " << Maslow.axis_id_to_label(_encoderAddress).c_str());
+    } 
 
     //If the belt is moving out, let's keep it moving out
     if (distMoved > .1) {  //EXPERIMENTAL
