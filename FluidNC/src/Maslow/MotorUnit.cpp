@@ -282,6 +282,7 @@ double MotorUnit::getCurrent() {
 
 // Stops the motor
 void MotorUnit::stop() {
+    log_info(Maslow.axis_id_to_label(_encoderAddress).c_str() << " motor stop called");
     motor.stop();
     _commandPWM = 0;
 }
