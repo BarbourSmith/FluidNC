@@ -40,6 +40,8 @@ void MotorUnit::begin(int forwardPin, int backwardPin, int readbackPin, int enco
     } else {
         log_info("Motor detected on " << Maslow.axis_id_to_label(_encoderAddress).c_str());
     }
+
+    encoder.setDirection(AS5600_CLOCK_WISE);
 }
 
 //Test the motor unit by testing the motor and checking the encoder
