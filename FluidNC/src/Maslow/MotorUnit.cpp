@@ -263,7 +263,7 @@ double MotorUnit::getTarget() {
 
 // Returns the current position of the axis in mm
 double MotorUnit::getPosition() {
-    double positionNow = (mostRecentCumulativeEncoderReading / 4096.0) * _mmPerRevolution * -1;
+    double positionNow = (mostRecentCumulativeEncoderReading / 4096.0) * _mmPerRevolution;
     return positionNow;
 }
 
