@@ -159,6 +159,8 @@ bool MotorUnit::comply() {
     //Print out the position and the distance moved
     if(random(2) == 0 && _encoderAddress == 2){
         log_info("Position: " << positionNow << " Distance moved: " << distMoved << " on axis " << Maslow.axis_id_to_label(_encoderAddress).c_str());
+        //Print positionNow, mostRecentCumulativeEncoderReading, _mmPerRevolution
+        log_info("Position: " << positionNow << " mostRecentCumulativeEncoderReading: " << mostRecentCumulativeEncoderReading << " _mmPerRevolution: " << _mmPerRevolution);
     } 
 
     //If the belt is moving out, let's keep it moving out
