@@ -161,7 +161,8 @@ void Maslow_::update() {
         else if (sys.state() == State::Homing) {
             home();
         } else {  //In any other state, keep motors off
-            //Maslow.stopMotors();
+            if (!test)
+                Maslow.stopMotors();
         }
 
         //If we are in any state other than idle or alarm turn the cooling fan on
