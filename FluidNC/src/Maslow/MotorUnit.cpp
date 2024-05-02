@@ -114,9 +114,12 @@ bool MotorUnit::updateEncoderPosition() {
         return false;
 
     if (encoder.isConnected()) {                                               //this func has 50ms timeout (or worse?, hard to tell)
-        mostRecentCumulativeEncoderReading = encoder.getCumulativePosition();  //This updates and returns the xvalue
+        mostRecentCumulativeEncoderReading = encoder.getCumulativePosition();  //This updates and returns the value
+        if(_encoderAddress == 2 && random(20) == 0){
+            log_info("mostRecentCumulativeEncoderReading: " << mostRecentCumulativeEncoderReading);
+        }
         return true;
-    } else if (millis() - encoderReadFailurePrintTime > 5000) {
+    } else if (millis() - encoderReadFailurePrintTime > 5000) { //This fails after a single read failure...is that what we want?
         encoderReadFailurePrintTime = millis();
         log_warn("Encoder read failure on " << _encoderAddress);
         Maslow.panic();
