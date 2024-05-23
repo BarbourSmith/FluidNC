@@ -387,6 +387,7 @@ bool Maslow_::takeSlackFunc() {
     if(takeSlackState == 1){
         if (move_with_slack(startingX, startingY, 0, 0)) {
             takeSlackState = 2;
+            log_info("Proceeding to take a measurement with calibrationCurrentThreshold set to " << calibrationCurrentThreshold);
         }
     }
 
@@ -402,7 +403,7 @@ bool Maslow_::takeSlackFunc() {
             float diffBL = calibration_data[2][0] - offset - computeBL(0, 0, 0);
             float diffBR = calibration_data[3][0] - offset - computeBR(0, 0, 0);
             log_info("Center point deviation: TL: " << diffTL << " TR: " << diffTR << " BL: " << diffBL << " BR: " << diffBR);
-            if (abs(diffTL) > threshold || abs(diffTR) > threshold || abs(diffBL) > threshold || abs(diffBR) > threshold) {
+            if (false){//(abs(diffTL) > threshold || abs(diffTR) > threshold || abs(diffBL) > threshold || abs(diffBR) > threshold) {
                 log_error("Center point deviation over " << threshold << "mmm, your coordinate system is not accurate, maybe try running calibration again?");
                 //Should we enter an alarm state here to prevent things from going wrong?
 
@@ -411,15 +412,51 @@ bool Maslow_::takeSlackFunc() {
                 return true;
             }
             else{
-                log_info("Center point deviation within " << threshold << "mm, your coordinate system is accurate");
+                //log_info("Center point deviation within " << threshold << "mm, your coordinate system is accurate");
                 takeSlackState = 3;
                 holdTimer = millis();
+
+                //Increase the measurement threshold
+                calibrationCurrentThreshold = calibrationCurrentThreshold + 500;
+
+                log_info("Proceeding to take a second measurement with calibrationCurrentThreshold set to " << calibrationCurrentThreshold);
             }
         }
     }
 
-    //Position hold for 2 seconds
+    //Take a second measurement but pull harder
     if(takeSlackState == 3){
+        if (take_measurement_avg_with_check(1, UP)) {
+            double offset = _beltEndExtension + _armLength;
+
+            //Compute how different the two sets of measurements are
+
+            float diffTL1 = calibration_data[0][0] - offset - computeTL(0, 0, 0);
+            float diffTR1 = calibration_data[1][0] - offset - computeTR(0, 0, 0);
+            float diffBL1 = calibration_data[2][0] - offset - computeBL(0, 0, 0);
+            float diffBR1 = calibration_data[3][0] - offset - computeBR(0, 0, 0);
+
+            float diffTL2 = calibration_data[0][1] - offset - computeTL(0, 0, 0);
+            float diffTR2 = calibration_data[1][1] - offset - computeTR(0, 0, 0);
+            float diffBL2 = calibration_data[2][1] - offset - computeBL(0, 0, 0);
+            float diffBR2 = calibration_data[3][1] - offset - computeBR(0, 0, 0);
+
+            log_info("Change in TL: " << diffTL2 - diffTL1 << " TR: " << diffTR2 - diffTR1 << " BL: " << diffBL2 - diffBL1 << " BR: " << diffBR2 - diffBR1);
+
+            //Compute the total average change
+            float totalChange = (abs(diffTL2 - diffTL1) + abs(diffTR2 - diffTR1) + abs(diffBL2 - diffBL1) + abs(diffBR2 - diffBR1)) / 4;
+            log_info("Total change: " << totalChange);
+
+            calibrationCurrentThreshold = calibrationCurrentThreshold - 500; //Reset the threshold
+
+            takeSlackState = 4;
+            holdTimer = millis();
+
+        }
+    }
+
+    //Position hold for 2 seconds
+    if(takeSlackState == 4){
         if(millis() - holdTimer > 2000){
             takeSlackState = 0;
             return true;
