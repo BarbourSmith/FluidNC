@@ -646,9 +646,9 @@ void Maslow_::safety_control() {
                                             << axis[i]->getPositionError() << "mm" << " Counter: " << positionErrorCounter[i]);
             log_warn("Previous error was " << previousPositionError[i] << "mm");
             
-            if(positionErrorCounter[i] > 5){
-                Maslow.eStop("Position error > 15mm while running. E-Stop triggered.");
-            }
+            // if(positionErrorCounter[i] > 5){
+            //     Maslow.eStop("Position error > 15mm while running. E-Stop triggered.");
+            // }
         }
         else{
             positionErrorCounter[i] = 0;
