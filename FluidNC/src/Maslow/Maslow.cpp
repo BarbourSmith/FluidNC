@@ -399,10 +399,10 @@ bool Maslow_::takeSlackFunc() {
             double offset = _beltEndExtension + _armLength;
             double threshold = 15;
 
-            float diffTL = calibration_data[0][0] - offset - computeTL(0, 0, 0);
-            float diffTR = calibration_data[1][0] - offset - computeTR(0, 0, 0);
-            float diffBL = calibration_data[2][0] - offset - computeBL(0, 0, 0);
-            float diffBR = calibration_data[3][0] - offset - computeBR(0, 0, 0);
+            float diffTL = calibration_data[0][0] - offset - tlExt - computeTL(0, 0, 0);
+            float diffTR = calibration_data[1][0] - offset - trExt - computeTR(0, 0, 0);
+            float diffBL = calibration_data[2][0] - offset - blExt - computeBL(0, 0, 0);
+            float diffBR = calibration_data[3][0] - offset - brExt - computeBR(0, 0, 0);
             log_info("Center point deviation: TL: " << diffTL << " TR: " << diffTR << " BL: " << diffBL << " BR: " << diffBR);
             if (abs(diffTL) > threshold || abs(diffTR) > threshold || abs(diffBL) > threshold || abs(diffBR) > threshold) {
                 log_error("Center point deviation over " << threshold << "mmm, your coordinate system is not accurate, maybe try running calibration again?");
@@ -672,7 +672,7 @@ float Maslow_::computeBL(float x, float y, float z) {
     float b = blY - y;
     float c = 0.0 - (z + blZ);
 
-    float length = sqrt(a * a + b * b + c * c) - (_beltEndExtension + _armLength);
+    float length = sqrt(a * a + b * b + c * c) - (_beltEndExtension + _armLength + blExt);
 
     return length;  //+ lowerBeltsExtra;
 }
@@ -684,7 +684,7 @@ float Maslow_::computeBR(float x, float y, float z) {
     float b = brY - y;
     float c = 0.0 - (z + brZ);
 
-    float length = sqrt(a * a + b * b + c * c) - (_beltEndExtension + _armLength);
+    float length = sqrt(a * a + b * b + c * c) - (_beltEndExtension + _armLength + brExt);
 
     return length;  //+ lowerBeltsExtra;
 }
@@ -695,7 +695,7 @@ float Maslow_::computeTR(float x, float y, float z) {
     float a = trX - x;
     float b = trY - y;
     float c = 0.0 - (z + trZ);
-    return sqrt(a * a + b * b + c * c) - (_beltEndExtension + _armLength);
+    return sqrt(a * a + b * b + c * c) - (_beltEndExtension + _armLength + trExt);
 }
 float Maslow_::computeTL(float x, float y, float z) {
     //Move from lower left corner coordinates to centered coordinates
@@ -704,7 +704,7 @@ float Maslow_::computeTL(float x, float y, float z) {
     float a = tlX - x;
     float b = tlY - y;
     float c = 0.0 - (z + tlZ);
-    return sqrt(a * a + b * b + c * c) - (_beltEndExtension + _armLength);
+    return sqrt(a * a + b * b + c * c) - (_beltEndExtension + _armLength + tlExt);
 }
 
 //------------------------------------------------------
@@ -761,10 +761,10 @@ bool Maslow_::take_measurement(int waypoint, int dir, int run) {
         //once both belts are pulled, take a measurement
         if (BR_tight && BL_tight) {
             //take measurement and record it to the calibration data array
-            calibration_data[0][waypoint] = axisTL.getPosition() + _beltEndExtension + _armLength;
-            calibration_data[1][waypoint] = axisTR.getPosition() + _beltEndExtension + _armLength;
-            calibration_data[2][waypoint] = axisBL.getPosition() + _beltEndExtension + _armLength;
-            calibration_data[3][waypoint] = axisBR.getPosition() + _beltEndExtension + _armLength;
+            calibration_data[0][waypoint] = axisTL.getPosition() + _beltEndExtension + _armLength + tlExt;
+            calibration_data[1][waypoint] = axisTR.getPosition() + _beltEndExtension + _armLength + trExt;
+            calibration_data[2][waypoint] = axisBL.getPosition() + _beltEndExtension + _armLength + blExt;
+            calibration_data[3][waypoint] = axisBR.getPosition() + _beltEndExtension + _armLength + brExt;
             BR_tight                      = false;
             BL_tight                      = false;
             return true;
@@ -854,10 +854,10 @@ bool Maslow_::take_measurement(int waypoint, int dir, int run) {
         }
         if (pull1_tight && pull2_tight) {
             //take measurement and record it to the calibration data array
-            calibration_data[0][waypoint] = axisTL.getPosition() + _beltEndExtension + _armLength;
-            calibration_data[1][waypoint] = axisTR.getPosition() + _beltEndExtension + _armLength;
-            calibration_data[2][waypoint] = axisBL.getPosition() + _beltEndExtension + _armLength;
-            calibration_data[3][waypoint] = axisBR.getPosition() + _beltEndExtension + _armLength;
+            calibration_data[0][waypoint] = axisTL.getPosition() + _beltEndExtension + _armLength + tlExt;
+            calibration_data[1][waypoint] = axisTR.getPosition() + _beltEndExtension + _armLength + trExt;
+            calibration_data[2][waypoint] = axisBL.getPosition() + _beltEndExtension + _armLength + blExt;
+            calibration_data[3][waypoint] = axisBR.getPosition() + _beltEndExtension + _armLength + brExt;
             pull1_tight                   = false;
             pull2_tight                   = false;
             return true;
@@ -944,10 +944,10 @@ bool Maslow_::take_measurement_avg_with_check(int waypoint, int dir) {
                 double offset = _beltEndExtension + _armLength;
                 double threshold = 100;
 
-                float diffTL = calibration_data[0][0] - offset - computeTL(0, 0, 0);
-                float diffTR = calibration_data[1][0] - offset - computeTR(0, 0, 0);
-                float diffBL = calibration_data[2][0] - offset - computeBL(0, 0, 0);
-                float diffBR = calibration_data[3][0] - offset - computeBR(0, 0, 0);
+                float diffTL = calibration_data[0][0] - offset - tlExt - computeTL(0, 0, 0);
+                float diffTR = calibration_data[1][0] - offset - trExt - computeTR(0, 0, 0);
+                float diffBL = calibration_data[2][0] - offset - blExt - computeBL(0, 0, 0);
+                float diffBR = calibration_data[3][0] - offset - brExt - computeBR(0, 0, 0);
                 log_info("Center point deviation: TL: " << diffTL << " TR: " << diffTR << " BL: " << diffBL << " BR: " << diffBR);
 
                 if (abs(diffTL) > threshold || abs(diffTR) > threshold || abs(diffBL) > threshold || abs(diffBR) > threshold) {
