@@ -101,6 +101,7 @@ namespace WebUI {
 
         //create instance
         _webserver = new WebServer(_port);
+        _webserver->enableCORS(true);
 #    ifdef ENABLE_AUTHENTICATION
         //here the list of headers to be recorded
         const char* headerkeys[]   = { "Cookie" };
@@ -157,6 +158,11 @@ namespace WebUI {
             _webserver->on("/gconnectivitycheck.gstatic.com", HTTP_ANY, handle_root);
             //do not forget the / at the end
             _webserver->on("/fwlink/", HTTP_ANY, handle_root);
+                        //Added special sauce for Apple devices. They will try to connect to this URL to check if they are behind a captive portal.
+            _webserver->on("/hotspot-detect.html", HTTP_ANY, [](){
+                _webserver->send(200, "text/html", "<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>");
+            });
+
         }
 
         //SSDP service presentation
@@ -906,21 +912,24 @@ namespace WebUI {
             return;
         }
 
-        // Handle deletions and directory creation
+        // Handle renames, deletions and directory creation
         if (_webserver->hasArg("action") && _webserver->hasArg("filename")) {
-            std::string action(_webserver->arg("action").c_str());
+            std::string action = std::string(_webserver->arg("action").c_str());
             std::string filename = std::string(_webserver->arg("filename").c_str());
             if (action == "delete") {
                 log_debug("Deleting " << fpath << " / " << filename);
                 if (stdfs::remove(fpath / filename, ec)) {
-                    fpath.rehash_fs();
                     sstatus = filename + " deleted";
                 } else {
                     sstatus = "Cannot delete ";
                     sstatus += filename + " " + ec.message();
                 }
+            } else if (action == "rename") {
+                std::string newname = std::string(_webserver->arg("newname").c_str());
+                stdfs::rename(fpath / filename, fpath / newname, ec);
+                sstatus = filename + " renamed to " + newname + " "+ ec.message();
             } else if (action == "deletedir") {
-                if (stdfs::remove_all(fpath / filename.c_str(), ec)) {
+                if (stdfs::remove_all(fpath / filename, ec)) {
                     sstatus = filename + " deleted";
                 } else {
                     sstatus = "Cannot delete ";
@@ -934,6 +943,7 @@ namespace WebUI {
                     sstatus += filename + " " + ec.message();
                 }
             }
+            fpath.rehash_fs();
         }
 
         //check if no need build file list
