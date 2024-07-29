@@ -103,21 +103,21 @@ void Maslow_::update() {
     static State prevState = sys.state();
 
     //If we are in an error state, blink the LED and stop the motors
-    if (error) {
-        static unsigned long timer = millis();
-        static bool          st    = true; //This is used to blink the LED
-        if (millis() - timer > 300) {
-            stopMotors();
-            st = !st;
-            digitalWrite(REDLED, st);
-            timer = millis();
-            if (errorMessage != "") {
-                log_error(errorMessage.c_str());
-            }
-            errorMessage = "";
-        }
-        return;
-    }
+    // if (error) {
+    //     static unsigned long timer = millis();
+    //     static bool          st    = true; //This is used to blink the LED
+    //     if (millis() - timer > 300) {
+    //         stopMotors();
+    //         st = !st;
+    //         digitalWrite(REDLED, st);
+    //         timer = millis();
+    //         if (errorMessage != "") {
+    //             log_error(errorMessage.c_str());
+    //         }
+    //         errorMessage = "";
+    //     }
+    //     return;
+    // }
 
     //Blinks the Ethernet LEDs randomly
     if (random(10000) == 0) {
@@ -641,14 +641,14 @@ void Maslow_::safety_control() {
         //If the motor has a position error greater than 15mm and we are running a file or jogging
         previousPositionError[i] = axis[i]->getPositionError();
         if ((abs(axis[i]->getPositionError()) > 15) && (sys.state() == State::Cycle)) {
-            positionErrorCounter[i]++;
-            log_warn("Position error on " << axis_id_to_label(i).c_str() << " axis exceeded 15mm while running. Error is "
-                                            << axis[i]->getPositionError() << "mm" << " Counter: " << positionErrorCounter[i]);
-            log_warn("Previous error was " << previousPositionError[i] << "mm");
+            // positionErrorCounter[i]++;
+            // log_warn("Position error on " << axis_id_to_label(i).c_str() << " axis exceeded 15mm while running. Error is "
+            //                                 << axis[i]->getPositionError() << "mm" << " Counter: " << positionErrorCounter[i]);
+            // log_warn("Previous error was " << previousPositionError[i] << "mm");
             
-            if(positionErrorCounter[i] > 5){
-                Maslow.eStop("Position error > 15mm while running. E-Stop triggered.");
-            }
+            // if(positionErrorCounter[i] > 5){
+            //     Maslow.eStop("Position error > 15mm while running. E-Stop triggered.");
+            // }
         }
         else{
             positionErrorCounter[i] = 0;
