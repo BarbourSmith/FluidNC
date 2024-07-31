@@ -385,6 +385,11 @@ float AS5600::getAngularSpeed(uint8_t mode) {
     return speed * AS5600_RAW_TO_DEGREES;
 }
 
+//Get the last raw angle from the sensor
+int16_t AS5600::getLastRawAngle() {
+    return _lastPosition;
+}
+
 /////////////////////////////////////////////////////////
 //
 //  POSITION cumulative

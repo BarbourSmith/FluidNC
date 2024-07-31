@@ -113,6 +113,10 @@ bool MotorUnit::updateEncoderPosition() {
 
     if (encoder.isConnected()) {                                               //this func has 50ms timeout (or worse?, hard to tell)
         mostRecentCumulativeEncoderReading = encoder.getCumulativePosition();  //This updates and returns the encoder value
+        if(_encoderAddress == 3 && random(10) == 1){
+            log_info("BLE: " << encoder.getLastRawAngle());
+            //log_info("Encoder value: " << mostRecentCumulativeEncoderReading);
+        }
         return true;
     } else if (millis() - encoderReadFailurePrintTime > 5000) {
         encoderReadFailurePrintTime = millis();

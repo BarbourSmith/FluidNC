@@ -198,6 +198,8 @@ public:
     //  mode == 0: degrees /second  (default)
     float getAngularSpeed(uint8_t mode = AS5600_MODE_DEGREES);
 
+    int16_t getLastRawAngle();
+
     //  EXPERIMENTAL CUMULATIVE POSITION
     //  reads sensor and updates cumulative position
     int32_t getCumulativePosition();
