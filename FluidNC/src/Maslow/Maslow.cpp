@@ -1525,6 +1525,14 @@ void Maslow_::setSafety(bool state) {
 void Maslow_::test_() {
     log_info("Firmware Version: " << VERSION_NUMBER);
 
+    log_info("I2C timeout: ");
+    log_info(Wire.getTimeOut());
+
+    Wire.setTimeOut(10);
+
+    log_info("I2C timeout: ");
+    log_info(Wire.getTimeOut());
+
     axisTL.test();
     axisTR.test();
     axisBL.test();
