@@ -48,7 +48,7 @@ private:
     MiniPID positionPID;  //These are the P,I,D values for the servo motors
     DCMotor motor;
     double  setpoint                           = 0.0;
-    double  _mmPerRevolution                   = 43.960;  //If the amount of belt extended is too long, this number needs to be bigger //Was 43.975
+    double  _mmPerRevolution                   = 43.955;  //If the amount of belt extended is too long, this number needs to be bigger //Was 43.975
     int     _stallThreshold                    = 25;      //The number of times in a row needed to trigger a warning
     int     _stallCurrent                      = 27;      //The current threshold needed to count
     int     _stallCount                        = 0;
