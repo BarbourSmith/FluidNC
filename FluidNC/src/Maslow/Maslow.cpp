@@ -674,8 +674,12 @@ float Maslow_::computeBL(float x, float y, float z) {
     float a = blX - x;
     float b = blY - y;
     float c = 0.0 - (z + blZ);
+    // The belt is only sloped between the end of the arm and the end of the anchor
+    // not all the way to the center of the bit. This matters when near the anchors
+    // at 600mm the eror can be almost 6mm
+    float xyLen = sqrt(a * a + b * b) - (_beltEndExtension + _armLength);
 
-    float length = sqrt(a * a + b * b + c * c) - (_beltEndExtension + _armLength);
+    float length = sqrt(xyLen * xyLen + c * c);
 
     return length;  //+ lowerBeltsExtra;
 }
@@ -686,8 +690,12 @@ float Maslow_::computeBR(float x, float y, float z) {
     float a = brX - x;
     float b = brY - y;
     float c = 0.0 - (z + brZ);
+    // The belt is only sloped between the end of the arm and the end of the anchor
+    // not all the way to the center of the bit. This matters when near the anchors
+    // at 600mm the eror can be almost 6mm
+    float xyLen = sqrt(a * a + b * b) - (_beltEndExtension + _armLength);
 
-    float length = sqrt(a * a + b * b + c * c) - (_beltEndExtension + _armLength);
+    float length = sqrt(xyLen * xyLen + c * c);
 
     return length;  //+ lowerBeltsExtra;
 }
@@ -698,7 +706,14 @@ float Maslow_::computeTR(float x, float y, float z) {
     float a = trX - x;
     float b = trY - y;
     float c = 0.0 - (z + trZ);
-    return sqrt(a * a + b * b + c * c) - (_beltEndExtension + _armLength);
+    // The belt is only sloped between the end of the arm and the end of the anchor
+    // not all the way to the center of the bit. This matters when near the anchors
+    // at 600mm the eror can be almost 6mm
+    float xyLen = sqrt(a * a + b * b) - (_beltEndExtension + _armLength);
+
+    float length = sqrt(xyLen * xyLen + c * c);
+
+    return length;  //+ lowerBeltsExtra;
 }
 float Maslow_::computeTL(float x, float y, float z) {
     //Move from lower left corner coordinates to centered coordinates
@@ -707,7 +722,14 @@ float Maslow_::computeTL(float x, float y, float z) {
     float a = tlX - x;
     float b = tlY - y;
     float c = 0.0 - (z + tlZ);
-    return sqrt(a * a + b * b + c * c) - (_beltEndExtension + _armLength);
+    // The belt is only sloped between the end of the arm and the end of the anchor
+    // not all the way to the center of the bit. This matters when near the anchors
+    // at 600mm the eror can be almost 6mm
+    float xyLen = sqrt(a * a + b * b) - (_beltEndExtension + _armLength);
+
+    float length = sqrt(xyLen * xyLen + c * c);
+
+    return length;  //+ lowerBeltsExtra;
 }
 
 //------------------------------------------------------
