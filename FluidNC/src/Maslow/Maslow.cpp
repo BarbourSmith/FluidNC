@@ -739,7 +739,6 @@ float Maslow_::computeTL(float x, float y, float z) {
 // Takes one measurement; returns true when it's done. Waypoint # is used to st
 bool Maslow_::take_measurement(int waypoint, int dir, int run) {
 
-    float a,b,c;
     //Shouldn't this be handled with the same code as below but with the direction set to UP?
     if (orientation == VERTICAL) {
         //first we pull two bottom belts tight one after another, if x<0 we pull left belt first, if x>0 we pull right belt first
@@ -787,22 +786,10 @@ bool Maslow_::take_measurement(int waypoint, int dir, int run) {
         //once both belts are pulled, take a measurement
         if (BR_tight && BL_tight) {
             //take measurement and record it to the calibration data array
-            b = z + tlZ;
-            c = axisTL.getPosition();
-            a=sqrt( ( c * c ) - ( b * b ) );
-            calibration_data[0][waypoint] = a + _beltEndExtension + _armLength;
-            b = z + trZ;
-            c = axisTR.getPosition();
-            a=sqrt( ( c * c ) - ( b * b ) );
-            calibration_data[1][waypoint] = a + _beltEndExtension + _armLength;
-            b = z + blZ;
-            c = axisBL.getPosition();
-            a=sqrt( ( c * c ) - ( b * b ) );
-            calibration_data[2][waypoint] = a + _beltEndExtension + _armLength;
-            b = z + brZ;
-            c = axisBR.getPosition();
-            a=sqrt( ( c * c ) - ( b * b ) );
-            calibration_data[3][waypoint] = a + _beltEndExtension + _armLength;
+            calibration_data[0][waypoint] = axisTL.getPosition() + _beltEndExtension + _armLength;
+            calibration_data[1][waypoint] = axisTR.getPosition() + _beltEndExtension + _armLength;
+            calibration_data[2][waypoint] = axisBL.getPosition() + _beltEndExtension + _armLength;
+            calibration_data[3][waypoint] = axisBR.getPosition() + _beltEndExtension + _armLength;
             BR_tight                      = false;
             BL_tight                      = false;
             return true;
@@ -892,22 +879,10 @@ bool Maslow_::take_measurement(int waypoint, int dir, int run) {
         }
         if (pull1_tight && pull2_tight) {
             //take measurement and record it to the calibration data array
-            b = z + tlZ;
-            c = axisTL.getPosition();
-            a=sqrt( ( c * c ) - ( b * b ) );
-            calibration_data[0][waypoint] = a + _beltEndExtension + _armLength;
-            b = z + trZ;
-            c = axisTR.getPosition();
-            a=sqrt( ( c * c ) - ( b * b ) );
-            calibration_data[1][waypoint] = a + _beltEndExtension + _armLength;
-            b = z + blZ;
-            c = axisBL.getPosition();
-            a=sqrt( ( c * c ) - ( b * b ) );
-            calibration_data[2][waypoint] = a + _beltEndExtension + _armLength;
-            b = tlZ;
-            c = axisBR.getPosition();
-            a=sqrt( ( c * c ) - ( b * b ) );
-            calibration_data[3][waypoint] = a + _beltEndExtension + _armLength;
+            calibration_data[0][waypoint] = axisTL.getPosition() + _beltEndExtension + _armLength;
+            calibration_data[1][waypoint] = axisTR.getPosition() + _beltEndExtension + _armLength;
+            calibration_data[2][waypoint] = axisBL.getPosition() + _beltEndExtension + _armLength;
+            calibration_data[3][waypoint] = axisBR.getPosition() + _beltEndExtension + _armLength;
             pull1_tight                   = false;
             pull2_tight                   = false;
             return true;
