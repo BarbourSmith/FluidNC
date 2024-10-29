@@ -990,7 +990,7 @@ bool Maslow_::firstMeasurementAccurate() {
             if(cycleNumber > 0){
                 log_info("Frame size adjusted to " + std::to_string(brX) + " by " + std::to_string(trY));
             }
-            log_info("Center point deviation within " + std::to_string(threshold) + "mm, your coordinate system is accurate");
+            log_info("Center point deviation within " + std::to_string(threshold) + "mm, your coordinate system is accurate enough");
             return true;
         }
     }
