@@ -968,9 +968,6 @@ bool Maslow_::firstMeasurementAccurate() {
         double diffBL = calibration_data[2][0] - offset - computeBL(0, 0, 0);
         double diffBR = calibration_data[3][0] - offset - computeBR(0, 0, 0);
 
-        log_info("Cycle: " + std::to_string(cycleNumber));
-        //log_info(" BL: " + std::to_string(diffBL) + " BR: " + std::to_string(diffBR));
-
         if (std::abs(diffTL) > threshold || std::abs(diffTR) > threshold || diffBL < 0 || diffBR < 0) {
             if (diffBL > threshold || diffBR > threshold) {
                 // The frame is currently too small, grow the frame and try again
@@ -979,7 +976,6 @@ bool Maslow_::firstMeasurementAccurate() {
                 trY += amountToAdjust;
                 brX += amountToAdjust;
                 updateCenterXY();
-                //log_error("Initial frame size too small, enlarging the frame to " + std::to_string(brX) + " by " + std::to_string(trY));
             } else if (diffBL < 0 || diffBR < 0) {
                 // The frame is currently too large, shrink the frame and try again
                 tlY -= amountToAdjust;
@@ -987,11 +983,13 @@ bool Maslow_::firstMeasurementAccurate() {
                 trY -= amountToAdjust;
                 brX -= amountToAdjust;
                 updateCenterXY();
-                //log_error("Initial frame size too large, shrinking the frame to " + std::to_string(brX) + " by " + std::to_string(trY));
             }
 
             cycleNumber++;
         } else {
+            if(cycleNumber > 0){
+                log_info("Frame size adjusted to " + std::to_string(brX) + " by " + std::to_string(trY));
+            }
             log_info("Center point deviation within " + std::to_string(threshold) + "mm, your coordinate system is accurate");
             return true;
         }
@@ -1194,32 +1192,24 @@ bool Maslow_::checkValidMove(double fromX, double fromY, double toX, double toY)
         case UP: // If we are moving up we expect the top belts to get shorter so they should be shorter than they are now
             if (computeTL(toX, toY, 0) + threshold > axisTL.getPosition() || 
                 computeTR(toX, toY, 0) + threshold > axisTR.getPosition()) {
-                log_warn("Compute TL: " << computeTL(toX, toY, 0) << " axisTL: " << axisTL.getPosition());
-                log_warn("Compute TR: " << computeTR(toX, toY, 0) << " axisTR: " << axisTR.getPosition());
                 valid = false;
             }
             break;
         case DOWN: // If we are moving down we expect the bottom belts to get shorter so they should be shorter than they are now
             if (computeBL(toX, toY, 0) + threshold > axisBL.getPosition() || 
                 computeBR(toX, toY, 0) + threshold > axisBR.getPosition()) {
-                log_warn("Compute BL: " << computeBL(toX, toY, 0) << " axisBL: " << axisBL.getPosition());
-                log_warn("Compute BR: " << computeBR(toX, toY, 0) << " axisBR: " << axisBR.getPosition());
                 valid = false;
             }
             break;
         case LEFT: // If we are moving left we expect the left belts to get shorter so they should be shorter than they are now
             if (computeTL(toX, toY, 0) + threshold > axisTL.getPosition() || 
                 computeBL(toX, toY, 0) + threshold > axisBL.getPosition()) {
-                log_warn("Compute TL: " << computeTL(toX, toY, 0) << " axisTL: " << axisTL.getPosition());
-                log_warn("Compute BL: " << computeBL(toX, toY, 0) << " axisBL: " << axisBL.getPosition());
                 valid = false;
             }
             break;
         case RIGHT: // If we are moving right we expect the right belts to get shorter so they should be shorter than they are now
             if (computeTR(toX, toY, 0) + threshold > axisTR.getPosition() || 
                 computeBR(toX, toY, 0) + threshold > axisBR.getPosition()) {
-                log_warn("Compute TR: " << computeTR(toX, toY, 0) << " axisTR: " << axisTR.getPosition());
-                log_warn("Compute BR: " << computeBR(toX, toY, 0) << " axisBR: " << axisBR.getPosition());
                 valid = false;
             }
             break;
