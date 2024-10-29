@@ -884,7 +884,7 @@ bool Maslow_::take_measurement_avg_with_check(int waypoint, int dir) {
             return false;  //discard the first three measurements
         }
 
-        measurements[0][run - 2] = calibration_data[0][waypoint];  //-3 cuz discarding the first 3 measurements
+        measurements[0][run - 2] = calibration_data[0][waypoint];  //-2 because discarding the first 2 measurements
         measurements[1][run - 2] = calibration_data[1][waypoint];
         measurements[2][run - 2] = calibration_data[2][waypoint];
         measurements[3][run - 2] = calibration_data[3][waypoint];
@@ -901,12 +901,12 @@ bool Maslow_::take_measurement_avg_with_check(int waypoint, int dir) {
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 3; j++) {
                     //find max deviation between measurements
-                    maxDeviation[i] = max(maxDeviation[i], abs(measurements[i][j] - measurements[i][j + 1]));
+                    maxDeviation[i] = std::max(maxDeviation[i], std::abs(measurements[i][j] - measurements[i][j + 1]));
                 }
             }
 
             for (int i = 0; i < 4; i++) {
-                maxDeviationAbs = max(maxDeviationAbs, maxDeviation[i]);
+                maxDeviationAbs = std::max(maxDeviationAbs, maxDeviation[i]);
             }
             if (maxDeviationAbs > 2.5) {
                 log_error("Measurement error, measurements are not within 2.5 mm of each other, trying again");
@@ -923,7 +923,6 @@ bool Maslow_::take_measurement_avg_with_check(int waypoint, int dir) {
                 if (criticalCounter++ > 8) { //This updates the counter and checks
                     log_error("Critical error, measurements are not within 1.5mm of each other 8 times in a row, stopping calibration");
                     calibrationInProgress = false;
-                    waypoint              = 0;
                     criticalCounter       = 0;
                     return false;
                 }
@@ -932,55 +931,73 @@ bool Maslow_::take_measurement_avg_with_check(int waypoint, int dir) {
             }
             //if they are, take the average and record it to the calibration data array
             for (int i = 0; i < 4; i++) {
+                sum = 0; // Reset sum for each axis
                 for (int j = 0; j < 4; j++) {
                     sum += measurements[i][j];
                 }
                 avg                           = sum / 4;
                 calibration_data[i][waypoint] = avg;
-                sum                           = 0;
-                criticalCounter               = 0;
             }
             log_info("Measured waypoint " << waypoint);
 
             //A check to see if the results on the first point are within the expected range
             if(waypoint == 0){
-                double offset = _beltEndExtension + _armLength;
-                double threshold = 100;
-
-                float diffTL = calibration_data[0][0] - offset - computeTL(0, 0, 0);
-                float diffTR = calibration_data[1][0] - offset - computeTR(0, 0, 0);
-                float diffBL = calibration_data[2][0] - offset - computeBL(0, 0, 0);
-                float diffBR = calibration_data[3][0] - offset - computeBR(0, 0, 0);
-                log_info("Center point deviation: TL: " << diffTL << " TR: " << diffTR << " BL: " << diffBL << " BR: " << diffBR);
-
-                if (abs(diffTL) > threshold || abs(diffTR) > threshold || abs(diffBL) > threshold || abs(diffBR) > threshold) {
-                    log_error("Center point deviation over " << threshold << "mmm, your coordinate system is not accurate, adjust your frame dimensions and restart.");
-                    //Should we enter an alarm state here to prevent things from going wrong?
-
-
-                    String message = "";
-                    //If both of the bottom belts are longer than expected then the frame is smaller than expected
-                    if(diffBL > threshold && diffBR > threshold){
-                        log_error("Frame size error, try entering larger frame dimensions and restart.");
-                        message = "Frame size error, try entering larger frame dimensions and restart.";
-                    }
-                    //If both of the bottom belts are shorter than expected then the frame is larger than expected
-                    else if(diffBL < -threshold && diffBR < -threshold){
-                        log_error("Frame size error, try entering smaller frame dimensions and restart.");
-                        message = "Frame size error, try entering smaller frame dimensions and restart.";
-                    }
-
-
-                    //Stop calibration
-                    eStop(message);
-                    return true;
+                if(!firstMeasurementAccurate()){
+                    eStop("Frame size error, adjust frame size and try again");
                 }
+                return true;
             }
-
             return true;
         }
     }
 
+    return false;
+}
+
+
+bool Maslow_::firstMeasurementAccurate() {
+    double offset = _beltEndExtension + _armLength;
+    double threshold = 100.0;
+    double amountToAdjust = 3;
+
+    static int cycleNumber = 0; // This is used to prevent an infinite loop
+
+    while (cycleNumber <= 150) {
+        double diffTL = calibration_data[0][0] - offset - computeTL(0, 0, 0);
+        double diffTR = calibration_data[1][0] - offset - computeTR(0, 0, 0);
+        double diffBL = calibration_data[2][0] - offset - computeBL(0, 0, 0);
+        double diffBR = calibration_data[3][0] - offset - computeBR(0, 0, 0);
+
+        log_info("Cycle: " + std::to_string(cycleNumber));
+        //log_info(" BL: " + std::to_string(diffBL) + " BR: " + std::to_string(diffBR));
+
+        if (std::abs(diffTL) > threshold || std::abs(diffTR) > threshold || diffBL < 0 || diffBR < 0) {
+            if (diffBL > threshold || diffBR > threshold) {
+                // The frame is currently too small, grow the frame and try again
+                tlY += amountToAdjust;
+                trX += amountToAdjust;
+                trY += amountToAdjust;
+                brX += amountToAdjust;
+                updateCenterXY();
+                //log_error("Initial frame size too small, enlarging the frame to " + std::to_string(brX) + " by " + std::to_string(trY));
+            } else if (diffBL < 0 || diffBR < 0) {
+                // The frame is currently too large, shrink the frame and try again
+                tlY -= amountToAdjust;
+                trX -= amountToAdjust;
+                trY -= amountToAdjust;
+                brX -= amountToAdjust;
+                updateCenterXY();
+                //log_error("Initial frame size too large, shrinking the frame to " + std::to_string(brX) + " by " + std::to_string(trY));
+            }
+
+            cycleNumber++;
+        } else {
+            log_info("Center point deviation within " + std::to_string(threshold) + "mm, your coordinate system is accurate");
+            return true;
+        }
+    }
+
+    log_error("Frame size error, adjust frame size and try again");
     return false;
 }
 
@@ -1168,37 +1185,53 @@ int Maslow_::get_direction(double x, double y, double targetX, double targetY) {
     return direction;
 }
 
-bool Maslow_::checkValidMove(double fromX, double fromY, double toX, double toY){
+bool Maslow_::checkValidMove(double fromX, double fromY, double toX, double toY) {
     bool valid = true;
     int direction = get_direction(fromX, fromY, toX, toY);
-    switch(direction){
-        case UP: //If we are moving up we expect the top belts to get shorter so to should be shorter than they are now
-            if(computeTL(toX, toY, 0) > axisTL.getPosition() || computeTR(toX, toY, 0) > axisTR.getPosition()){
+    double threshold = 5.0; // Allow some error in the belt length to account for small position errors
+
+    switch(direction) {
+        case UP: // If we are moving up we expect the top belts to get shorter so they should be shorter than they are now
+            if (computeTL(toX, toY, 0) + threshold > axisTL.getPosition() || 
+                computeTR(toX, toY, 0) + threshold > axisTR.getPosition()) {
+                log_warn("Compute TL: " << computeTL(toX, toY, 0) << " axisTL: " << axisTL.getPosition());
+                log_warn("Compute TR: " << computeTR(toX, toY, 0) << " axisTR: " << axisTR.getPosition());
                 valid = false;
             }
             break;
-        case DOWN: //If we are moving down we expect the bottom belts to get shorter so they should be shorter than they are now
-            if(computeBL(toX, toY, 0) > axisBL.getPosition() || computeBR(toX, toY, 0) > axisBR.getPosition()){
+        case DOWN: // If we are moving down we expect the bottom belts to get shorter so they should be shorter than they are now
+            if (computeBL(toX, toY, 0) + threshold > axisBL.getPosition() || 
+                computeBR(toX, toY, 0) + threshold > axisBR.getPosition()) {
+                log_warn("Compute BL: " << computeBL(toX, toY, 0) << " axisBL: " << axisBL.getPosition());
+                log_warn("Compute BR: " << computeBR(toX, toY, 0) << " axisBR: " << axisBR.getPosition());
                 valid = false;
             }
             break;
-        case LEFT: //If we are moving left we expect the left belts to get shorter so they should be shorter than they are now
-            if(computeTL(toX, toY, 0) > axisTL.getPosition() || computeBL(toX, toY, 0) > axisBL.getPosition()){
+        case LEFT: // If we are moving left we expect the left belts to get shorter so they should be shorter than they are now
+            if (computeTL(toX, toY, 0) + threshold > axisTL.getPosition() || 
+                computeBL(toX, toY, 0) + threshold > axisBL.getPosition()) {
+                log_warn("Compute TL: " << computeTL(toX, toY, 0) << " axisTL: " << axisTL.getPosition());
+                log_warn("Compute BL: " << computeBL(toX, toY, 0) << " axisBL: " << axisBL.getPosition());
                 valid = false;
             }
             break;
-        case RIGHT: //If we are moving right we expect the right belts to get shorter so they should be shorter than they are now
-            if(computeTR(toX, toY, 0) > axisTR.getPosition() || computeBR(toX, toY, 0) > axisBR.getPosition()){
+        case RIGHT: // If we are moving right we expect the right belts to get shorter so they should be shorter than they are now
+            if (computeTR(toX, toY, 0) + threshold > axisTR.getPosition() || 
+                computeBR(toX, toY, 0) + threshold > axisBR.getPosition()) {
+                log_warn("Compute TR: " << computeTR(toX, toY, 0) << " axisTR: " << axisTR.getPosition());
+                log_warn("Compute BR: " << computeBR(toX, toY, 0) << " axisBR: " << axisBR.getPosition());
                 valid = false;
             }
             break;
     }
-    if(!valid){
+
+    if (!valid) {
         log_error("Unable to move safely, stopping calibration");
         calibrationInProgress = false;
-        waypoint              = 0;
+        waypoint = 0;
         eStop("Unable to move safely, stopping calibration");
     }
+
     return valid;
 }
 
