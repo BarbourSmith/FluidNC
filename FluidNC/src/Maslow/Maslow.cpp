@@ -1405,10 +1405,6 @@ void Maslow_::runCalibration() {
     }
     stop();
 
-    //Save the z-axis 'stop' position
-    targetZ = 0;
-    setZStop();
-
     //if not all axis are homed, we can't run calibration, OR if the user hasnt entered width and height?
     if (!allAxisExtended()) {
         log_error("Cannot run calibration until all belts are extended fully");
