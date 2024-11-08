@@ -271,6 +271,12 @@ double MotorUnit::getPosition() {
     return positionNow;
 }
 
+// Sets the current position of the axis in mm
+double MotorUnit::setPosition(double currentLength) {
+    mostRecentCumulativeEncoderReading = (currentLength * 4096.0 ) / _mmPerRevolution * -1;
+    return true;
+}
+
 // Returns the current motor power draw
 double MotorUnit::getCurrent() {
     return motor.readCurrent();

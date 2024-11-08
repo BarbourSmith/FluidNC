@@ -20,6 +20,7 @@ public:
     void   setTarget(double newTarget);
     double getTarget();
     double getPosition();
+    double setPosition(double currentLength);
     double getCurrent();
     double getPositionError();
     void   stop();

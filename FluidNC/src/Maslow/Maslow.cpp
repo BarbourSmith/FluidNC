@@ -88,7 +88,7 @@ void Maslow_::begin(void (*sys_rt)()) {
     currentThreshold = 1500;
     lastCallToUpdate = millis();
 
-    loadZPos(); //Loads the z-axis position from EEPROM
+    loadPos(); //Loads the z-axis position from EEPROM
 
     stopMotors();
 
@@ -133,7 +133,7 @@ void Maslow_::update() {
 
     //Save the z-axis position if the prevous state was jog or cycle and the current state is idle
     if ((prevState == State::Jog || prevState == State::Cycle) && sys.state() == State::Idle) {
-        saveZPos();
+        savePos();
     }
 
     blinkIPAddress();
@@ -1566,8 +1566,38 @@ void Maslow_::test_() {
     axisBL.test();
     axisBR.test();
 }
-//This function saves the current z-axis position to the non-volitle storage
-void Maslow_::saveZPos() {
+//helper function for savePos()
+bool Maslow_::saveToNvs(const char* varName, float currentPos, nvs_handle_t nvsHandle)
+{
+    bool changed = false;
+    int32_t savedPos;
+    union FloatInt32 {
+        float f;
+        int32_t i;
+    };
+    FloatInt32 fi;
+    fi.f = currentPos;
+    // Read the current value
+    esp_err_t ret = nvs_get_i32(nvsHandle, varName, &savedPos);
+    if (ret != ESP_OK && ret != ESP_ERR_NVS_NOT_FOUND) {
+        log_info("Error " + std::string(esp_err_to_name(ret)) + " reading from NVS!\n");
+        return(false);
+    }
+    // Write - Convert the float to an int32_t and write only if it has changed
+    if (ret == ESP_ERR_NVS_NOT_FOUND || savedPos != fi.i) { // Only write if the value has changed
+        ret = nvs_set_i32(nvsHandle, varName, fi.i);
+        if (ret != ESP_OK) {
+            log_info("Error " + std::string(esp_err_to_name(ret)) + " writing to NVS!\n");
+        } else {
+            //log_info("Written " + &varName[0] + " = " + std::to_string(currentPos));
+            changed = true;
+        }
+    }
+    return(changed);
+}
+//This function saves the current position to the non-volitle storage
+void Maslow_::savePos() {
+    bool c, changed = false;
     nvs_handle_t nvsHandle;
     esp_err_t ret = nvs_open("maslow", NVS_READWRITE, &nvsHandle);
     if (ret != ESP_OK) {
@@ -1575,39 +1605,27 @@ void Maslow_::saveZPos() {
         return;
     }
 
-    // Read the current value
-    int32_t currentZPos;
-    ret = nvs_get_i32(nvsHandle, "zPos", &currentZPos);
-    if (ret != ESP_OK && ret != ESP_ERR_NVS_NOT_FOUND) {
-        log_info("Error " + std::string(esp_err_to_name(ret)) + " reading from NVS!\n");
-        return;
-    }
-
-    // Write - Convert the float to an int32_t and write only if it has changed
-    union FloatInt32 {
-        float f;
-        int32_t i;
-    };
-    FloatInt32 fi;
-    fi.f = targetZ;
-    if (ret == ESP_ERR_NVS_NOT_FOUND || currentZPos != fi.i) { // Only write if the value has changed
-        ret = nvs_set_i32(nvsHandle, "zPos", fi.i);
+    c = saveToNvs("zPos", targetZ, nvsHandle);
+    changed = changed || c;
+    c = saveToNvs("tlPos", axisTL.getPosition(), nvsHandle);
+    changed = changed || c;
+    c = saveToNvs("trPos", axisTR.getPosition(), nvsHandle);
+    changed = changed || c;
+    c = saveToNvs("blPos", axisBL.getPosition(), nvsHandle);
+    changed = changed || c;
+    c = saveToNvs("brPos", axisBR.getPosition(), nvsHandle);
+    changed = changed || c;
+    if (changed) {
+        // Commit written value to non-volatile storage
+        ret = nvs_commit(nvsHandle);
         if (ret != ESP_OK) {
-            log_info("Error " + std::string(esp_err_to_name(ret)) + " writing to NVS!\n");
-        } else {
-            //log_info("Written value = " + std::to_string(targetZ));
-
-            // Commit written value to non-volatile storage
-            ret = nvs_commit(nvsHandle);
-            if (ret != ESP_OK) {
-                log_info("Error " + std::string(esp_err_to_name(ret)) + " committing changes to NVS!\n");
-            }
+            log_info("Error " + std::string(esp_err_to_name(ret)) + " committing changes to NVS!\n");
         }
     }
 }
 
-//This function loads the z-axis position from the non-volitle storage
-void Maslow_::loadZPos() {
+//This function loads the position from the non-volitle storage
+void Maslow_::loadPos() {
     nvs_handle_t nvsHandle;
     esp_err_t ret = nvs_open("maslow", NVS_READWRITE, &nvsHandle);
     if (ret != ESP_OK) {
@@ -1636,9 +1654,61 @@ void Maslow_::loadZPos() {
 
         log_info("Current z-axis position loaded as: " << targetZ);
 
-        gc_sync_position();//This updates the Gcode engine with the new position from the stepping engine that we set with set_motor_steps
-        plan_sync_position();
     }
+    ret = nvs_get_i32(nvsHandle, "tlPos", &value2);
+    if (ret != ESP_OK) {
+        log_info("Error " + std::string(esp_err_to_name(ret)) + " reading from NVS!");
+    } else {
+        union FloatInt32 {
+            float f;
+            int32_t i;
+        };
+        FloatInt32 fi;
+        fi.i = value2;
+        axisTL.setPosition(fi.f);
+	log_info("current TL position loaded as: " << fi.f);
+    }
+    ret = nvs_get_i32(nvsHandle, "trPos", &value2);
+    if (ret != ESP_OK) {
+        log_info("Error " + std::string(esp_err_to_name(ret)) + " reading from NVS!");
+    } else {
+        union FloatInt32 {
+            float f;
+            int32_t i;
+        };
+        FloatInt32 fi;
+        fi.i = value2;
+        axisTR.setPosition(fi.f);
+	log_info("current TR position loaded as: " << fi.f);
+    }
+    ret = nvs_get_i32(nvsHandle, "blPos", &value2);
+    if (ret != ESP_OK) {
+        log_info("Error " + std::string(esp_err_to_name(ret)) + " reading from NVS!");
+    } else {
+        union FloatInt32 {
+            float f;
+            int32_t i;
+        };
+        FloatInt32 fi;
+        fi.i = value2;
+        axisBL.setPosition(fi.f);
+	log_info("current BL position loaded as: " << fi.f);
+    }
+    ret = nvs_get_i32(nvsHandle, "brPos", &value2);
+    if (ret != ESP_OK) {
+        log_info("Error " + std::string(esp_err_to_name(ret)) + " reading from NVS!");
+    } else {
+        union FloatInt32 {
+            float f;
+            int32_t i;
+        };
+        FloatInt32 fi;
+        fi.i = value2;
+        axisBR.setPosition(fi.f);
+	log_info("current BR position loaded as: " << fi.f);
+    }
+    gc_sync_position();//This updates the Gcode engine with the new position from the stepping engine that we set with set_motor_steps
+    plan_sync_position();
 }
 
 /** Sets the 'bottom' Z position, this is a 'stop' beyond which travel cannot continue */
