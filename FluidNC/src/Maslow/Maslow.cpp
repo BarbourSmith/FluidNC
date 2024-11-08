@@ -400,10 +400,10 @@ bool Maslow_::takeSlackFunc() {
 
             double threshold = 15;
 
-            float diffTL = calibration_data[0][0] - measurementToXYPlane(computeTL(0, 0, 0), tlZ);
-            float diffTR = calibration_data[1][0] - measurementToXYPlane(computeTR(0, 0, 0), trZ);
-            float diffBL = calibration_data[2][0] - measurementToXYPlane(computeBL(0, 0, 0), blZ);
-            float diffBR = calibration_data[3][0] - measurementToXYPlane(computeBR(0, 0, 0), brZ);
+            float diffTL = calibration_data[0][0] - measurementToXYPlane(computeTL(0, 0, targetZ), tlZ);
+            float diffTR = calibration_data[1][0] - measurementToXYPlane(computeTR(0, 0, targetZ), trZ);
+            float diffBL = calibration_data[2][0] - measurementToXYPlane(computeBL(0, 0, targetZ), blZ);
+            float diffBR = calibration_data[3][0] - measurementToXYPlane(computeBR(0, 0, targetZ), brZ);
             log_info("Center point deviation: TL: " << diffTL << " TR: " << diffTR << " BL: " << diffBL << " BR: " << diffBR);
             if (abs(diffTL) > threshold || abs(diffTR) > threshold || abs(diffBL) > threshold || abs(diffBR) > threshold) {
                 log_error("Center point deviation over " << threshold << "mm, your coordinate system is not accurate, maybe try running calibration again?");
@@ -737,9 +737,10 @@ float Maslow_::computeTL(float x, float y, float z) {
 //------------------------------------------------------
 
 //Takes a raw measurement, projects it into the XY plane, then adds the belt end extension and arm length to get the actual distance.
-float Maslow_::measurementToXYPlane(float measurement, float zHeight){
+float Maslow_::measurementToXYPlane(float measurement, float zbase){
 
-    float lengthInXY = sqrt(measurement * measurement - zHeight * zHeight);
+    float z = zbase + targetZ;
+    float lengthInXY = sqrt(measurement * measurement - z * z);
     return lengthInXY + _beltEndExtension + _armLength; //Add the belt end extension and arm length to get the actual distance
 }
 
@@ -976,10 +977,10 @@ bool Maslow_::take_measurement_avg_with_check(int waypoint, int dir) {
             if(waypoint == 0){
                 double threshold = 100;
 
-                float diffTL = calibration_data[0][0] - measurementToXYPlane(computeTL(0, 0, 0), tlZ);
-                float diffTR = calibration_data[1][0] - measurementToXYPlane(computeTR(0, 0, 0), trZ);
-                float diffBL = calibration_data[2][0] - measurementToXYPlane(computeBL(0, 0, 0), blZ);
-                float diffBR = calibration_data[3][0] - measurementToXYPlane(computeBR(0, 0, 0), brZ);
+                float diffTL = calibration_data[0][0] - measurementToXYPlane(computeTL(0, 0, targetZ), tlZ);
+                float diffTR = calibration_data[1][0] - measurementToXYPlane(computeTR(0, 0, targetZ), trZ);
+                float diffBL = calibration_data[2][0] - measurementToXYPlane(computeBL(0, 0, targetZ), blZ);
+                float diffBR = calibration_data[3][0] - measurementToXYPlane(computeBR(0, 0, targetZ), brZ);
                 log_info("Center point deviation: TL: " << diffTL << " TR: " << diffTR << " BL: " << diffBL << " BR: " << diffBR);
 
                 if (abs(diffTL) > threshold || abs(diffTR) > threshold || abs(diffBL) > threshold || abs(diffBR) > threshold) {
