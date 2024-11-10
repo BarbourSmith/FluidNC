@@ -64,6 +64,7 @@ struct TelemetryData {
     bool extendedTR;
     bool extendedBL;
     bool extendedBR;
+    bool zMechanicalLimitSet;
 
     bool extendingALL;
     bool complyALL;
@@ -165,6 +166,7 @@ public:
     bool extendedTR = false;
     bool extendedBL = false;
     bool extendedBR = false;
+    bool zMechanicalLimitSet = false; //This is separate from homing because this is the mechanical stop of the machine while Z home is where the bit is at Z=0
 
     bool extendingALL = false;
     bool complyALL    = false;

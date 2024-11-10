@@ -1405,6 +1405,12 @@ void Maslow_::runCalibration() {
     }
     stop();
 
+    //if the Z mechanical limit is not known, we can't run calibration
+    if (!zMechanicalLimitSet) {
+        log_error("Cannot run calibration until the Z position is known. Run it down to the stops and set Z stop");
+        sys.set_state(State::Idle);
+        return;
+    }
     //if not all axis are homed, we can't run calibration, OR if the user hasnt entered width and height?
     if (!allAxisExtended()) {
         log_error("Cannot run calibration until all belts are extended fully");
@@ -1627,6 +1633,7 @@ void Maslow_::loadZPos() {
         int zAxis = 2;
         float* mpos = get_mpos();
         mpos[zAxis] = targetZ;
+        zMechanicalLimitSet = true;
         set_motor_steps_from_mpos(mpos);
 
         log_info("Current z-axis position loaded as: " << targetZ);
@@ -1645,6 +1652,7 @@ void Maslow_::setZStop() {
     int zAxis = 2;
     float* mpos = get_mpos();
     mpos[zAxis] = targetZ;
+    zMechanicalLimitSet = true;
     set_motor_steps_from_mpos(mpos);
 
     gc_sync_position();//This updates the Gcode engine with the new position from the stepping engine that we set with set_motor_steps
