@@ -1307,30 +1307,12 @@ void Maslow_::printCalibrationGrid() {
 //------------------------------------------------------ User commands
 //------------------------------------------------------
 
-void Maslow_::retractTL() {
+void Maslow_::retract(char arm) {
     //We allow other bells retracting to continue
-    retracting[tl] = true;
+    retracting[arm] = true;
     complyALL    = false;
     extendingALL = false;
-    axis[tl].reset();
-}
-void Maslow_::retractTR() {
-    retracting[tr] = true;
-    complyALL    = false;
-    extendingALL = false;
-    axis[tr].reset();
-}
-void Maslow_::retractBL() {
-    retracting[bl] = true;
-    complyALL    = false;
-    extendingALL = false;
-    axis[bl].reset();
-}
-void Maslow_::retractBR() {
-    retracting[br] = true;
-    complyALL    = false;
-    extendingALL = false;
-    axis[br].reset();
+    axis[arm].reset();
 }
 void Maslow_::retractALL() {
     retracting[tl] = true;

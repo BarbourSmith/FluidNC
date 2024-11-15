@@ -119,10 +119,7 @@ public:
 
     void stopMotors();
 
-    void   retractTL();
-    void   retractTR();
-    void   retractBL();
-    void   retractBR();
+    void   retract(char arm);
     void   retractALL();
     void   extendALL();
     void   take_slack();

@@ -833,7 +833,7 @@ static Error maslow_retract_TL(const char* value, WebUI::AuthenticationLevel aut
         return Error::ConfigurationInvalid;
     }
     sys.set_state(State::Homing);
-    Maslow.retractTL();
+    Maslow.retract(tl);
     return Error::Ok;
 }
 static Error maslow_retract_TR(const char* value, WebUI::AuthenticationLevel auth_level, Channel& out) {
@@ -841,7 +841,7 @@ static Error maslow_retract_TR(const char* value, WebUI::AuthenticationLevel aut
         return Error::ConfigurationInvalid;
     }
     sys.set_state(State::Homing);
-    Maslow.retractTR();
+    Maslow.retract(tr);
     return Error::Ok;
 }
 static Error maslow_retract_BR(const char* value, WebUI::AuthenticationLevel auth_level, Channel& out) {
@@ -849,7 +849,7 @@ static Error maslow_retract_BR(const char* value, WebUI::AuthenticationLevel aut
         return Error::ConfigurationInvalid;
     }
     sys.set_state(State::Homing);
-    Maslow.retractBR();
+    Maslow.retract(br);
     return Error::Ok;
 }
 static Error maslow_retract_BL(const char* value, WebUI::AuthenticationLevel auth_level, Channel& out) {
@@ -857,7 +857,7 @@ static Error maslow_retract_BL(const char* value, WebUI::AuthenticationLevel aut
         return Error::ConfigurationInvalid;
     }
     sys.set_state(State::Homing);
-    Maslow.retractBL();
+    Maslow.retract(bl);
     return Error::Ok;
 }
 static Error maslow_retract_ALL(const char* value, WebUI::AuthenticationLevel auth_level, Channel& out) {
