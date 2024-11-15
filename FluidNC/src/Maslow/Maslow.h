@@ -268,6 +268,12 @@ public:
     bool          holding   = false;
     unsigned long holdTime  = 0;
 
+    //variables to use as indexes into various arrays
+    const char tl = 0;
+    const char tr = 1;
+    const char bl = 2;
+    const char br = 3;
+
     float tlX;
     float tlY;
     float tlZ;

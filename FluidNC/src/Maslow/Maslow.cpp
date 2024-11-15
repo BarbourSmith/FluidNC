@@ -279,28 +279,28 @@ void Maslow_::home() {
     if (retractingTL) {
         if (axisTL.retract()) {
             retractingTL  = false;
-            axis_homed[0] = true;
+            axis_homed[tl] = true;
             extendedTL    = false;
         }
     }
     if (retractingTR) {
         if (axisTR.retract()) {
             retractingTR  = false;
-            axis_homed[1] = true;
+            axis_homed[tr] = true;
             extendedTR    = false;
         }
     }
     if (retractingBL) {
         if (axisBL.retract()) {
             retractingBL  = false;
-            axis_homed[2] = true;
+            axis_homed[bl] = true;
             extendedBL    = false;
         }
     }
     if (retractingBR) {
         if (axisBR.retract()) {
             retractingBR  = false;
-            axis_homed[3] = true;
+            axis_homed[br] = true;
             extendedBR    = false;
         }
     }
@@ -401,10 +401,10 @@ bool Maslow_::takeSlackFunc() {
             double offset = _beltEndExtension + _armLength;
             double threshold = 12;
 
-            float diffTL = calibration_data[0][0] - measurementToXYPlane(computeTL(0, 0, 0), tlZ);
-            float diffTR = calibration_data[1][0] - measurementToXYPlane(computeTR(0, 0, 0), trZ);
-            float diffBL = calibration_data[2][0] - measurementToXYPlane(computeBL(0, 0, 0), blZ);
-            float diffBR = calibration_data[3][0] - measurementToXYPlane(computeBR(0, 0, 0), brZ);
+            float diffTL = calibration_data[tl][0] - measurementToXYPlane(computeTL(0, 0, 0), tlZ);
+            float diffTR = calibration_data[tr][0] - measurementToXYPlane(computeTR(0, 0, 0), trZ);
+            float diffBL = calibration_data[bl][0] - measurementToXYPlane(computeBL(0, 0, 0), blZ);
+            float diffBR = calibration_data[br][0] - measurementToXYPlane(computeBR(0, 0, 0), brZ);
             log_info("Center point deviation: TL: " << diffTL << " TR: " << diffTR << " BL: " << diffBL << " BR: " << diffBR);
             if (abs(diffTL) > threshold || abs(diffTR) > threshold || abs(diffBL) > threshold || abs(diffBR) > threshold) {
                 log_error("Center point deviation over " << threshold << "mm, your coordinate system is not accurate, maybe try running calibration again?");
@@ -795,10 +795,10 @@ bool Maslow_::take_measurement(int waypoint, int dir, int run) {
         //once both belts are pulled, take a measurement
         if (BR_tight && BL_tight) {
             //take measurement and record it to the calibration data array
-            calibration_data[0][waypoint] = measurementToXYPlane(axisTL.getPosition(), tlZ);
-            calibration_data[1][waypoint] = measurementToXYPlane(axisTR.getPosition(), trZ);
-            calibration_data[2][waypoint] = measurementToXYPlane(axisBL.getPosition(), blZ);
-            calibration_data[3][waypoint] = measurementToXYPlane(axisBR.getPosition(), brZ);
+            calibration_data[tl][waypoint] = measurementToXYPlane(axisTL.getPosition(), tlZ);
+            calibration_data[tr][waypoint] = measurementToXYPlane(axisTR.getPosition(), trZ);
+            calibration_data[bl][waypoint] = measurementToXYPlane(axisBL.getPosition(), blZ);
+            calibration_data[br][waypoint] = measurementToXYPlane(axisBR.getPosition(), brZ);
             BR_tight                      = false;
             BL_tight                      = false;
             return true;
@@ -888,10 +888,10 @@ bool Maslow_::take_measurement(int waypoint, int dir, int run) {
         }
         if (pull1_tight && pull2_tight) {
             //take measurement and record it to the calibration data array
-            calibration_data[0][waypoint] = measurementToXYPlane(axisTL.getPosition(), tlZ);
-            calibration_data[1][waypoint] = measurementToXYPlane(axisTR.getPosition(), trZ);
-            calibration_data[2][waypoint] = measurementToXYPlane(axisBL.getPosition(), blZ);
-            calibration_data[3][waypoint] = measurementToXYPlane(axisBR.getPosition(), brZ);
+            calibration_data[tl][waypoint] = measurementToXYPlane(axisTL.getPosition(), tlZ);
+            calibration_data[tr][waypoint] = measurementToXYPlane(axisTR.getPosition(), trZ);
+            calibration_data[bl][waypoint] = measurementToXYPlane(axisBL.getPosition(), blZ);
+            calibration_data[br][waypoint] = measurementToXYPlane(axisBR.getPosition(), brZ);
             pull1_tight                   = false;
             pull2_tight                   = false;
             return true;
@@ -915,10 +915,10 @@ bool Maslow_::take_measurement_avg_with_check(int waypoint, int dir) {
             return false;  //discard the first three measurements
         }
 
-        measurements[0][run - 2] = calibration_data[0][waypoint];  //-3 cuz discarding the first 3 measurements
-        measurements[1][run - 2] = calibration_data[1][waypoint];
-        measurements[2][run - 2] = calibration_data[2][waypoint];
-        measurements[3][run - 2] = calibration_data[3][waypoint];
+        measurements[tl][run - 2] = calibration_data[tl][waypoint];  //-3 cuz discarding the first 3 measurements
+        measurements[tr][run - 2] = calibration_data[tr][waypoint];
+        measurements[bl][run - 2] = calibration_data[bl][waypoint];
+        measurements[br][run - 2] = calibration_data[br][waypoint];
 
         run++;
 
@@ -977,10 +977,10 @@ bool Maslow_::take_measurement_avg_with_check(int waypoint, int dir) {
             if(waypoint == 0){
                 double threshold = 100;
 
-                float diffTL = calibration_data[0][0] - measurementToXYPlane(computeTL(0, 0, 0), tlZ);
-                float diffTR = calibration_data[1][0] - measurementToXYPlane(computeTR(0, 0, 0), trZ);
-                float diffBL = calibration_data[2][0] - measurementToXYPlane(computeBL(0, 0, 0), blZ);
-                float diffBR = calibration_data[3][0] - measurementToXYPlane(computeBR(0, 0, 0), brZ);
+                float diffTL = calibration_data[tl][0] - measurementToXYPlane(computeTL(0, 0, 0), tlZ);
+                float diffTR = calibration_data[tr][0] - measurementToXYPlane(computeTR(0, 0, 0), trZ);
+                float diffBL = calibration_data[bl][0] - measurementToXYPlane(computeBL(0, 0, 0), blZ);
+                float diffBR = calibration_data[br][0] - measurementToXYPlane(computeBR(0, 0, 0), brZ);
                 log_info("Center point deviation: TL: " << diffTL << " TR: " << diffTR << " BL: " << diffBL << " BR: " << diffBR);
 
                 if (abs(diffTL) > threshold || abs(diffTR) > threshold || abs(diffBL) > threshold || abs(diffBR) > threshold) {
@@ -1711,7 +1711,7 @@ void Maslow_::reset_all_axis() {
 
 // True if all axis were zeroed
 bool Maslow_::all_axis_homed() {
-    return axis_homed[0] && axis_homed[1] && axis_homed[2] && axis_homed[3];
+    return axis_homed[tl] && axis_homed[tr] && axis_homed[bl] && axis_homed[br];
 }
 
 // True if all axis were extended
@@ -1759,8 +1759,8 @@ void Maslow_::checkCalibrationData() {
 void Maslow_::print_calibration_data() {
     String data = "CLBM:[";
     for (int i = 0; i < waypoint; i++) {
-        data += "{bl:" + String(calibration_data[2][i]) + ",   br:" + String(calibration_data[3][i]) +
-                ",   tr:" + String(calibration_data[1][i]) + ",   tl:" + String(calibration_data[0][i]) + "},";
+        data += "{bl:" + String(calibration_data[bl][i]) + ",   br:" + String(calibration_data[br][i]) +
+                ",   tr:" + String(calibration_data[tr][i]) + ",   tl:" + String(calibration_data[tl][i]) + "},";
     }
     data += "]";
     HeartBeatEnabled = false;
