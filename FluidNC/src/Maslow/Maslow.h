@@ -181,10 +181,7 @@ public:
     double targetY = 0;
     double targetZ = 0;
 
-    MotorUnit axisTL;
-    MotorUnit axisTR;
-    MotorUnit axisBL;
-    MotorUnit axisBR;
+    MotorUnit axis[4];
     int retractCurrentThreshold = 1300;
     int calibrationCurrentThreshold = 1300;
     float acceptableCalibrationThreshold = 0.5;
