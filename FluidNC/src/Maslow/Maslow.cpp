@@ -321,13 +321,13 @@ void Maslow_::home() {
         //then make all the belts comply until they are extended fully, or user terminates it
         else {
             if (!extended[tl])
-                extended[tl] = axis[tl].extend(computeTL(0, 0, 0));
+                extended[tl] = axis[tl].extend(compute(0, 0, 0, tl));
             if (!extended[tr])
-                extended[tr] = axis[tr].extend(computeTR(0, 0, 0));
+                extended[tr] = axis[tr].extend(compute(0, 0, 0, tr));
             if (!extended[bl])
-                extended[bl] = axis[bl].extend(computeBL(0, 300, 0));
+                extended[bl] = axis[bl].extend(compute(0, 300, 0, bl));
             if (!extended[br])
-                extended[br] = axis[br].extend(computeBR(0, 300, 0));
+                extended[br] = axis[br].extend(compute(0, 300, 0, br));
             if (extended[tl] && extended[tr] && extended[bl] && extended[br]) {
                 extendingALL = false;
                 log_info("All belts extended to center position");
@@ -402,10 +402,10 @@ bool Maslow_::takeSlackFunc() {
             double threshold = 12;
 
             float diff[4];
-	    diff[tl] = calibration_data[tl][0] - measurementToXYPlane(computeTL(0, 0, 0), tl);
-            diff[tr] = calibration_data[tr][0] - measurementToXYPlane(computeTR(0, 0, 0), tr);
-            diff[bl] = calibration_data[bl][0] - measurementToXYPlane(computeBL(0, 0, 0), bl);
-            diff[br] = calibration_data[br][0] - measurementToXYPlane(computeBR(0, 0, 0), br);
+	    diff[tl] = calibration_data[tl][0] - measurementToXYPlane(compute(0, 0, 0, tl), tl);
+            diff[tr] = calibration_data[tr][0] - measurementToXYPlane(compute(0, 0, 0, tr), tr);
+            diff[bl] = calibration_data[bl][0] - measurementToXYPlane(compute(0, 0, 0, bl), bl);
+            diff[br] = calibration_data[br][0] - measurementToXYPlane(compute(0, 0, 0, br), br);
             log_info("Center point deviation: TL: " << diff[tl] << " TR: " << diff[tr] << " BL: " << diff[bl] << " BR: " << diff[br]);
             if (abs(diff[tl]) > threshold || abs(diff[tr]) > threshold || abs(diff[bl]) > threshold || abs(diff[br]) > threshold) {
                 log_error("Center point deviation over " << threshold << "mm, your coordinate system is not accurate, maybe try running calibration again?");
@@ -559,16 +559,16 @@ void Maslow_::setTargets(float xTarget, float yTarget, float zTarget, bool tl, b
     targetZ = zTarget;
 
     if (tl) {
-        axis[tl].setTarget(computeTL(xTarget, yTarget, zTarget));
+        axis[tl].setTarget(compute(xTarget, yTarget, zTarget, tl));
     }
     if (tr) {
-        axis[tr].setTarget(computeTR(xTarget, yTarget, zTarget));
+        axis[tr].setTarget(compute(xTarget, yTarget, zTarget, tr));
     }
     if (bl) {
-        axis[bl].setTarget(computeBL(xTarget, yTarget, zTarget));
+        axis[bl].setTarget(compute(xTarget, yTarget, zTarget, bl));
     }
     if (br) {
-        axis[br].setTarget(computeBR(xTarget, yTarget, zTarget));
+        axis[br].setTarget(compute(xTarget, yTarget, zTarget, br));
     }
 }
 
@@ -668,62 +668,14 @@ void Maslow_::safety_control() {
 }
 
 // Compute target belt lengths based on X-Y-Z coordinates
-float Maslow_::computeBL(float x, float y, float z) {
+float Maslow_::compute(float x, float y, float z, char arm) {
     //Move from lower left corner coordinates to centered coordinates
     x       = x + centerX;
     y       = y + centerY;
-    float a = anchor[bl][0] - x; //X dist from corner to router center
-    float b = anchor[bl][1] - y; //Y dist from corner to router center
-    float c = 0.0 - (z + zOffset[bl]); //Z dist from corner to router center
+    float a = anchor[arm][0] - x; //X dist from corner to router center
+    float b = anchor[arm][1] - y; //Y dist from corner to router center
+    float c = 0.0 - (z + zOffset[arm]); //Z dist from corner to router center
 
-    float XYlength = sqrt(a * a + b * b); //Get the distance in the XY plane from the corner to the router center
-
-    float XYBeltLength = XYlength - (_beltEndExtension + _armLength); //Subtract the belt end extension and arm length to get the belt length
-
-    float length = sqrt(XYBeltLength * XYBeltLength + c * c); //Get the angled belt length
-
-    return length;  //+ lowerBeltsExtra;
-}
-float Maslow_::computeBR(float x, float y, float z) {
-    //Move from lower left corner coordinates to centered coordinates
-    x       = x + centerX;
-    y       = y + centerY;
-    float a = anchor[br][0] - x;
-    float b = anchor[br][1] - y;
-    float c = 0.0 - (z + zOffset[br]);
-
-    float XYlength = sqrt(a * a + b * b); //Get the distance in the XY plane from the corner to the router center
-
-    float XYBeltLength = XYlength - (_beltEndExtension + _armLength); //Subtract the belt end extension and arm length to get the belt length
-
-    float length = sqrt(XYBeltLength * XYBeltLength + c * c); //Get the angled belt length
-
-    return length;  //+ lowerBeltsExtra;
-}
-float Maslow_::computeTR(float x, float y, float z) {
-    //Move from lower left corner coordinates to centered coordinates
-    x       = x + centerX;
-    y       = y + centerY;
-    float a = anchor[tr][0] - x;
-    float b = anchor[tr][1] - y;
-    float c = 0.0 - (z + zOffset[tr]);
-    
-    float XYlength = sqrt(a * a + b * b); //Get the distance in the XY plane from the corner to the router center
-
-    float XYBeltLength = XYlength - (_beltEndExtension + _armLength); //Subtract the belt end extension and arm length to get the belt length
-
-    float length = sqrt(XYBeltLength * XYBeltLength + c * c); //Get the angled belt length
-
-    return length;  //+ lowerBeltsExtra;
-}
-float Maslow_::computeTL(float x, float y, float z) {
-    //Move from lower left corner coordinates to centered coordinates
-    x       = x + centerX;
-    y       = y + centerY;
-    float a = anchor[tl][0] - x;
-    float b = anchor[tl][1] - y;
-    float c = 0.0 - (z + zOffset[tl]);
-    
     float XYlength = sqrt(a * a + b * b); //Get the distance in the XY plane from the corner to the router center
 
     float XYBeltLength = XYlength - (_beltEndExtension + _armLength); //Subtract the belt end extension and arm length to get the belt length
@@ -975,10 +927,10 @@ bool Maslow_::take_measurement_avg_with_check(int waypoint, int dir) {
             if(waypoint == 0){
                 double threshold = 100;
                 float diff[4];
-                diff[tl] = calibration_data[tl][0] - measurementToXYPlane(computeTL(0, 0, 0), tl);
-                diff[tr] = calibration_data[tr][0] - measurementToXYPlane(computeTR(0, 0, 0), tr);
-                diff[bl] = calibration_data[bl][0] - measurementToXYPlane(computeBL(0, 0, 0), bl);
-                diff[br] = calibration_data[br][0] - measurementToXYPlane(computeBR(0, 0, 0), br);
+                diff[tl] = calibration_data[tl][0] - measurementToXYPlane(compute(0, 0, 0, tl), tl);
+                diff[tr] = calibration_data[tr][0] - measurementToXYPlane(compute(0, 0, 0, tr), tr);
+                diff[bl] = calibration_data[bl][0] - measurementToXYPlane(compute(0, 0, 0, bl), bl);
+                diff[br] = calibration_data[br][0] - measurementToXYPlane(compute(0, 0, 0, br), br);
                 log_info("Center point deviation: TL: " << diff[tl] << " TR: " << diff[tr] << " BL: " << diff[bl] << " BR: " << diff[br]);
 
                 if (abs(diff[tl]) > threshold || abs(diff[tr]) > threshold || abs(diff[bl]) > threshold || abs(diff[br]) > threshold) {
@@ -1201,22 +1153,22 @@ bool Maslow_::checkValidMove(double fromX, double fromY, double toX, double toY)
     int direction = get_direction(fromX, fromY, toX, toY);
     switch(direction){
         case UP: //If we are moving up we expect the top belts to get shorter so to should be shorter than they are now
-            if(computeTL(toX, toY, 0) > axis[tl].getPosition() || computeTR(toX, toY, 0) > axis[tr].getPosition()){
+            if(compute(toX, toY, 0, tl) > axis[tl].getPosition() || compute(toX, toY, 0, tr) > axis[tr].getPosition()){
                 valid = false;
             }
             break;
         case DOWN: //If we are moving down we expect the bottom belts to get shorter so they should be shorter than they are now
-            if(computeBL(toX, toY, 0) > axis[bl].getPosition() || computeBR(toX, toY, 0) > axis[br].getPosition()){
+            if(compute(toX, toY, 0, bl) > axis[bl].getPosition() || compute(toX, toY, 0, br) > axis[br].getPosition()){
                 valid = false;
             }
             break;
         case LEFT: //If we are moving left we expect the left belts to get shorter so they should be shorter than they are now
-            if(computeTL(toX, toY, 0) > axis[tl].getPosition() || computeBL(toX, toY, 0) > axis[bl].getPosition()){
+            if(compute(toX, toY, 0, tl) > axis[tl].getPosition() || compute(toX, toY, 0, bl) > axis[bl].getPosition()){
                 valid = false;
             }
             break;
         case RIGHT: //If we are moving right we expect the right belts to get shorter so they should be shorter than they are now
-            if(computeTR(toX, toY, 0) > axis[tr].getPosition() || computeBR(toX, toY, 0) > axis[br].getPosition()){
+            if(compute(toX, toY, 0, tr) > axis[tr].getPosition() || compute(toX, toY, 0, br) > axis[br].getPosition()){
                 valid = false;
             }
             break;

@@ -106,10 +106,7 @@ public:
 
     //math
     void  updateCenterXY();
-    float computeBL(float x, float y, float z);
-    float computeBR(float x, float y, float z);
-    float computeTR(float x, float y, float z);
-    float computeTL(float x, float y, float z);
+    float compute(float x, float y, float z, char arm);
 
     //Save and load z-axis position, set z-stop
     void saveZPos();
