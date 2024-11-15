@@ -681,7 +681,7 @@ float Maslow_::compute(float x, float y, float z, char arm) {
     float XYBeltLength = XYlength - (_beltEndExtension + _armLength); //Subtract the belt end extension and arm length to get the belt length
 
     float length = sqrt(XYBeltLength * XYBeltLength + c * c); //Get the angled belt length
-
+    length = length - beltExtension[arm]; // subtract the belt extension from the needed belt length.
     return length;  //+ lowerBeltsExtra;
 }
 
@@ -691,8 +691,8 @@ float Maslow_::compute(float x, float y, float z, char arm) {
 
 //Takes a raw measurement, projects it into the XY plane, then adds the belt end extension and arm length to get the actual distance.
 float Maslow_::measurementToXYPlane(float measurement, char arm){
-
-    float lengthInXY = sqrt(measurement * measurement - zOffset[arm] * zOffset[arm]);
+    float length = measurement + beltExtension[arm]; // add the belt extension on this arm to the measured belt length
+    float lengthInXY = sqrt(length * length - zOffset[arm] * zOffset[arm]);
     return lengthInXY + _beltEndExtension + _armLength; //Add the belt end extension and arm length to get the actual distance
 }
 

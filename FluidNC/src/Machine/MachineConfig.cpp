@@ -116,6 +116,11 @@ namespace Machine {
         handler.item(M+"_blZ", Maslow.zOffset[Maslow.bl]);
         handler.item(M+"_brZ", Maslow.zOffset[Maslow.br]);
 
+        handler.item(M+"_tlExtension", Maslow.beltExtension[Maslow.tl]);
+        handler.item(M+"_trExtension", Maslow.beltExtension[Maslow.tr]);
+        handler.item(M+"_blExtension", Maslow.beltExtension[Maslow.bl]);
+        handler.item(M+"_brExtension", Maslow.beltExtension[Maslow.br]);
+
         handler.item(M+"_Retract_Current_Threshold", Maslow.retractCurrentThreshold, 0, 3500);
         handler.item(M+"_Calibration_Current_Threshold", Maslow.calibrationCurrentThreshold, 0, 3500);
         handler.item(M+"_Acceptable_Calibration_Threshold", Maslow.acceptableCalibrationThreshold, 0, 1);

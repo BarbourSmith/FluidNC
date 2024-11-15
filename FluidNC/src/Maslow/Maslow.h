@@ -246,6 +246,7 @@ public:
     // per-arm arrays
     float zOffset[4];
     float anchor[4][2];
+    float beltExtension[4] = { 0.0, 0.0, 0.0, 0.0 };
 
     float _beltEndExtension = 30;  //Based on the CAD model these should add to 153.4
     float _armLength        = 123.4;
