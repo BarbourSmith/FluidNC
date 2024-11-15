@@ -398,13 +398,13 @@ bool Maslow_::takeSlackFunc() {
     if(takeSlackState == 2){
         if (take_measurement_avg_with_check(0, UP)) {
 
-            double offset = _beltEndExtension + _armLength;
+
             double threshold = 12;
 
-            float diffTL = calibration_data[0][0] - measurementToXYPlane(computeTL(0, 0, 0), tlZ);
-            float diffTR = calibration_data[1][0] - measurementToXYPlane(computeTR(0, 0, 0), trZ);
-            float diffBL = calibration_data[2][0] - measurementToXYPlane(computeBL(0, 0, 0), blZ);
-            float diffBR = calibration_data[3][0] - measurementToXYPlane(computeBR(0, 0, 0), brZ);
+            float diffTL = calibration_data[0][0] - measurementToXYPlane(computeTL(0, 0, targetZ), tlZ);
+            float diffTR = calibration_data[1][0] - measurementToXYPlane(computeTR(0, 0, targetZ), trZ);
+            float diffBL = calibration_data[2][0] - measurementToXYPlane(computeBL(0, 0, targetZ), blZ);
+            float diffBR = calibration_data[3][0] - measurementToXYPlane(computeBR(0, 0, targetZ), brZ);
             log_info("Center point deviation: TL: " << diffTL << " TR: " << diffTR << " BL: " << diffBL << " BR: " << diffBR);
             if (abs(diffTL) > threshold || abs(diffTR) > threshold || abs(diffBL) > threshold || abs(diffBR) > threshold) {
                 log_error("Center point deviation over " << threshold << "mm, your coordinate system is not accurate, maybe try running calibration again?");
@@ -738,9 +738,10 @@ float Maslow_::computeTL(float x, float y, float z) {
 //------------------------------------------------------
 
 //Takes a raw measurement, projects it into the XY plane, then adds the belt end extension and arm length to get the actual distance.
-float Maslow_::measurementToXYPlane(float measurement, float zHeight){
+float Maslow_::measurementToXYPlane(float measurement, float zbase){
 
-    float lengthInXY = sqrt(measurement * measurement - zHeight * zHeight);
+    float z = zbase + targetZ;
+    float lengthInXY = sqrt(measurement * measurement - z * z);
     return lengthInXY + _beltEndExtension + _armLength; //Add the belt end extension and arm length to get the actual distance
 }
 
@@ -977,10 +978,10 @@ bool Maslow_::take_measurement_avg_with_check(int waypoint, int dir) {
             if(waypoint == 0){
                 double threshold = 100;
 
-                float diffTL = calibration_data[0][0] - measurementToXYPlane(computeTL(0, 0, 0), tlZ);
-                float diffTR = calibration_data[1][0] - measurementToXYPlane(computeTR(0, 0, 0), trZ);
-                float diffBL = calibration_data[2][0] - measurementToXYPlane(computeBL(0, 0, 0), blZ);
-                float diffBR = calibration_data[3][0] - measurementToXYPlane(computeBR(0, 0, 0), brZ);
+                float diffTL = calibration_data[0][0] - measurementToXYPlane(computeTL(0, 0, targetZ), tlZ);
+                float diffTR = calibration_data[1][0] - measurementToXYPlane(computeTR(0, 0, targetZ), trZ);
+                float diffBL = calibration_data[2][0] - measurementToXYPlane(computeBL(0, 0, targetZ), blZ);
+                float diffBR = calibration_data[3][0] - measurementToXYPlane(computeBR(0, 0, targetZ), brZ);
                 log_info("Center point deviation: TL: " << diffTL << " TR: " << diffTR << " BL: " << diffBL << " BR: " << diffBR);
 
                 if (abs(diffTL) > threshold || abs(diffTR) > threshold || abs(diffBL) > threshold || abs(diffBR) > threshold) {
@@ -1405,10 +1406,12 @@ void Maslow_::runCalibration() {
     }
     stop();
 
-    //Save the z-axis 'stop' position
-    targetZ = 0;
-    setZStop();
-
+    //if the Z mechanical limit is not known, we can't run calibration
+    if (!zMechanicalLimitSet) {
+        log_error("Cannot run calibration until the Z position is known. Run it down to the stops and set Z stop");
+        sys.set_state(State::Idle);
+        return;
+    }
     //if not all axis are homed, we can't run calibration, OR if the user hasnt entered width and height?
     if (!allAxisExtended()) {
         log_error("Cannot run calibration until all belts are extended fully");
@@ -1631,6 +1634,7 @@ void Maslow_::loadZPos() {
         int zAxis = 2;
         float* mpos = get_mpos();
         mpos[zAxis] = targetZ;
+        zMechanicalLimitSet = true;
         set_motor_steps_from_mpos(mpos);
 
         log_info("Current z-axis position loaded as: " << targetZ);
@@ -1649,6 +1653,7 @@ void Maslow_::setZStop() {
     int zAxis = 2;
     float* mpos = get_mpos();
     mpos[zAxis] = targetZ;
+    zMechanicalLimitSet = true;
     set_motor_steps_from_mpos(mpos);
 
     gc_sync_position();//This updates the Gcode engine with the new position from the stepping engine that we set with set_motor_steps
