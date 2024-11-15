@@ -674,8 +674,12 @@ float Maslow_::compute(float x, float y, float z, char arm) {
     y       = y + centerY;
     float a = anchor[arm][0] - x; //X dist from corner to router center
     float b = anchor[arm][1] - y; //Y dist from corner to router center
-    float c = 0.0 - (z + zOffset[arm]); //Z dist from corner to router center
-
+    float c;
+    if (fixedZ) {
+        c = 0.0 - (zOffset[arm]); //with fixed Z, the arms don't move vertically so the offset is all that's needed.
+    } else {
+        c = 0.0 - (z + zOffset[arm]); //if the arms move, the current Z location needs to be included in the calculation.
+    }
     float XYlength = sqrt(a * a + b * b); //Get the distance in the XY plane from the corner to the router center
 
     float XYBeltLength = XYlength - (_beltEndExtension + _armLength); //Subtract the belt end extension and arm length to get the belt length
@@ -692,7 +696,13 @@ float Maslow_::compute(float x, float y, float z, char arm) {
 //Takes a raw measurement, projects it into the XY plane, then adds the belt end extension and arm length to get the actual distance.
 float Maslow_::measurementToXYPlane(float measurement, char arm){
     float length = measurement + beltExtension[arm]; // add the belt extension on this arm to the measured belt length
-    float lengthInXY = sqrt(length * length - zOffset[arm] * zOffset[arm]);
+    float c;
+    if (fixedZ) {
+        c = zOffset[arm];
+    } else {
+        c = zOffset[arm] + targetZ; //if the arms move with the spindle, the current Z height needs to be included in the calculations
+    }
+    float lengthInXY = sqrt(length * length - c * c);
     return lengthInXY + _beltEndExtension + _armLength; //Add the belt end extension and arm length to get the actual distance
 }
 
