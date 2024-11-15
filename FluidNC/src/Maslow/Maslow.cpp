@@ -672,8 +672,8 @@ float Maslow_::computeBL(float x, float y, float z) {
     //Move from lower left corner coordinates to centered coordinates
     x       = x + centerX;
     y       = y + centerY;
-    float a = blX - x; //X dist from corner to router center
-    float b = blY - y; //Y dist from corner to router center
+    float a = anchor[bl][0] - x; //X dist from corner to router center
+    float b = anchor[bl][1] - y; //Y dist from corner to router center
     float c = 0.0 - (z + zOffset[bl]); //Z dist from corner to router center
 
     float XYlength = sqrt(a * a + b * b); //Get the distance in the XY plane from the corner to the router center
@@ -688,8 +688,8 @@ float Maslow_::computeBR(float x, float y, float z) {
     //Move from lower left corner coordinates to centered coordinates
     x       = x + centerX;
     y       = y + centerY;
-    float a = brX - x;
-    float b = brY - y;
+    float a = anchor[br][0] - x;
+    float b = anchor[br][1] - y;
     float c = 0.0 - (z + zOffset[br]);
 
     float XYlength = sqrt(a * a + b * b); //Get the distance in the XY plane from the corner to the router center
@@ -704,8 +704,8 @@ float Maslow_::computeTR(float x, float y, float z) {
     //Move from lower left corner coordinates to centered coordinates
     x       = x + centerX;
     y       = y + centerY;
-    float a = trX - x;
-    float b = trY - y;
+    float a = anchor[tr][0] - x;
+    float b = anchor[tr][1] - y;
     float c = 0.0 - (z + zOffset[tr]);
     
     float XYlength = sqrt(a * a + b * b); //Get the distance in the XY plane from the corner to the router center
@@ -720,8 +720,8 @@ float Maslow_::computeTL(float x, float y, float z) {
     //Move from lower left corner coordinates to centered coordinates
     x       = x + centerX;
     y       = y + centerY;
-    float a = tlX - x;
-    float b = tlY - y;
+    float a = anchor[tl][0] - x;
+    float b = anchor[tl][1] - y;
     float c = 0.0 - (z + zOffset[tl]);
     
     float XYlength = sqrt(a * a + b * b); //Get the distance in the XY plane from the corner to the router center
@@ -1658,13 +1658,13 @@ void Maslow_::setZStop() {
 
 
 void Maslow_::set_frame_width(double width) {
-    trX = width;
-    brX = width;
+    anchor[tr][0] = width;
+    anchor[br][0] = width;
     updateCenterXY();
 }
 void Maslow_::set_frame_height(double height) {
-    tlY = height;
-    trY = height;
+    anchor[tl][1] = height;
+    anchor[tr][1] = height;
     updateCenterXY();
 }
 void Maslow_::take_slack() {
@@ -1843,10 +1843,10 @@ double Maslow_::getTargetZ() {
 
 //Updates where the center x and y positions are
 void Maslow_::updateCenterXY() {
-    double A = (trY - blY) / (trX - blX);
-    double B = (brY - tlY) / (brX - tlX);
-    centerX  = (brY - (B * brX) + (A * trX) - trY) / (A - B);
-    centerY  = A * (centerX - trX) + trY;
+    double A = (anchor[tr][1] - anchor[bl][1]) / (anchor[tr][0] - anchor[bl][0]);
+    double B = (anchor[br][1] - anchor[tl][1]) / (anchor[br][0] - anchor[tl][0]);
+    centerX  = (anchor[br][1] - (B * anchor[br][0]) + (A * anchor[tr][0]) - anchor[tr][1]) / (A - B);
+    centerY  = A * (centerX - anchor[tr][0]) + anchor[tr][1];
 }
 
 // Prints out state
