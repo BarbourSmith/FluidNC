@@ -236,10 +236,10 @@ public:
     unsigned long holdTime  = 0;
 
     //variables to use as indexes into various arrays
-    const char tl = 0;
+    const char tl = 2;
     const char tr = 1;
-    const char bl = 2;
-    const char br = 3;
+    const char bl = 3;
+    const char br = 0;
 
     // per-arm arrays
     float zOffset[4];
