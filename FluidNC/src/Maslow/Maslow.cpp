@@ -192,7 +192,7 @@ void Maslow_::update() {
             digitalWrite(coolingFanPin, HIGH);  //keep the cooling fan on
         }
         //If we are doing calibration turn the cooling fan on
-        else if (calibrationInProgress || extendingALL || retractingTL || retractingTR || retractingBL || retractingBR) {
+        else if (calibrationInProgress || extendingALL || retracting[tl] || retracting[tr] || retracting[bl] || retracting[br]) {
             digitalWrite(coolingFanPin, HIGH);  //keep the cooling fan on
         } else {
             digitalWrite(coolingFanPin, LOW);  //Turn the cooling fan off
@@ -276,32 +276,32 @@ void Maslow_::heartBeat(){
 // -Maslow homing loop
 void Maslow_::home() {
     //run all the retract functions untill we hit the current limit
-    if (retractingTL) {
+    if (retracting[tl]) {
         if (axisTL.retract()) {
-            retractingTL  = false;
+            retracting[tl]  = false;
             axis_homed[tl] = true;
-            extendedTL    = false;
+            extended[tl]    = false;
         }
     }
-    if (retractingTR) {
+    if (retracting[tr]) {
         if (axisTR.retract()) {
-            retractingTR  = false;
+            retracting[tr]  = false;
             axis_homed[tr] = true;
-            extendedTR    = false;
+            extended[tr]    = false;
         }
     }
-    if (retractingBL) {
+    if (retracting[bl]) {
         if (axisBL.retract()) {
-            retractingBL  = false;
+            retracting[bl]  = false;
             axis_homed[bl] = true;
-            extendedBL    = false;
+            extended[bl]    = false;
         }
     }
-    if (retractingBR) {
+    if (retracting[br]) {
         if (axisBR.retract()) {
-            retractingBR  = false;
+            retracting[br]  = false;
             axis_homed[br] = true;
-            extendedBR    = false;
+            extended[br]    = false;
         }
     }
 
@@ -320,15 +320,15 @@ void Maslow_::home() {
         }
         //then make all the belts comply until they are extended fully, or user terminates it
         else {
-            if (!extendedTL)
-                extendedTL = axisTL.extend(computeTL(0, 0, 0));
-            if (!extendedTR)
-                extendedTR = axisTR.extend(computeTR(0, 0, 0));
-            if (!extendedBL)
-                extendedBL = axisBL.extend(computeBL(0, 300, 0));
-            if (!extendedBR)
-                extendedBR = axisBR.extend(computeBR(0, 300, 0));
-            if (extendedTL && extendedTR && extendedBL && extendedBR) {
+            if (!extended[tl])
+                extended[tl] = axisTL.extend(computeTL(0, 0, 0));
+            if (!extended[tr])
+                extended[tr] = axisTR.extend(computeTR(0, 0, 0));
+            if (!extended[bl])
+                extended[bl] = axisBL.extend(computeBL(0, 300, 0));
+            if (!extended[br])
+                extended[br] = axisBR.extend(computeBR(0, 300, 0));
+            if (extended[tl] && extended[tr] && extended[bl] && extended[br]) {
                 extendingALL = false;
                 log_info("All belts extended to center position");
             }
@@ -367,7 +367,7 @@ void Maslow_::home() {
     handleMotorOverides();
 
     //if we are done with all the homing moves, switch system state back to Idle?
-    if (!retractingTL && !retractingBL && !retractingBR && !retractingTR && !extendingALL && !complyALL && !calibrationInProgress &&
+    if (!retracting[tl] && !retracting[bl] && !retracting[br] && !retracting[tr] && !extendingALL && !complyALL && !calibrationInProgress &&
         !takeSlack && !checkOverides()) {
         sys.set_state(State::Idle);
     }
@@ -401,12 +401,13 @@ bool Maslow_::takeSlackFunc() {
             double offset = _beltEndExtension + _armLength;
             double threshold = 12;
 
-            float diffTL = calibration_data[tl][0] - measurementToXYPlane(computeTL(0, 0, 0), zOffset[tl]);
-            float diffTR = calibration_data[tr][0] - measurementToXYPlane(computeTR(0, 0, 0), zOffset[tr]);
-            float diffBL = calibration_data[bl][0] - measurementToXYPlane(computeBL(0, 0, 0), zOffset[bl]);
-            float diffBR = calibration_data[br][0] - measurementToXYPlane(computeBR(0, 0, 0), zOffset[br]);
-            log_info("Center point deviation: TL: " << diffTL << " TR: " << diffTR << " BL: " << diffBL << " BR: " << diffBR);
-            if (abs(diffTL) > threshold || abs(diffTR) > threshold || abs(diffBL) > threshold || abs(diffBR) > threshold) {
+            float diff[4];
+	    diff[tl] = calibration_data[tl][0] - measurementToXYPlane(computeTL(0, 0, 0), zOffset[tl]);
+            diff[tr] = calibration_data[tr][0] - measurementToXYPlane(computeTR(0, 0, 0), zOffset[tr]);
+            diff[bl] = calibration_data[bl][0] - measurementToXYPlane(computeBL(0, 0, 0), zOffset[bl]);
+            diff[br] = calibration_data[br][0] - measurementToXYPlane(computeBR(0, 0, 0), zOffset[br]);
+            log_info("Center point deviation: TL: " << diff[tl] << " TR: " << diff[tr] << " BL: " << diff[bl] << " BR: " << diff[br]);
+            if (abs(diff[tl]) > threshold || abs(diff[tr]) > threshold || abs(diff[bl]) > threshold || abs(diff[br]) > threshold) {
                 log_error("Center point deviation over " << threshold << "mm, your coordinate system is not accurate, maybe try running calibration again?");
                 //Should we enter an alarm state here to prevent things from going wrong?
 
@@ -976,26 +977,26 @@ bool Maslow_::take_measurement_avg_with_check(int waypoint, int dir) {
             //A check to see if the results on the first point are within the expected range
             if(waypoint == 0){
                 double threshold = 100;
+                float diff[4];
+                diff[tl] = calibration_data[tl][0] - measurementToXYPlane(computeTL(0, 0, 0), zOffset[tl]);
+                diff[tr] = calibration_data[tr][0] - measurementToXYPlane(computeTR(0, 0, 0), zOffset[tr]);
+                diff[bl] = calibration_data[bl][0] - measurementToXYPlane(computeBL(0, 0, 0), zOffset[bl]);
+                diff[br] = calibration_data[br][0] - measurementToXYPlane(computeBR(0, 0, 0), zOffset[br]);
+                log_info("Center point deviation: TL: " << diff[tl] << " TR: " << diff[tr] << " BL: " << diff[bl] << " BR: " << diff[br]);
 
-                float diffTL = calibration_data[tl][0] - measurementToXYPlane(computeTL(0, 0, 0), zOffset[tl]);
-                float diffTR = calibration_data[tr][0] - measurementToXYPlane(computeTR(0, 0, 0), zOffset[tr]);
-                float diffBL = calibration_data[bl][0] - measurementToXYPlane(computeBL(0, 0, 0), zOffset[bl]);
-                float diffBR = calibration_data[br][0] - measurementToXYPlane(computeBR(0, 0, 0), zOffset[br]);
-                log_info("Center point deviation: TL: " << diffTL << " TR: " << diffTR << " BL: " << diffBL << " BR: " << diffBR);
-
-                if (abs(diffTL) > threshold || abs(diffTR) > threshold || abs(diffBL) > threshold || abs(diffBR) > threshold) {
+                if (abs(diff[tl]) > threshold || abs(diff[tr]) > threshold || abs(diff[bl]) > threshold || abs(diff[br]) > threshold) {
                     log_error("Center point deviation over " << threshold << "mmm, your coordinate system is not accurate, adjust your frame dimensions and restart.");
                     //Should we enter an alarm state here to prevent things from going wrong?
 
 
                     String message = "";
                     //If both of the bottom belts are longer than expected then the frame is smaller than expected
-                    if(diffBL > threshold && diffBR > threshold){
+                    if(diff[bl] > threshold && diff[br] > threshold){
                         log_error("Frame size error, try entering larger frame dimensions and restart.");
                         message = "Frame size error, try entering larger frame dimensions and restart.";
                     }
                     //If both of the bottom belts are shorter than expected then the frame is larger than expected
-                    else if(diffBL < -threshold && diffBR < -threshold){
+                    else if(diff[bl] < -threshold && diff[br] < -threshold){
                         log_error("Frame size error, try entering smaller frame dimensions and restart.");
                         message = "Frame size error, try entering smaller frame dimensions and restart.";
                     }
@@ -1349,34 +1350,34 @@ void Maslow_::printCalibrationGrid() {
 
 void Maslow_::retractTL() {
     //We allow other bells retracting to continue
-    retractingTL = true;
+    retracting[tl] = true;
     complyALL    = false;
     extendingALL = false;
     axisTL.reset();
 }
 void Maslow_::retractTR() {
-    retractingTR = true;
+    retracting[tr] = true;
     complyALL    = false;
     extendingALL = false;
     axisTR.reset();
 }
 void Maslow_::retractBL() {
-    retractingBL = true;
+    retracting[bl] = true;
     complyALL    = false;
     extendingALL = false;
     axisBL.reset();
 }
 void Maslow_::retractBR() {
-    retractingBR = true;
+    retracting[br] = true;
     complyALL    = false;
     extendingALL = false;
     axisBR.reset();
 }
 void Maslow_::retractALL() {
-    retractingTL = true;
-    retractingTR = true;
-    retractingBL = true;
-    retractingBR = true;
+    retracting[tl] = true;
+    retracting[tr] = true;
+    retracting[bl] = true;
+    retracting[br] = true;
     complyALL    = false;
     extendingALL = false;
     axisTL.reset();
@@ -1422,10 +1423,10 @@ void Maslow_::runCalibration() {
 }
 void Maslow_::comply() {
     complyCallTimer = millis();
-    retractingTL    = false;
-    retractingTR    = false;
-    retractingBL    = false;
-    retractingBR    = false;
+    retracting[tl]    = false;
+    retracting[tr]    = false;
+    retracting[bl]    = false;
+    retracting[br]    = false;
     extendingALL    = false;
     complyALL       = true;
     axisTL.reset(); //This just resets the thresholds for pull tight
@@ -1674,10 +1675,10 @@ void Maslow_::take_slack() {
         sys.set_state(State::Idle);
         return;
     }
-    retractingTL = false;
-    retractingTR = false;
-    retractingBL = false;
-    retractingBR = false;
+    retracting[tl] = false;
+    retracting[tr] = false;
+    retracting[bl] = false;
+    retracting[br] = false;
     extendingALL = false;
     complyALL    = false;
     axisTL.reset();
@@ -1716,7 +1717,7 @@ bool Maslow_::all_axis_homed() {
 
 // True if all axis were extended
 bool Maslow_::allAxisExtended() {
-    return extendedTL && extendedTR && extendedBL && extendedBR;
+    return extended[tl] && extended[tr] && extended[bl] && extended[br];
 }
 
 // True if calibration is complete or take slack has been run
@@ -1777,10 +1778,10 @@ void Maslow_::calibrationDataRecieved(){
 // Stop all motors and reset all state variables
 void Maslow_::stop() {
     stopMotors();
-    retractingTL          = false;
-    retractingTR          = false;
-    retractingBL          = false;
-    retractingBR          = false;
+    retracting[tl]        = false;
+    retracting[tr]        = false;
+    retracting[bl]        = false;
+    retracting[br]        = false;
     extendingALL          = false;
     complyALL             = false;
     calibrationInProgress = false;
@@ -1942,26 +1943,26 @@ void Maslow_::log_telem_hdr_csv() {
 void Maslow_::log_telem_pt_csv(TelemetryData data) {
     log_data(
        std::to_string(data.timestamp) + ","
-       + std::to_string(data.tlCurrent) + ","
-       + std::to_string(data.trCurrent)  + ","
-       + std::to_string(data.blCurrent)  + ","
-       + std::to_string(data.brCurrent)  + ","
-       + std::to_string(data.tlPower) + ","
-       + std::to_string(data.trPower) + ","
-       + std::to_string(data.blPower) + ","
-       + std::to_string(data.brPower) + ","
-       + std::to_string(data.tlSpeed) + ","
-       + std::to_string(data.trSpeed) + ","
-       + std::to_string(data.blSpeed) + ","
-       + std::to_string(data.brSpeed) + ","
-       + std::to_string(data.tlPos) + ","
-       + std::to_string(data.trPos) + ","
-       + std::to_string(data.blPos) + ","
-       + std::to_string(data.brPos) + ","
-       + std::to_string(data.extendedTL) + ","
-       + std::to_string(data.extendedTR) + ","
-       + std::to_string(data.extendedBL) + ","
-       + std::to_string(data.extendedBR) + ","
+       + std::to_string(data.current[tl]) + ","
+       + std::to_string(data.current[tr])  + ","
+       + std::to_string(data.current[bl])  + ","
+       + std::to_string(data.current[br])  + ","
+       + std::to_string(data.power[tl]) + ","
+       + std::to_string(data.power[tr]) + ","
+       + std::to_string(data.power[bl]) + ","
+       + std::to_string(data.power[br]) + ","
+       + std::to_string(data.speed[tl]) + ","
+       + std::to_string(data.speed[tr]) + ","
+       + std::to_string(data.speed[bl]) + ","
+       + std::to_string(data.speed[br]) + ","
+       + std::to_string(data.pos[tl]) + ","
+       + std::to_string(data.pos[tr]) + ","
+       + std::to_string(data.pos[bl]) + ","
+       + std::to_string(data.pos[br]) + ","
+       + std::to_string(data.extended[tl]) + ","
+       + std::to_string(data.extended[tr]) + ","
+       + std::to_string(data.extended[bl]) + ","
+       + std::to_string(data.extended[br]) + ","
        + std::to_string(data.extendingALL) + ","
        + std::to_string(data.complyALL) + ","
        + std::to_string(data.takeSlack) + ","
@@ -1996,30 +1997,30 @@ TelemetryData Maslow_::get_telemetry_data() {
     //if (xSemaphoreTake(telemetry_mutex, portMAX_DELAY)) {
     // Access shared variables here
     data.timestamp = millis();
-    data.tlCurrent = axisTL.getMotorCurrent();
-    data.trCurrent = axisTR.getMotorCurrent();
-    data.blCurrent = axisBL.getMotorCurrent();
-    data.brCurrent = axisBR.getMotorCurrent();
+    data.current[tl] = axisTL.getMotorCurrent();
+    data.current[tr] = axisTR.getMotorCurrent();
+    data.current[bl] = axisBL.getMotorCurrent();
+    data.current[br] = axisBR.getMotorCurrent();
 
-    data.tlPower = axisTL.getMotorPower();
-    data.trPower = axisTR.getMotorPower();
-    data.blPower = axisBL.getMotorPower();
-    data.brPower = axisBR.getMotorPower();
+    data.power[tl] = axisTL.getMotorPower();
+    data.power[tr] = axisTR.getMotorPower();
+    data.power[bl] = axisBL.getMotorPower();
+    data.power[br] = axisBR.getMotorPower();
 
-    data.tlSpeed = axisTL.getBeltSpeed();
-    data.trSpeed = axisTR.getBeltSpeed();
-    data.blSpeed = axisBL.getBeltSpeed();
-    data.brSpeed = axisBR.getBeltSpeed();
+    data.speed[tl] = axisTL.getBeltSpeed();
+    data.speed[tr] = axisTR.getBeltSpeed();
+    data.speed[bl] = axisBL.getBeltSpeed();
+    data.speed[br] = axisBR.getBeltSpeed();
 
-    data.tlPos = axisTL.getPosition();
-    data.trPos = axisTR.getPosition();
-    data.blPos = axisBL.getPosition();
-    data.brPos = axisBR.getPosition();
+    data.pos[tl] = axisTL.getPosition();
+    data.pos[tr] = axisTR.getPosition();
+    data.pos[bl] = axisBL.getPosition();
+    data.pos[br] = axisBR.getPosition();
 
-    data.extendedTL          = extendedTL;
-    data.extendedTR          = extendedTR;
-    data.extendedBL          = extendedBL;
-    data.extendedBR          = extendedBR;
+    data.extended[tl]          = extended[tl];
+    data.extended[tr]          = extended[tr];
+    data.extended[bl]          = extended[bl];
+    data.extended[br]          = extended[br];
     data.extendingALL        = extendingALL;
     data.complyALL           = complyALL;
     data.takeSlack           = takeSlack;

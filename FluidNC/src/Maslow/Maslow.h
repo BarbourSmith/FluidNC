@@ -40,35 +40,17 @@ struct TelemetryFileHeader {
 struct TelemetryData {
     unsigned long timestamp;
     // motors
-    double tlCurrent;
-    double trCurrent;
-    double blCurrent;
-    double brCurrent;
+    double current[4];
     // power
-    double tlPower;
-    double trPower;
-    double blPower;
-    double brPower;
+    double power[4];
     // speed
-    double tlSpeed;
-    double trSpeed;
-    double blSpeed;
-    double brSpeed;
+    double speed[4];
      // position
-    double tlPos;
-    double trPos;
-    double blPos;
-    double brPos;
+    double pos[4];
 
-    int tlState;
-    int trState;
-    int blState;
-    int brState;
+    int state[4];
 
-    bool extendedTL;
-    bool extendedTR;
-    bool extendedBL;
-    bool extendedBR;
+    bool extended[4];
 
     bool extendingALL;
     bool complyALL;
@@ -161,15 +143,8 @@ public:
     void   set_frame_height(double height);
     void   update_frame_xyz();
     bool   axis_homed[4] = { false, false, false, false };
-    bool   retractingTL  = false;
-    bool   retractingTR  = false;
-    bool   retractingBL  = false;
-    bool   retractingBR  = false;
-
-    bool extendedTL = false;
-    bool extendedTR = false;
-    bool extendedBL = false;
-    bool extendedBR = false;
+    bool   retracting[4] = { false, false, false, false };
+    bool   extended[4] = { false, false, false, false };
 
     bool extendingALL = false;
     bool complyALL    = false;
