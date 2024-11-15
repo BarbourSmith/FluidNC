@@ -401,10 +401,10 @@ bool Maslow_::takeSlackFunc() {
             double offset = _beltEndExtension + _armLength;
             double threshold = 12;
 
-            float diffTL = calibration_data[tl][0] - measurementToXYPlane(computeTL(0, 0, 0), tlZ);
-            float diffTR = calibration_data[tr][0] - measurementToXYPlane(computeTR(0, 0, 0), trZ);
-            float diffBL = calibration_data[bl][0] - measurementToXYPlane(computeBL(0, 0, 0), blZ);
-            float diffBR = calibration_data[br][0] - measurementToXYPlane(computeBR(0, 0, 0), brZ);
+            float diffTL = calibration_data[tl][0] - measurementToXYPlane(computeTL(0, 0, 0), zOffset[tl]);
+            float diffTR = calibration_data[tr][0] - measurementToXYPlane(computeTR(0, 0, 0), zOffset[tr]);
+            float diffBL = calibration_data[bl][0] - measurementToXYPlane(computeBL(0, 0, 0), zOffset[bl]);
+            float diffBR = calibration_data[br][0] - measurementToXYPlane(computeBR(0, 0, 0), zOffset[br]);
             log_info("Center point deviation: TL: " << diffTL << " TR: " << diffTR << " BL: " << diffBL << " BR: " << diffBR);
             if (abs(diffTL) > threshold || abs(diffTR) > threshold || abs(diffBL) > threshold || abs(diffBR) > threshold) {
                 log_error("Center point deviation over " << threshold << "mm, your coordinate system is not accurate, maybe try running calibration again?");
@@ -674,7 +674,7 @@ float Maslow_::computeBL(float x, float y, float z) {
     y       = y + centerY;
     float a = blX - x; //X dist from corner to router center
     float b = blY - y; //Y dist from corner to router center
-    float c = 0.0 - (z + blZ); //Z dist from corner to router center
+    float c = 0.0 - (z + zOffset[bl]); //Z dist from corner to router center
 
     float XYlength = sqrt(a * a + b * b); //Get the distance in the XY plane from the corner to the router center
 
@@ -690,7 +690,7 @@ float Maslow_::computeBR(float x, float y, float z) {
     y       = y + centerY;
     float a = brX - x;
     float b = brY - y;
-    float c = 0.0 - (z + brZ);
+    float c = 0.0 - (z + zOffset[br]);
 
     float XYlength = sqrt(a * a + b * b); //Get the distance in the XY plane from the corner to the router center
 
@@ -706,7 +706,7 @@ float Maslow_::computeTR(float x, float y, float z) {
     y       = y + centerY;
     float a = trX - x;
     float b = trY - y;
-    float c = 0.0 - (z + trZ);
+    float c = 0.0 - (z + zOffset[tr]);
     
     float XYlength = sqrt(a * a + b * b); //Get the distance in the XY plane from the corner to the router center
 
@@ -722,7 +722,7 @@ float Maslow_::computeTL(float x, float y, float z) {
     y       = y + centerY;
     float a = tlX - x;
     float b = tlY - y;
-    float c = 0.0 - (z + tlZ);
+    float c = 0.0 - (z + zOffset[tl]);
     
     float XYlength = sqrt(a * a + b * b); //Get the distance in the XY plane from the corner to the router center
 
@@ -795,10 +795,10 @@ bool Maslow_::take_measurement(int waypoint, int dir, int run) {
         //once both belts are pulled, take a measurement
         if (BR_tight && BL_tight) {
             //take measurement and record it to the calibration data array
-            calibration_data[tl][waypoint] = measurementToXYPlane(axisTL.getPosition(), tlZ);
-            calibration_data[tr][waypoint] = measurementToXYPlane(axisTR.getPosition(), trZ);
-            calibration_data[bl][waypoint] = measurementToXYPlane(axisBL.getPosition(), blZ);
-            calibration_data[br][waypoint] = measurementToXYPlane(axisBR.getPosition(), brZ);
+            calibration_data[tl][waypoint] = measurementToXYPlane(axisTL.getPosition(), zOffset[tl]);
+            calibration_data[tr][waypoint] = measurementToXYPlane(axisTR.getPosition(), zOffset[tr]);
+            calibration_data[bl][waypoint] = measurementToXYPlane(axisBL.getPosition(), zOffset[bl]);
+            calibration_data[br][waypoint] = measurementToXYPlane(axisBR.getPosition(), zOffset[br]);
             BR_tight                      = false;
             BL_tight                      = false;
             return true;
@@ -888,10 +888,10 @@ bool Maslow_::take_measurement(int waypoint, int dir, int run) {
         }
         if (pull1_tight && pull2_tight) {
             //take measurement and record it to the calibration data array
-            calibration_data[tl][waypoint] = measurementToXYPlane(axisTL.getPosition(), tlZ);
-            calibration_data[tr][waypoint] = measurementToXYPlane(axisTR.getPosition(), trZ);
-            calibration_data[bl][waypoint] = measurementToXYPlane(axisBL.getPosition(), blZ);
-            calibration_data[br][waypoint] = measurementToXYPlane(axisBR.getPosition(), brZ);
+            calibration_data[tl][waypoint] = measurementToXYPlane(axisTL.getPosition(), zOffset[tl]);
+            calibration_data[tr][waypoint] = measurementToXYPlane(axisTR.getPosition(), zOffset[tr]);
+            calibration_data[bl][waypoint] = measurementToXYPlane(axisBL.getPosition(), zOffset[bl]);
+            calibration_data[br][waypoint] = measurementToXYPlane(axisBR.getPosition(), zOffset[br]);
             pull1_tight                   = false;
             pull2_tight                   = false;
             return true;
@@ -977,10 +977,10 @@ bool Maslow_::take_measurement_avg_with_check(int waypoint, int dir) {
             if(waypoint == 0){
                 double threshold = 100;
 
-                float diffTL = calibration_data[tl][0] - measurementToXYPlane(computeTL(0, 0, 0), tlZ);
-                float diffTR = calibration_data[tr][0] - measurementToXYPlane(computeTR(0, 0, 0), trZ);
-                float diffBL = calibration_data[bl][0] - measurementToXYPlane(computeBL(0, 0, 0), blZ);
-                float diffBR = calibration_data[br][0] - measurementToXYPlane(computeBR(0, 0, 0), brZ);
+                float diffTL = calibration_data[tl][0] - measurementToXYPlane(computeTL(0, 0, 0), zOffset[tl]);
+                float diffTR = calibration_data[tr][0] - measurementToXYPlane(computeTR(0, 0, 0), zOffset[tr]);
+                float diffBL = calibration_data[bl][0] - measurementToXYPlane(computeBL(0, 0, 0), zOffset[bl]);
+                float diffBR = calibration_data[br][0] - measurementToXYPlane(computeBR(0, 0, 0), zOffset[br]);
                 log_info("Center point deviation: TL: " << diffTL << " TR: " << diffTR << " BL: " << diffBL << " BR: " << diffBR);
 
                 if (abs(diffTL) > threshold || abs(diffTR) > threshold || abs(diffBL) > threshold || abs(diffBR) > threshold) {

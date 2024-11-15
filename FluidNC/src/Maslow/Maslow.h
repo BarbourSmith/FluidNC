@@ -274,18 +274,17 @@ public:
     const char bl = 2;
     const char br = 3;
 
+    // per-arm arrays
+    float zOffset[4];
+
     float tlX;
     float tlY;
-    float tlZ;
     float trX;
     float trY;
-    float trZ;
     float blX;
     float blY;
-    float blZ;
     float brX;
     float brY;
-    float brZ;
 
     float _beltEndExtension = 30;  //Based on the CAD model these should add to 153.4
     float _armLength        = 123.4;

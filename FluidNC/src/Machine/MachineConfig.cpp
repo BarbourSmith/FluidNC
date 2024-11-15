@@ -111,10 +111,10 @@ namespace Machine {
         handler.item(M+"_brX", Maslow.brX);
         handler.item(M+"_brY", Maslow.brY);
 
-        handler.item(M+"_tlZ", Maslow.tlZ);
-        handler.item(M+"_trZ", Maslow.trZ);
-        handler.item(M+"_blZ", Maslow.blZ);
-        handler.item(M+"_brZ", Maslow.brZ);
+        handler.item(M+"_tlZ", Maslow.zOffset[Maslow.tl]);
+        handler.item(M+"_trZ", Maslow.zOffset[Maslow.tr]);
+        handler.item(M+"_blZ", Maslow.zOffset[Maslow.bl]);
+        handler.item(M+"_brZ", Maslow.zOffset[Maslow.br]);
 
         handler.item(M+"_Retract_Current_Threshold", Maslow.retractCurrentThreshold, 0, 3500);
         handler.item(M+"_Calibration_Current_Threshold", Maslow.calibrationCurrentThreshold, 0, 3500);
