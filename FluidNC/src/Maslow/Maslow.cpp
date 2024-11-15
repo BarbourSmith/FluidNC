@@ -402,10 +402,10 @@ bool Maslow_::takeSlackFunc() {
             double threshold = 12;
 
             float diff[4];
-	    diff[tl] = calibration_data[tl][0] - measurementToXYPlane(computeTL(0, 0, 0), zOffset[tl]);
-            diff[tr] = calibration_data[tr][0] - measurementToXYPlane(computeTR(0, 0, 0), zOffset[tr]);
-            diff[bl] = calibration_data[bl][0] - measurementToXYPlane(computeBL(0, 0, 0), zOffset[bl]);
-            diff[br] = calibration_data[br][0] - measurementToXYPlane(computeBR(0, 0, 0), zOffset[br]);
+	    diff[tl] = calibration_data[tl][0] - measurementToXYPlane(computeTL(0, 0, 0), tl);
+            diff[tr] = calibration_data[tr][0] - measurementToXYPlane(computeTR(0, 0, 0), tr);
+            diff[bl] = calibration_data[bl][0] - measurementToXYPlane(computeBL(0, 0, 0), bl);
+            diff[br] = calibration_data[br][0] - measurementToXYPlane(computeBR(0, 0, 0), br);
             log_info("Center point deviation: TL: " << diff[tl] << " TR: " << diff[tr] << " BL: " << diff[bl] << " BR: " << diff[br]);
             if (abs(diff[tl]) > threshold || abs(diff[tr]) > threshold || abs(diff[bl]) > threshold || abs(diff[br]) > threshold) {
                 log_error("Center point deviation over " << threshold << "mm, your coordinate system is not accurate, maybe try running calibration again?");
@@ -738,9 +738,9 @@ float Maslow_::computeTL(float x, float y, float z) {
 //------------------------------------------------------
 
 //Takes a raw measurement, projects it into the XY plane, then adds the belt end extension and arm length to get the actual distance.
-float Maslow_::measurementToXYPlane(float measurement, float zHeight){
+float Maslow_::measurementToXYPlane(float measurement, char arm){
 
-    float lengthInXY = sqrt(measurement * measurement - zHeight * zHeight);
+    float lengthInXY = sqrt(measurement * measurement - zOffset[arm] * zOffset[arm]);
     return lengthInXY + _beltEndExtension + _armLength; //Add the belt end extension and arm length to get the actual distance
 }
 
@@ -794,10 +794,10 @@ bool Maslow_::take_measurement(int waypoint, int dir, int run) {
         //once both belts are pulled, take a measurement
         if (tight[br]&& tight[bl]) {
             //take measurement and record it to the calibration data array
-            calibration_data[tl][waypoint] = measurementToXYPlane(axis[tl].getPosition(), zOffset[tl]);
-            calibration_data[tr][waypoint] = measurementToXYPlane(axis[tr].getPosition(), zOffset[tr]);
-            calibration_data[bl][waypoint] = measurementToXYPlane(axis[bl].getPosition(), zOffset[bl]);
-            calibration_data[br][waypoint] = measurementToXYPlane(axis[br].getPosition(), zOffset[br]);
+            calibration_data[tl][waypoint] = measurementToXYPlane(axis[tl].getPosition(), tl);
+            calibration_data[tr][waypoint] = measurementToXYPlane(axis[tr].getPosition(), tr);
+            calibration_data[bl][waypoint] = measurementToXYPlane(axis[bl].getPosition(), bl);
+            calibration_data[br][waypoint] = measurementToXYPlane(axis[br].getPosition(), br);
             tight[br] = tight[bl] = false;
             return true;
         }
@@ -886,10 +886,10 @@ bool Maslow_::take_measurement(int waypoint, int dir, int run) {
         }
         if (pull1_tight && pull2_tight) {
             //take measurement and record it to the calibration data array
-            calibration_data[tl][waypoint] = measurementToXYPlane(axis[tl].getPosition(), zOffset[tl]);
-            calibration_data[tr][waypoint] = measurementToXYPlane(axis[tr].getPosition(), zOffset[tr]);
-            calibration_data[bl][waypoint] = measurementToXYPlane(axis[bl].getPosition(), zOffset[bl]);
-            calibration_data[br][waypoint] = measurementToXYPlane(axis[br].getPosition(), zOffset[br]);
+            calibration_data[tl][waypoint] = measurementToXYPlane(axis[tl].getPosition(), tl);
+            calibration_data[tr][waypoint] = measurementToXYPlane(axis[tr].getPosition(), tr);
+            calibration_data[bl][waypoint] = measurementToXYPlane(axis[bl].getPosition(), bl);
+            calibration_data[br][waypoint] = measurementToXYPlane(axis[br].getPosition(), br);
             pull1_tight                   = false;
             pull2_tight                   = false;
             return true;
@@ -975,10 +975,10 @@ bool Maslow_::take_measurement_avg_with_check(int waypoint, int dir) {
             if(waypoint == 0){
                 double threshold = 100;
                 float diff[4];
-                diff[tl] = calibration_data[tl][0] - measurementToXYPlane(computeTL(0, 0, 0), zOffset[tl]);
-                diff[tr] = calibration_data[tr][0] - measurementToXYPlane(computeTR(0, 0, 0), zOffset[tr]);
-                diff[bl] = calibration_data[bl][0] - measurementToXYPlane(computeBL(0, 0, 0), zOffset[bl]);
-                diff[br] = calibration_data[br][0] - measurementToXYPlane(computeBR(0, 0, 0), zOffset[br]);
+                diff[tl] = calibration_data[tl][0] - measurementToXYPlane(computeTL(0, 0, 0), tl);
+                diff[tr] = calibration_data[tr][0] - measurementToXYPlane(computeTR(0, 0, 0), tr);
+                diff[bl] = calibration_data[bl][0] - measurementToXYPlane(computeBL(0, 0, 0), bl);
+                diff[br] = calibration_data[br][0] - measurementToXYPlane(computeBR(0, 0, 0), br);
                 log_info("Center point deviation: TL: " << diff[tl] << " TR: " << diff[tr] << " BL: " << diff[bl] << " BR: " << diff[br]);
 
                 if (abs(diff[tl]) > threshold || abs(diff[tr]) > threshold || abs(diff[bl]) > threshold || abs(diff[br]) > threshold) {
