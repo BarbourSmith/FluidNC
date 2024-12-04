@@ -40,35 +40,17 @@ struct TelemetryFileHeader {
 struct TelemetryData {
     unsigned long timestamp;
     // motors
-    double tlCurrent;
-    double trCurrent;
-    double blCurrent;
-    double brCurrent;
+    double current[4];
     // power
-    double tlPower;
-    double trPower;
-    double blPower;
-    double brPower;
+    double power[4];
     // speed
-    double tlSpeed;
-    double trSpeed;
-    double blSpeed;
-    double brSpeed;
+    double speed[4];
      // position
-    double tlPos;
-    double trPos;
-    double blPos;
-    double brPos;
+    double pos[4];
 
-    int tlState;
-    int trState;
-    int blState;
-    int brState;
+    int state[4];
 
-    bool extendedTL;
-    bool extendedTR;
-    bool extendedBL;
-    bool extendedBR;
+    bool extended[4];
 
     bool extendingALL;
     bool complyALL;
@@ -124,10 +106,7 @@ public:
 
     //math
     void  updateCenterXY();
-    float computeBL(float x, float y, float z);
-    float computeBR(float x, float y, float z);
-    float computeTR(float x, float y, float z);
-    float computeTL(float x, float y, float z);
+    float compute(float x, float y, float z, char arm);
 
     //Save and load z-axis position, set z-stop
     void saveZPos();
@@ -140,10 +119,7 @@ public:
 
     void stopMotors();
 
-    void   retractTL();
-    void   retractTR();
-    void   retractBL();
-    void   retractBR();
+    void   retract(char arm);
     void   retractALL();
     void   extendALL();
     void   take_slack();
@@ -161,15 +137,8 @@ public:
     void   set_frame_height(double height);
     void   update_frame_xyz();
     bool   axis_homed[4] = { false, false, false, false };
-    bool   retractingTL  = false;
-    bool   retractingTR  = false;
-    bool   retractingBL  = false;
-    bool   retractingBR  = false;
-
-    bool extendedTL = false;
-    bool extendedTR = false;
-    bool extendedBL = false;
-    bool extendedBR = false;
+    bool   retracting[4] = { false, false, false, false };
+    bool   extended[4] = { false, false, false, false };
 
     bool extendingALL = false;
     bool complyALL    = false;
@@ -206,10 +175,7 @@ public:
     double targetY = 0;
     double targetZ = 0;
 
-    MotorUnit axisTL;
-    MotorUnit axisTR;
-    MotorUnit axisBL;
-    MotorUnit axisBR;
+    MotorUnit axis[4];
     int retractCurrentThreshold = 1300;
     int calibrationCurrentThreshold = 1300;
     float acceptableCalibrationThreshold = 0.5;
@@ -244,7 +210,7 @@ public:
     bool   checkValidMove(double fromX, double fromY, double toX, double toY);
     bool   take_measurement_avg_with_check(int waypoint, int dir);
     bool   take_measurement(int waypoint, int dir, int run);
-    float  measurementToXYPlane(float measurement, float zHeight);
+    float  measurementToXYPlane(float measurement, char arm);
     bool   takeSlackFunc();
     void   test_();
     void   calibration_loop();
@@ -254,6 +220,7 @@ public:
     void   reset_all_axis();
     bool   test = false;
     bool   orientation;
+    bool   fixedZ;
     double calibration_data[4][CALIBRATION_GRID_SIZE_MAX] = { 0 };
     int    pointCount                                 = 0;  //number of actual points in the grid,  < GRID_SIZE_MAX
     int    waypoint                                   = 0;  //The current waypoint in the calibration process
@@ -268,18 +235,16 @@ public:
     bool          holding   = false;
     unsigned long holdTime  = 0;
 
-    float tlX;
-    float tlY;
-    float tlZ;
-    float trX;
-    float trY;
-    float trZ;
-    float blX;
-    float blY;
-    float blZ;
-    float brX;
-    float brY;
-    float brZ;
+    //variables to use as indexes into various arrays
+    const char tl = 2;
+    const char tr = 1;
+    const char bl = 3;
+    const char br = 0;
+
+    // per-arm arrays
+    float zOffset[4];
+    float anchor[4][2];
+    float beltExtension[4] = { 0.0, 0.0, 0.0, 0.0 };
 
     float _beltEndExtension = 30;  //Based on the CAD model these should add to 153.4
     float _armLength        = 123.4;

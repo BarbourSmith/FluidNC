@@ -95,26 +95,32 @@ namespace Machine {
 
     void MachineConfig::groupM4Items(Configuration::HandlerBase& handler) {
         handler.item(M+"_vertical", Maslow.orientation);
+        handler.item(M+"_fixedZ", Maslow.fixedZ);
         handler.item(M+"_calibration_grid_width_mm_X", Maslow.calibration_grid_width_mm_X, 100, 3000);
         handler.item(M+"_calibration_grid_height_mm_Y", Maslow.calibration_grid_height_mm_Y, 100, 3000);
         handler.item(M+"_calibration_grid_size", Maslow.calibrationGridSize, 3, 9);
 
-        handler.item(M+"_tlX", Maslow.tlX);
-        handler.item(M+"_tlY", Maslow.tlY);
+        handler.item(M+"_tlX", Maslow.anchor[Maslow.tl][0]);
+        handler.item(M+"_tlY", Maslow.anchor[Maslow.tl][1]);
 
-        handler.item(M+"_trX", Maslow.trX);
-        handler.item(M+"_trY", Maslow.trY);
+        handler.item(M+"_trX", Maslow.anchor[Maslow.tr][0]);
+        handler.item(M+"_trY", Maslow.anchor[Maslow.tr][1]);
 
-        handler.item(M+"_blX", Maslow.blX);
-        handler.item(M+"_blY", Maslow.blY);
+        handler.item(M+"_blX", Maslow.anchor[Maslow.bl][0]);
+        handler.item(M+"_blY", Maslow.anchor[Maslow.bl][1]);
         
-        handler.item(M+"_brX", Maslow.brX);
-        handler.item(M+"_brY", Maslow.brY);
+        handler.item(M+"_brX", Maslow.anchor[Maslow.br][0]);
+        handler.item(M+"_brY", Maslow.anchor[Maslow.br][1]);
 
-        handler.item(M+"_tlZ", Maslow.tlZ);
-        handler.item(M+"_trZ", Maslow.trZ);
-        handler.item(M+"_blZ", Maslow.blZ);
-        handler.item(M+"_brZ", Maslow.brZ);
+        handler.item(M+"_tlZ", Maslow.zOffset[Maslow.tl]);
+        handler.item(M+"_trZ", Maslow.zOffset[Maslow.tr]);
+        handler.item(M+"_blZ", Maslow.zOffset[Maslow.bl]);
+        handler.item(M+"_brZ", Maslow.zOffset[Maslow.br]);
+
+        handler.item(M+"_tlExtension", Maslow.beltExtension[Maslow.tl]);
+        handler.item(M+"_trExtension", Maslow.beltExtension[Maslow.tr]);
+        handler.item(M+"_blExtension", Maslow.beltExtension[Maslow.bl]);
+        handler.item(M+"_brExtension", Maslow.beltExtension[Maslow.br]);
 
         handler.item(M+"_Retract_Current_Threshold", Maslow.retractCurrentThreshold, 0, 3500);
         handler.item(M+"_Calibration_Current_Threshold", Maslow.calibrationCurrentThreshold, 0, 3500);
