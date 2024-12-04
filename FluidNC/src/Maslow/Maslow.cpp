@@ -10,7 +10,7 @@
 #include "../FileStream.h"
 
 // Maslow specific defines
-#define VERSION_NUMBER "0.85"
+#define VERSION_NUMBER "0.87"
 
 #define TLEncoderLine 2
 #define TREncoderLine 1
@@ -1321,10 +1321,12 @@ void Maslow_::retractALL() {
     retracting[br] = true;
     complyALL    = false;
     extendingALL = false;
+  
     axis[tl].reset();
     axis[tr].reset();
     axis[bl].reset();
     axis[br].reset();
+    setupIsComplete = false;
 }
 void Maslow_::extendALL() {
 
