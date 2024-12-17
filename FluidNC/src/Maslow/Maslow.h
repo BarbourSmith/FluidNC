@@ -129,9 +129,10 @@ public:
     float computeTR(float x, float y, float z);
     float computeTL(float x, float y, float z);
 
-    //Save and load z-axis position, set z-stop
-    void saveZPos();
-    void loadZPos();
+    //Save and load position, set z-stop
+    void savePos();
+    void loadPos();
+    bool saveToNvs(const char*, float, nvs_handle_t); //helper function
     /** Sets the 'bottom' Z position, this is a 'stop' beyond which travel cannot continue */
     void setZStop();
 
