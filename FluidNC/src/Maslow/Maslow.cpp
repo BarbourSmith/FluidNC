@@ -1150,12 +1150,21 @@ bool Maslow_::take_measurement_avg_with_check(int waypoint, int dir) {
                 //Recompute the first four waypoint locations based on the current position
                 calibrationGrid[0][0] = x;//This first point is never really used because we've already measured here, but it shouldn't be left undefined
                 calibrationGrid[0][1] = y;
+
                 calibrationGrid[1][0] = x + 100;
                 calibrationGrid[1][1] = y;
+
                 calibrationGrid[2][0] = x + 100;
                 calibrationGrid[2][1] = y + 100;
+
                 calibrationGrid[3][0] = x;
                 calibrationGrid[3][1] = y + 100;
+
+                calibrationGrid[4][0] = x - 100;
+                calibrationGrid[4][1] = y + 100;
+
+                calibrationGrid[5][0] = x - 100;
+                calibrationGrid[5][1] = y;
 
                 printCalibrationGrid();
                 
@@ -1460,12 +1469,12 @@ bool Maslow_::generate_calibration_grid() {
             return false; // return false or handle error appropriately
     }
 
-    pointCount = 4; //The first four points are computed dynamically
+    pointCount = 6; //The first six points are computed dynamically
 
     //The point in the center
     calibrationGrid[pointCount][0] = 0;
     calibrationGrid[pointCount][1] = 0;
-    recomputePoints[0] = 3;
+    recomputePoints[0] = 5;
     pointCount++;
 
     int maxX = 1;
