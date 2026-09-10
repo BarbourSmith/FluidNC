@@ -147,6 +147,7 @@ void Maslow_::begin(void (*sys_rt)()) {
 
 // Maslow main loop, everything is processed here
 void Maslow_::update() {
+    updateCount++;
     if (!initialized) {
         return;  // begin() has not run yet - no I2C bus, no motor units
     }
@@ -199,10 +200,10 @@ void Maslow_::update() {
             st = !st;
             digitalWrite(REDLED, st);
             timer = millis();
-            if (errorMessage != "") {
+            if (errorMessage != "" && !errorMessageLogged) {
                 log_error(errorMessage.c_str());
+                errorMessageLogged = true;
             }
-            errorMessage = "";
         }
         return;
     }
@@ -317,6 +318,7 @@ void Maslow_::update() {
         }
         //--------Homing routines
         else if (sys.state() == State::Homing) {
+            homeCallCount++;
             calibration.home();
         } else {  //This is confusing to understand. This is an else if so this is only run if we are not in jog, cycle, or homing
             // Clear any motor override flags to ensure motors stop
@@ -1262,9 +1264,10 @@ bool Maslow_::clearError() {
                  "tension and machine position before cutting");
     }
 
-    error         = false;
-    watchdogFired = false;
-    errorMessage  = "";
+    error              = false;
+    watchdogFired      = false;
+    errorMessage       = "";
+    errorMessageLogged = false;
 
     // Both early returns skip the point where lastCallToUpdate is refreshed, so by now it
     // is far in the past.  Without this the update watchdog re-fires on the very next call
@@ -1274,13 +1277,24 @@ bool Maslow_::clearError() {
     return true;
 }
 
+String Maslow_::motionBlockedReason() const {
+    if (watchdogFired) {
+        return "the update watchdog fired. Find what is blocking the processor, then send $X to re-enable motion";
+    }
+    if (errorMessage != "") {
+        return errorMessage + ". Fix the cause, then send $X to re-enable motion";
+    }
+    return "an error was latched. Fix the cause, then send $X to re-enable motion";
+}
+
 //Emergency Stop
 void Maslow_::eStop(String message) {
     log_error("Emergency stop! Stopping all motors");
     log_warn("The machine will not respond until turned off and back on again");
     stop();
-    error        = true;
-    errorMessage = message;
+    error              = true;
+    errorMessage       = message;
+    errorMessageLogged = false;
     stopEverything();
 }
 

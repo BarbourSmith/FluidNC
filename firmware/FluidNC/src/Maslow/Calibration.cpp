@@ -618,6 +618,15 @@ bool Calibration::requestStateChange(int newState) {
 }
 
 // -Maslow homing loop. This is used whenver any of the homing funcitons are active (belts extending or retracting)
+void Calibration::printDiagnostics() {
+    log_info("  calibration.currentState = " << currentState << " (" << stateNames[currentState].name << ")");
+    log_info("  holding = " << (holding ? "YES" : "no") << "  holdTime = " << holdTime
+                            << "  since holdTimer = " << (millis() - holdTimer));
+    log_info("  retracting TL/TR/BL/BR = " << retracting[_TL] << retracting[_TR] << retracting[_BL] << retracting[_BR]);
+    log_info("  extended   TL/TR/BL/BR = " << extended[_TL] << extended[_TR] << extended[_BL] << extended[_BR]);
+    log_info("  axisHomed  TL/TR/BL/BR = " << axisHomed[_TL] << axisHomed[_TR] << axisHomed[_BL] << axisHomed[_BR]);
+}
+
 void Calibration::home() {
     switch (currentState) {
         case RETRACTING:

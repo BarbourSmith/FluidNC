@@ -90,6 +90,9 @@ public:
     //State machine variables
     int currentState = UNKNOWN;
 
+    // Diagnostics: dump the retract/extend state machine's internals
+    void printDiagnostics();
+
 private:
     //Variables used for retracting state
     bool axis_homed[4]         = { false, false, false, false };

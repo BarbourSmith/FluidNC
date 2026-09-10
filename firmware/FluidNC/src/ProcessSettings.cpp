@@ -24,6 +24,8 @@
 #include "FileStream.h"           // FileStream()
 #include "StartupLog.h"           // startupLog
 #include "Driver/gpio_dump.h"     // gpio_dump()
+#include <algorithm>              // std::sort
+#include <esp_system.h>           // esp_reset_reason()
 #include "Driver/backtrace.h"     // backtrace_get(), etc.
 #include "FileCommands.h"         // make_file_commands()
 #include "Job.h"                  // Job::active()
@@ -1025,6 +1027,69 @@ static Error showHeap(const char* value, AuthenticationLevel auth_level, Channel
     return Error::Ok;
 }
 
+// Report the smallest amount of stack each task has ever had left.  The point
+// is sizing: a task that has never dropped below, say, 7 KB free is carrying
+// 7 KB it does not need, and on this board internal DRAM is the scarce
+// resource.  Run the machine through everything that matters - retract, home,
+// a real cut, WebUI under load - before trusting the numbers, because these
+// are high-water marks and a code path you have not exercised will not appear.
+static const char* resetReasonName(esp_reset_reason_t r) {
+    switch (r) {
+        case ESP_RST_POWERON:  return "power-on";
+        case ESP_RST_EXT:      return "external pin";
+        case ESP_RST_SW:       return "software restart";
+        case ESP_RST_PANIC:    return "PANIC (exception or abort)";
+        case ESP_RST_INT_WDT:  return "INTERRUPT WATCHDOG";
+        case ESP_RST_TASK_WDT: return "TASK WATCHDOG";
+        case ESP_RST_WDT:      return "other watchdog";
+        case ESP_RST_DEEPSLEEP: return "deep sleep wake";
+        case ESP_RST_BROWNOUT: return "BROWNOUT (supply voltage sagged)";
+        case ESP_RST_SDIO:     return "SDIO";
+        default:               return "unknown";
+    }
+}
+
+static Error showTasks(const char* value, AuthenticationLevel auth_level, Channel& out) {
+    // Why the board last restarted.  A panic leaves a core dump; a brownout or
+    // watchdog does not, so without this a reset with an empty coredump
+    // partition is indistinguishable from "it never reset at all".
+    log_info("Last reset: " << resetReasonName(esp_reset_reason()) << ", up " << (millis() / 1000) << " s");
+
+    UBaseType_t count = uxTaskGetNumberOfTasks();
+
+    // Deliberately not on the caller's stack: this runs from a channel task and
+    // the array is ~1 KB.  With the PSRAM threshold lowered this lands in PSRAM.
+    TaskStatus_t* tasks = static_cast<TaskStatus_t*>(malloc(count * sizeof(TaskStatus_t)));
+    if (!tasks) {
+        log_error("Not enough memory to list tasks");
+        return Error::Ok;
+    }
+    count = uxTaskGetSystemState(tasks, count, nullptr);
+
+    // Biggest reclaim opportunity first
+    std::sort(tasks, tasks + count, [](const TaskStatus_t& a, const TaskStatus_t& b) {
+        return a.usStackHighWaterMark > b.usStackHighWaterMark;
+    });
+
+    log_info("Task stack headroom (min free bytes ever, high-water):");
+    uint32_t total = 0;
+    for (UBaseType_t i = 0; i < count; i++) {
+        const TaskStatus_t& ts = tasks[i];
+        total += ts.usStackHighWaterMark;
+        std::string core;
+#if ( configTASKLIST_INCLUDE_COREID == 1 )
+        core = ts.xCoreID == tskNO_AFFINITY ? "any" : std::to_string(ts.xCoreID);
+#else
+        core = "?";
+#endif
+        log_info("  " << ts.pcTaskName << " prio " << (unsigned)ts.uxCurrentPriority << " core " << core
+                      << " min free " << (unsigned)ts.usStackHighWaterMark);
+    }
+    log_info("  " << (unsigned)count << " tasks, " << total << " bytes of stack never used");
+    free(tasks);
+    return Error::Ok;
+}
+
 static Error list_parameters(const char* value, AuthenticationLevel auth_level, Channel& out) {
     list_global_params(out);
     list_local_params(out);
@@ -1050,9 +1115,39 @@ static Error fakeLaserMode(const char* value, AuthenticationLevel auth_level, Ch
               //////////  Maslow-specific user cmd functions  //////////////
 */
 
+static Error maslow_diag(const char* value, AuthenticationLevel auth_level, Channel& out) {
+    log_info("Maslow diagnostics:");
+    log_info("  sys.state() = " << (int)sys.state() << "   initialized = " << (Maslow.initialized ? "yes" : "NO")
+                                << "   using_default_config = " << (Maslow.using_default_config ? "YES" : "no"));
+    log_info("  update() calls = " << Maslow.updateCount << "   home() calls = " << Maslow.homeCallCount);
+    log_info("  motion blocked = " << (Maslow.motionBlocked() ? "YES" : "no")
+                                   << (Maslow.motionBlocked() ? ("  reason: " + Maslow.motionBlockedReason()).c_str() : ""));
+    Maslow.calibration.printDiagnostics();
+    for (int arm = 0; arm < 4; arm++) {
+        log_info("  axis " << arm << " position " << Maslow.axis[arm].getPosition() << " current "
+                           << Maslow.axis[arm].getMotorCurrent());
+    }
+    return Error::Ok;
+}
+
+// A latched error or a fired watchdog makes Maslow_::update() return before the motion
+// state machine, so a command that only sets the state is accepted and then never acts on.
+// That is how a failed motor test at startup turns "Retract All" into a silent hang in
+// <Home>.  Refuse the command up front and say what is wrong instead.
+static bool maslow_motion_blocked(Channel& out) {
+    if (!Maslow.motionBlocked()) {
+        return false;
+    }
+    log_error("Motion is disabled: " << Maslow.motionBlockedReason().c_str());
+    return true;
+}
+
 static Error maslow_retract_ALL(const char* value, AuthenticationLevel auth_level, Channel& out) {
     if (Maslow.using_default_config) {
         return Error::ConfigurationInvalid;
+    }
+    if (maslow_motion_blocked(out)) {
+        return Error::SystemGcLock;
     }
     sys.set_state(State::Homing);
     log_info("Retracting all belts");
@@ -1062,6 +1157,9 @@ static Error maslow_retract_ALL(const char* value, AuthenticationLevel auth_leve
 static Error maslow_extend_ALL(const char* value, AuthenticationLevel auth_level, Channel& out) {
     if (Maslow.using_default_config) {
         return Error::ConfigurationInvalid;
+    }
+    if (maslow_motion_blocked(out)) {
+        return Error::SystemGcLock;
     }
     sys.set_state(State::Homing);
     log_info("Extending all belts");
@@ -1133,6 +1231,9 @@ static Error maslow_start_calibration(const char* value, AuthenticationLevel aut
     if (Maslow.using_default_config) {
         return Error::ConfigurationInvalid;
     }
+    if (maslow_motion_blocked(out)) {
+        return Error::SystemGcLock;
+    }
     sys.set_state(State::Homing);
     // requestStateChange(CALIBRATION_IN_PROGRESS) performs significant initialization work
     // (memory allocation, grid generation, position computation). Reset the update watchdog
@@ -1158,6 +1259,9 @@ static Error maslow_TLO(const char* value, AuthenticationLevel auth_level, Chann
     if (Maslow.using_default_config) {
         return Error::ConfigurationInvalid;
     }
+    if (maslow_motion_blocked(out)) {
+        return Error::SystemGcLock;
+    }
     sys.set_state(State::Homing);
     Maslow.calibration.TLO();
     return Error::Ok;
@@ -1165,6 +1269,9 @@ static Error maslow_TLO(const char* value, AuthenticationLevel auth_level, Chann
 static Error maslow_TRO(const char* value, AuthenticationLevel auth_level, Channel& out) {
     if (Maslow.using_default_config) {
         return Error::ConfigurationInvalid;
+    }
+    if (maslow_motion_blocked(out)) {
+        return Error::SystemGcLock;
     }
     sys.set_state(State::Homing);
     Maslow.calibration.TRO();
@@ -1174,6 +1281,9 @@ static Error maslow_BLO(const char* value, AuthenticationLevel auth_level, Chann
     if (Maslow.using_default_config) {
         return Error::ConfigurationInvalid;
     }
+    if (maslow_motion_blocked(out)) {
+        return Error::SystemGcLock;
+    }
     sys.set_state(State::Homing);
     Maslow.calibration.BLO();
     return Error::Ok;
@@ -1181,6 +1291,9 @@ static Error maslow_BLO(const char* value, AuthenticationLevel auth_level, Chann
 static Error maslow_BRO(const char* value, AuthenticationLevel auth_level, Channel& out) {
     if (Maslow.using_default_config) {
         return Error::ConfigurationInvalid;
+    }
+    if (maslow_motion_blocked(out)) {
+        return Error::SystemGcLock;
     }
     sys.set_state(State::Homing);
     Maslow.calibration.BRO();
@@ -1190,6 +1303,9 @@ static Error maslow_TLI(const char* value, AuthenticationLevel auth_level, Chann
     if (Maslow.using_default_config) {
         return Error::ConfigurationInvalid;
     }
+    if (maslow_motion_blocked(out)) {
+        return Error::SystemGcLock;
+    }
     sys.set_state(State::Homing);
     Maslow.calibration.TLI();
     return Error::Ok;
@@ -1197,6 +1313,9 @@ static Error maslow_TLI(const char* value, AuthenticationLevel auth_level, Chann
 static Error maslow_TRI(const char* value, AuthenticationLevel auth_level, Channel& out) {
     if (Maslow.using_default_config) {
         return Error::ConfigurationInvalid;
+    }
+    if (maslow_motion_blocked(out)) {
+        return Error::SystemGcLock;
     }
     sys.set_state(State::Homing);
     Maslow.calibration.TRI();
@@ -1206,6 +1325,9 @@ static Error maslow_BLI(const char* value, AuthenticationLevel auth_level, Chann
     if (Maslow.using_default_config) {
         return Error::ConfigurationInvalid;
     }
+    if (maslow_motion_blocked(out)) {
+        return Error::SystemGcLock;
+    }
     sys.set_state(State::Homing);
     Maslow.calibration.BLI();
     return Error::Ok;
@@ -1213,6 +1335,9 @@ static Error maslow_BLI(const char* value, AuthenticationLevel auth_level, Chann
 static Error maslow_BRI(const char* value, AuthenticationLevel auth_level, Channel& out) {
     if (Maslow.using_default_config) {
         return Error::ConfigurationInvalid;
+    }
+    if (maslow_motion_blocked(out)) {
+        return Error::SystemGcLock;
     }
     sys.set_state(State::Homing);
     Maslow.calibration.BRI();
@@ -1245,6 +1370,9 @@ static Error maslow_test(const char* value, AuthenticationLevel auth_level, Chan
 static Error maslow_takeSlack(const char* value, AuthenticationLevel auth_level, Channel& out) {
     if (Maslow.using_default_config) {
         return Error::ConfigurationInvalid;
+    }
+    if (maslow_motion_blocked(out)) {
+        return Error::SystemGcLock;
     }
     sys.set_state(State::Homing);
     Maslow.calibration.requestStateChange(TAKING_SLACK);
@@ -1345,6 +1473,7 @@ void make_user_commands() {
 
     new ReportCommand("SA", "Alarm/Send", sendAlarm, anyState);
     new ReportCommand("Heap", "Heap/Show", showHeap, anyState);
+    new ReportCommand("Tasks", "Tasks/Show", showTasks, anyState);
 #ifdef HEAPDIFF
     new ReportCommand("HS", "Heap/Snapshot", heap_snapshot, anyState);
     new ReportCommand("HD", "Heap/Diff", heap_diff, anyState);
@@ -1360,6 +1489,7 @@ void make_user_commands() {
     // Maslow-specific commands
     new UserCommand("30", "FakeMaxSpindleSpeed", fakeMaxSpindleSpeed, notIdleOrAlarm);
     new UserCommand("32", "FakeLaserMode", fakeLaserMode, notIdleOrAlarm);
+    new UserCommand("MDIAG", "Maslow/diag", maslow_diag, anyState);
     new UserCommand("ALL", "Maslow/retract", maslow_retract_ALL, anyState);
     new UserCommand("EXT", "Maslow/extend", maslow_extend_ALL, anyState);
     new UserCommand("TELEMDUMP", "Maslow/telemetryDump", maslow_telemetry_dump, anyState);
