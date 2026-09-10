@@ -10,6 +10,32 @@
 
 #include "DCMotor.h"
 
+#include "esp_adc/adc_oneshot.h"
+
+extern void bootTrace(const char*);  // TEMPORARY bring-up diagnostics
+
+// ADC access via the IDF oneshot driver.  Arduino core 3's analogRead() can
+// wedge on ADC2 pins (the TL current sense is GPIO18 = ADC2_CH7) while WiFi
+// holds the ADC2 arbitration lock.  Reading through adc_oneshot with an
+// explicit error path degrades to "no reading" instead of blocking.
+#ifndef ADC_ATTEN_DB_12
+#    define ADC_ATTEN_DB_12 ADC_ATTEN_DB_11
+#endif
+static adc_oneshot_unit_handle_t adcUnits[2] = { nullptr, nullptr };
+
+static adc_oneshot_unit_handle_t adcUnitHandle(adc_unit_t unit) {
+    if (adcUnits[unit] == nullptr) {
+        adc_oneshot_unit_init_cfg_t cfg = {};
+        cfg.unit_id                     = unit;
+        cfg.ulp_mode                    = ADC_ULP_MODE_DISABLE;
+        if (adc_oneshot_new_unit(&cfg, &adcUnits[unit]) != ESP_OK) {
+            adcUnits[unit] = nullptr;
+        }
+    }
+    return adcUnits[unit];
+}
+
+
 #define motorPWMFreq 16000
 #define motorPWMRes 10
 
@@ -37,6 +63,22 @@ void DCMotor::begin(uint8_t forwardPin, uint8_t backwardPin, int readbackPin, in
 
     ledcAttach(_back, motorPWMFreq, motorPWMRes);
     ledcWrite(_back, 0);
+
+    bootTrace("DC adc map");
+    //Set up the current-sense ADC channel through the oneshot driver
+    _adcValid = false;
+    if (adc_oneshot_io_to_channel(_readback, &_adcUnit, &_adcChannel) == ESP_OK) {
+        bootTrace("DC adc unit");
+        if (auto handle = adcUnitHandle(_adcUnit)) {
+            bootTrace("DC adc cfg");
+            adc_oneshot_chan_cfg_t ch_cfg = {};
+            ch_cfg.atten                  = ADC_ATTEN_DB_12;
+            ch_cfg.bitwidth               = ADC_BITWIDTH_12;
+            if (adc_oneshot_config_channel(handle, _adcChannel, &ch_cfg) == ESP_OK) {
+                _adcValid = true;
+            }
+        }
+    }
 }
 
 /*!
@@ -138,5 +180,20 @@ void DCMotor::highZ() {
  *
  */
 double DCMotor::readCurrent() {
-    return analogRead(_readback);
+    if (!_adcValid) {
+        return 0;
+    }
+    // On the ESP32-S3 with IDF 5 / Arduino core 3, ADC2 cannot be read while
+    // WiFi is active (the radio owns the SAR ADC2 arbitration); attempting it
+    // can wedge the system.  The TL current sense is on GPIO18 = ADC2_CH7, so
+    // that channel reports its last pre-WiFi reading (0 on a fresh boot).
+    // TODO: revisit if a safe ADC2-with-WiFi read path becomes available.
+    if (_adcUnit == ADC_UNIT_2) {
+        return _lastCurrentReading;
+    }
+    int raw = 0;
+    if (adc_oneshot_read(adcUnits[_adcUnit], _adcChannel, &raw) == ESP_OK) {
+        _lastCurrentReading = raw;
+    }
+    return _lastCurrentReading;
 }

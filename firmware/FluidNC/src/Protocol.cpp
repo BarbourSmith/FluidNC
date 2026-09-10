@@ -343,8 +343,12 @@ uint32_t maxBlockLowWater = UINT_MAX;
 
 void protocol_main_loop() {
     add_watchdog_to_task();
-    Maslow.begin(&protocol_exec_rt_system);
+    // Start channel polling and output before Maslow hardware init so the
+    // console stays responsive even if encoder/motor detection is slow.
+    ::printf("[BOOT] J protocol_main_loop entered\n");
     start_polling();
+    Maslow.begin(&protocol_exec_rt_system);
+    ::printf("[BOOT] K Maslow.begin done\n");
     start_telemetry();
 
     // ---------------------------------------------------------------------------------

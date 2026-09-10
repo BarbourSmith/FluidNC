@@ -38,6 +38,11 @@ public:
     double readCurrent();
 
 private:
+    // Current-sense channel through the IDF adc_oneshot driver (see DCMotor.cpp)
+    adc_unit_t    _adcUnit    = ADC_UNIT_1;
+    adc_channel_t _adcChannel = ADC_CHANNEL_0;
+    bool          _adcValid   = false;
+    int           _lastCurrentReading = 0;
     int     multisamples = 1;
     uint8_t _forward, _back;
     int     _readback;

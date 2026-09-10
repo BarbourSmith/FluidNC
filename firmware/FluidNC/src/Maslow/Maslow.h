@@ -151,6 +151,15 @@ public:
 
     bool readingFromSD = false;  //Used to turn off reading from the encoders when reading from the - i dont think we need this anymore TODO
     bool using_default_config = false;
+    // Set once begin() has completed; update() is a no-op before that because
+    // protocol_execute_realtime() can pump update() during setup, before the
+    // I2C bus and motor units exist.
+    bool initialized = false;
+
+    // Consumed by the Maslow web UI / updater; parsed here so the keys in
+    // maslow.yaml are recognized by the config system.
+    bool        autoUpdate = true;
+    std::string updateURL  = "";
     QWIICMUX I2CMux;
 
     bool   error = false;

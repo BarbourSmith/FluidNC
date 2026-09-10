@@ -28,7 +28,9 @@ public:
         // If USB host is later configured, UsbHostUart::begin() tears
         // down TinyUSB and takes over the USB port.
         static auto* cdc_enable = new EnumSetting("USB CDC Enable", WEBSET, WG, NULL, "USBCDC/Enable", true, &onoffOptions);
-        if (cdc_enable->get()) {
+        // TEMPORARY bench-debug: keep USB in JTAG/serial mode (no TinyUSB CDC)
+        // so openocd can attach and esptool can flash without the BOOT button.
+        if (false && cdc_enable->get()) {
             CDCChannel.init();
             // Give a USB CDC terminal emulator time to enumerate and connect
             // before any startup/boot messages are sent, so boards with only
