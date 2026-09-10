@@ -1130,6 +1130,25 @@ static Error maslow_diag(const char* value, AuthenticationLevel auth_level, Chan
     return Error::Ok;
 }
 
+// GPIO18, the Top Left current sense, is ADC2_CH7 - the only one of the four not on ADC1.
+// readCurrent() currently refuses to convert on ADC2 and hands back a stale value, so
+// motor_test() never sees current on TL, runs its full 100 ms pulse (the visible belt
+// twitch at every boot) and then reports "Motor not found on Top Left".  Report what a
+// real conversion does on each channel so that guard can be judged against the hardware.
+static Error maslow_adc_diag(const char* value, AuthenticationLevel auth_level, Channel& out) {
+    static const char* names[4] = { "Top Left", "Top Right", "Bottom Left", "Bottom Right" };
+    log_info("ADC current-sense probe:");
+    for (int arm = 0; arm < 4; arm++) {
+        int  unit, channel, raw, err, viaArduino;
+        bool valid;
+        Maslow.axis[arm].probeADC(unit, channel, valid, raw, err, viaArduino);
+        log_info("  " << names[arm] << ": ADC" << (unit + 1) << "_CH" << channel << "  configured = "
+                      << (valid ? "yes" : "NO") << "  oneshot = " << esp_err_to_name((esp_err_t)err) << " raw " << raw
+                      << "   analogRead = " << viaArduino);
+    }
+    return Error::Ok;
+}
+
 // A latched error or a fired watchdog makes Maslow_::update() return before the motion
 // state machine, so a command that only sets the state is accepted and then never acts on.
 // That is how a failed motor test at startup turns "Retract All" into a silent hang in
@@ -1490,6 +1509,7 @@ void make_user_commands() {
     new UserCommand("30", "FakeMaxSpindleSpeed", fakeMaxSpindleSpeed, notIdleOrAlarm);
     new UserCommand("32", "FakeLaserMode", fakeLaserMode, notIdleOrAlarm);
     new UserCommand("MDIAG", "Maslow/diag", maslow_diag, anyState);
+    new UserCommand("MADC", "Maslow/adc", maslow_adc_diag, anyState);
     new UserCommand("ALL", "Maslow/retract", maslow_retract_ALL, anyState);
     new UserCommand("EXT", "Maslow/extend", maslow_extend_ALL, anyState);
     new UserCommand("TELEMDUMP", "Maslow/telemetryDump", maslow_telemetry_dump, anyState);

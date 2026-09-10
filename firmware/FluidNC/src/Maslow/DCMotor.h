@@ -37,6 +37,11 @@ public:
     void   highZ();
     double readCurrent();
 
+    /** One-off probe of the current-sense channel, for $MADC.  Reports which ADC unit and
+     *  channel this motor reads and what a real conversion does right now, so the ADC2
+     *  guard in readCurrent() can be judged against the hardware instead of assumed. */
+    void probeADC(int& unit, int& channel, bool& valid, int& raw, int& err, int& viaArduino);
+
 private:
     // Current-sense channel through the IDF adc_oneshot driver (see DCMotor.cpp)
     adc_unit_t    _adcUnit    = ADC_UNIT_1;

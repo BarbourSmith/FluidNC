@@ -179,18 +179,30 @@ void DCMotor::highZ() {
  *  @return Reading of current is in arbitrary units. 0 is no current, 4095 is max. TODO: Compute max in mA based on resistor choices.
  *
  */
+void DCMotor::probeADC(int& unit, int& channel, bool& valid, int& raw, int& err, int& viaArduino) {
+    unit    = (int)_adcUnit;
+    channel = (int)_adcChannel;
+    valid   = _adcValid;
+    raw     = -1;
+    err     = ESP_FAIL;
+    if (_adcValid) {
+        if (auto handle = adcUnitHandle(_adcUnit)) {
+            err = adc_oneshot_read(handle, _adcChannel, &raw);
+        }
+    }
+    viaArduino = analogRead(_readback);
+}
+
 double DCMotor::readCurrent() {
     if (!_adcValid) {
         return 0;
     }
-    // On the ESP32-S3 with IDF 5 / Arduino core 3, ADC2 cannot be read while
-    // WiFi is active (the radio owns the SAR ADC2 arbitration); attempting it
-    // can wedge the system.  The TL current sense is on GPIO18 = ADC2_CH7, so
-    // that channel reports its last pre-WiFi reading (0 on a fresh boot).
-    // TODO: revisit if a safe ADC2-with-WiFi read path becomes available.
-    if (_adcUnit == ADC_UNIT_2) {
-        return _lastCurrentReading;
-    }
+    // ADC2 is read here too.  It was skipped for a while on the assumption that the WiFi
+    // radio owns the ADC2 arbitration on the ESP32-S3, but $MADC shows adc_oneshot_read()
+    // on ADC2_CH7 returning ESP_OK with WiFi up, and skipping it is not harmless: the TL
+    // current sense is the only one of the four on ADC2 (GPIO18), so returning a stale 0
+    // made motor_test() run its full 100 ms pulse - the belt twitch at every boot - and
+    // then declare "Motor not found on Top Left".
     int raw = 0;
     if (adc_oneshot_read(adcUnits[_adcUnit], _adcChannel, &raw) == ESP_OK) {
         _lastCurrentReading = raw;
