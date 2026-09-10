@@ -52,8 +52,31 @@ static void startBootTrace() {
 #    define BOOTMARK(x) bootTrace(x)
 
 
+#    ifdef BOARD_HAS_PSRAM
+#        include "esp_heap_caps.h"
+#    endif
+
 void setup() {
     platform_preinit();
+
+#    ifdef BOARD_HAS_PSRAM
+    // The framework is built with CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL=4096, so
+    // only allocations larger than 4 KB land in PSRAM and everything smaller
+    // competes for internal DRAM.  On a Maslow M4 that leaves ~20 KB free once
+    // WiFi and the web server are up, against ~70 KB on the previous firmware,
+    // and WebUI cannot load: concurrent XHRs plus the 149 KB index.html.gz
+    // transfer exhaust it, so requests come back truncated.  Lower the
+    // threshold so ordinary allocations go to the 2 MB of PSRAM as well.
+    // DMA-capable requests are unaffected - those ask for MALLOC_CAP_DMA and
+    // are always served from internal memory.
+    // 256 rather than something larger because the framework also sets
+    // CONFIG_SPIRAM_MALLOC_RESERVE_INTERNAL=0, so nothing holds internal DRAM
+    // back for the allocations that can only live there - FreeRTOS objects and
+    // DMA buffers.  newlib does not fail gracefully when those run out: fopen()
+    // aborts inside lock_init_generic() instead of returning NULL, which took
+    // the board down mid "Retract All".
+    heap_caps_malloc_extmem_enable(256);
+#    endif
 
     set_state(State::Starting);
 
