@@ -281,6 +281,12 @@ static Error disable_alarm_lock(const char* value, AuthenticationLevel auth_leve
     if (state_is(State::ConfigAlarm)) {
         return Error::ConfigurationInvalid;
     }
+
+    // Clear any latched Maslow error or update-watchdog condition and turn the red LED off.
+    // Those latches outlive the alarm state that raised them, so this runs before the
+    // not-in-Alarm early return below: $X clears the red LED whether or not we are alarmed.
+    Maslow.clearError();
+
     if (!state_is(State::Alarm)) {
         // Nothing is locked, so $X is a no-op.  In particular it must not run
         // the after_unlock macro while a job is running - that would nest a

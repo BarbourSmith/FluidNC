@@ -327,6 +327,12 @@ static void alarm_msg(ExecAlarm alarm_code) {
     log_info_to(allChannels, "ALARM: " << alarmString(alarm_code));
     log_stream(allChannels, "ALARM:" << static_cast<int>(alarm_code));
     delay_ms(500);  // Force delay to ensure message clears serial write buffer.
+
+    // That delay blocks this task, and this task is the one that calls Maslow.update().  The
+    // Maslow update watchdog trips after 100 ms, so without this every alarm - however
+    // harmless, including a probe that simply never touched off - latched the watchdog and
+    // left the red LED blinking with the machine unusable until a power cycle.
+    Maslow.resetUpdateWatchdog();
 }
 
 const uint32_t heapWarnThreshold = 15000;
