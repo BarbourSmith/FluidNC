@@ -739,7 +739,13 @@ namespace WebUI {
             WebClient* webClient = new WebClient();
             webClient->attachWS(silent);
             webClient->executeCommandBackground(line);
-            response = request->beginChunkedResponse("", [webClient, request](uint8_t* buffer, size_t maxLen, size_t total) mutable -> size_t {
+            // Content type must be set.  Without it no Content-Type header is sent,
+            // and a browser then sniffs the XHR body - Firefox tries to parse it as
+            // XML and every command logs "XML Parsing Error: not well-formed".
+            // WebUI never gets a usable [ESP800] reply, so it never learns the
+            // websocket port, never receives CURRENT_ID, and sends PAGEID= empty.
+            response = request->beginChunkedResponse(
+                "text/plain", [webClient, request](uint8_t* buffer, size_t maxLen, size_t total) mutable -> size_t {
                 // The method can change before the end... not good
                 //if(request->method() != HTTP_GET)
                 //    return 0;
@@ -757,7 +763,7 @@ namespace WebUI {
                 }
             });
         } else
-            response = request->beginResponse(200, "", "");
+            response = request->beginResponse(200, "text/plain", "");
         response->addHeader(T_Cache_Control, T_no_cache);
         request->send(response);
         return;
