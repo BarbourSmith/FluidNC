@@ -911,4 +911,11 @@ float: left;
 
 .calibration-modal-input {
 width: 100%;
+-moz-appearance: textfield;
+}
+
+.calibration-modal-input::-webkit-inner-spin-button,
+.calibration-modal-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
